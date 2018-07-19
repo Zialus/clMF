@@ -34,24 +34,24 @@ matrix:
 #        - brew cask uninstall oclint
 #        - brew install llvm@4 && brew link --overwrite llvm@4 --force
 #        - brew install clinfo
-#    - os: osx
-#      osx_image: xcode9
-#      env:
-#        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++"
-#      before_script:
-#        - brew update
-#        - brew cask uninstall oclint
-#        - brew install llvm@5 && brew link --overwrite llvm@5 --force
-#        - brew install clinfo
-#    - os: osx
-#      osx_image: xcode9.4
-#      env:
-#        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++"
-#      before_script:
-#        - brew update
-#        - brew cask uninstall oclint
-#        - brew install llvm@6 && brew link --overwrite llvm@6 --force
-#        - brew install clinfo
+    - os: osx
+      osx_image: xcode9
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++"
+      before_script:
+        - brew update
+        - brew cask uninstall oclint
+        - brew install llvm@5 && brew link --overwrite llvm@5 --force
+        - brew install clinfo
+    - os: osx
+      osx_image: xcode9
+      env:
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++"
+      before_script:
+        - brew update
+        - brew cask uninstall oclint
+        - brew install llvm@6 && brew link --overwrite llvm@6 --force
+        - brew install clinfo
 
     ######## OSX GCC ########
 #    - os: osx
@@ -81,24 +81,24 @@ matrix:
 #        - brew cask uninstall oclint
 #        - brew install gcc@6
 #        - brew install clinfo
-#    - os: osx
-#      osx_image: xcode9.4
-#      env:
-#       - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-#      before_script:
-#       - brew update
-#       - brew cask uninstall oclint
-#       - brew install gcc@7
-#       - brew install clinfo
-#    - os: osx
-#      osx_image: xcode9
-#      env:
-#       - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-#      before_script:
-#       - brew update
-#       - brew cask uninstall oclint
-#       - brew install gcc@8
-#       - brew install clinfo
+    - os: osx
+      osx_image: xcode9
+      env:
+       - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      before_script:
+       - brew update
+       - brew cask uninstall oclint
+       - brew install gcc@7
+       - brew install clinfo
+    - os: osx
+      osx_image: xcode9
+      env:
+       - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      before_script:
+       - brew update
+       - brew cask uninstall oclint
+       - brew install gcc@8
+       - brew install clinfo
 
     ######## LINUX CLANG ########
 #    - os: linux

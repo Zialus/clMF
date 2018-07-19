@@ -266,8 +266,8 @@ int main(int argc, char* argv[])
 	double t1 = gettime();
 	for(unsigned int ite=0;ite<5;ite++)
     {
-        size_t global_work_size[1] = {nBlocks*nThreadsPerBlock};
-        size_t local_work_size[1] = {nThreadsPerBlock};
+        size_t global_work_size[1] = {static_cast<size_t>(nBlocks*nThreadsPerBlock)};
+        size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
 
         /** update_W_Over_H */
         cl_event enentPoint;

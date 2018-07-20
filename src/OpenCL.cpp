@@ -120,12 +120,13 @@ void M_byMt_multiply(int i, int j, float**M, float**Result){
 int main(int argc, char* argv[])
 {
     double t11=gettime();
+	char device_type[4]={'g', 'p', 'u', '\0'};
 
 	cl_int    status;
 	cl_uint NumDevice;
 	cl_platform_id platform;
 	getPlatform(platform,0);
-	cl_device_id *devices=getCl_device_id(platform);
+	cl_device_id *devices=getCl_device_id(platform, device_type);
 	cl_context context = clCreateContext(NULL,1, devices,NULL,NULL,NULL);
 	status=clGetContextInfo(context,CL_CONTEXT_NUM_DEVICES,sizeof(cl_uint),&NumDevice,NULL);
 	cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);

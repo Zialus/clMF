@@ -58,19 +58,40 @@ int getPlatform(cl_platform_id &platform, int id)
     return -1;
 }
 
-cl_device_id *getCl_device_id(cl_platform_id &platform)
+cl_device_id* getCl_device_id(cl_platform_id &platform, char* device_type)
 {
   cl_uint numDevices=0;
+  cl_int status = 0;
   cl_device_id *devices=NULL;
-  //cl_int status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_ACCELERATOR,0,NULL,&numDevices);
-  //cl_int status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_CPU,0,NULL,&numDevices);
-  cl_int status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_GPU,0,NULL,&numDevices);
+
+  if((device_type[0]=='m')&&(device_type[1]=='i')&&(device_type[2]=='c'))
+    status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_ACCELERATOR,0,NULL,&numDevices);
+  else if((device_type[0]=='c')&&(device_type[1]=='p')&&(device_type[2]=='u'))
+    status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_CPU,0,NULL,&numDevices);
+  else if((device_type[0]=='g')&&(device_type[1]=='p')&&(device_type[2]=='u'))
+    status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_GPU,0,NULL,&numDevices);
+
+  if(status!=CL_SUCCESS)
+  {
+    cout<<"ERROR:Getting numDevices from clGetDeviceIDs!\n";
+    exit(1);
+  }
+
   if(numDevices>0)
   {
     devices=(cl_device_id*)malloc(numDevices*sizeof(cl_device_id));
-    //status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_CPU,numDevices,devices,NULL);
-    //status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_ACCELERATOR,numDevices,devices,NULL);
-    status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_GPU,numDevices,devices,NULL);
+    if((device_type[0]=='c')&&(device_type[1]=='p')&&(device_type[2]=='u'))
+      status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_CPU,numDevices,devices, NULL);
+    else if((device_type[0]=='m')&&(device_type[1]=='i')&&(device_type[2]=='c'))
+      status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_ACCELERATOR,numDevices,devices, NULL);
+    else if((device_type[0]=='g')&&(device_type[1]=='p')&&(device_type[2]=='u'))
+      status=clGetDeviceIDs(platform,CL_DEVICE_TYPE_GPU,numDevices,devices, NULL);
   }
-    return devices;
+
+  if(status!=CL_SUCCESS)
+  {
+    cout<<"ERROR:Getting devices from clGetDeviceIDs!\n";
+    exit(1);
+  }
+  return devices;
 }

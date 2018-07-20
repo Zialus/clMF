@@ -23,6 +23,6 @@ int convertToString(const char *filename,string& s);
 int getPlatform(cl_platform_id &platform,int id);
 
 /**Step 2:Query the platform and choose the first GPU device if has one.*/
-cl_device_id *getCl_device_id(cl_platform_id &platform);
+cl_device_id *getCl_device_id(cl_platform_id &platform, char* device_type);
 
 #endif

@@ -17,6 +17,10 @@
 
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)
+#define CL_CHECK(API) if((err=API)!=CL_SUCCESS){\
+    printf("[err] id: %d, msg: %s, line: %d\n", err, get_error_string(err), __LINE__);\
+    exit(-1); \
+}
 
 enum {ROWMAJOR, COLMAJOR};
 

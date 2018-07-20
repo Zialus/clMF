@@ -246,31 +246,30 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	status = clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &rows);
-	status = clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), (void*) &col_idxBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), (void*) &colMajored_sparse_idxBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), (void*) &valBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 5, sizeof(float), &lambda);
-	status = clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k);
-	status = clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), (void*) &WBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), (void*) &HBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), (void*) &pBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), (void*) &subVecBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), (void*) &subMatBuffer);
-	status = clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), (void*) &subMatrixBuffer);
-
-	status = clSetKernelArg(updateHOverW_kernel, 0, sizeof(long), &cols);
-	status = clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), (void*) &col_ptrBuffer);
-	status = clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), (void*) &row_idxBuffer);
-	status = clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), (void*) &valBuffer);
-	status = clSetKernelArg(updateHOverW_kernel, 4, sizeof(float), &lambda);
-	status = clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k);
-	status = clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), (void*) &WBuffer);
-	status = clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), (void*) &HBuffer);
-	status = clSetKernelArg(updateHOverW_kernel, 8, sizeof(cl_mem), (void*) &p_Buffer);
-	status = clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer);
-	status = clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer);
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &rows));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), (void*) &col_idxBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), (void*) &colMajored_sparse_idxBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), (void*) &valBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(float), &lambda));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), (void*) &WBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), (void*) &HBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), (void*) &pBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), (void*) &subVecBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), (void*) &subMatBuffer));
+	CL_CHECK(clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), (void*) &subMatrixBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(long), &cols));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), (void*) &col_ptrBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), (void*) &row_idxBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), (void*) &valBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(float), &lambda));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), (void*) &WBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), (void*) &HBuffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 8, sizeof(cl_mem), (void*) &p_Buffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer));
+	CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
 	double t1 = gettime();
 	for (unsigned int ite = 0; ite < 5; ite++)
@@ -350,8 +349,8 @@ int main(int argc, char* argv[])
 	double deltaT = t2 - t1;
 	cout << "Training Time:" << deltaT << " s.\n";
 
-	status = clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
-	status = clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
+	CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL));
+	CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL));
 
 	for (int i = 0; i < rows; ++i)
 	{
@@ -390,20 +389,20 @@ int main(int argc, char* argv[])
 
 	/* Release */
 
-	status = clReleaseKernel(updateHOverW_kernel);
-	status = clReleaseKernel(updateWOverH_kernel);
-	status = clReleaseProgram(program);
-	status = clReleaseMemObject(row_ptrBuffer);
-	status = clReleaseMemObject(col_idxBuffer);
-	status = clReleaseMemObject(col_ptrBuffer);
-	status = clReleaseMemObject(row_idxBuffer);
-	status = clReleaseMemObject(colMajored_sparse_idxBuffer);
-	status = clReleaseMemObject(valBuffer);
-	status = clReleaseMemObject(WBuffer);
-	status = clReleaseMemObject(HBuffer);
-	status = clReleaseMemObject(subMatrixBuffer);
-	status = clReleaseCommandQueue(commandQueue);
-	status = clReleaseContext(context);
+	CL_CHECK(clReleaseKernel(updateHOverW_kernel));
+	CL_CHECK(clReleaseKernel(updateWOverH_kernel));
+	CL_CHECK(clReleaseProgram(program));
+	CL_CHECK(clReleaseMemObject(row_ptrBuffer));
+	CL_CHECK(clReleaseMemObject(col_idxBuffer));
+	CL_CHECK(clReleaseMemObject(col_ptrBuffer));
+	CL_CHECK(clReleaseMemObject(row_idxBuffer));
+	CL_CHECK(clReleaseMemObject(colMajored_sparse_idxBuffer));
+	CL_CHECK(clReleaseMemObject(valBuffer));
+	CL_CHECK(clReleaseMemObject(WBuffer));
+	CL_CHECK(clReleaseMemObject(HBuffer));
+	CL_CHECK(clReleaseMemObject(subMatrixBuffer));
+	CL_CHECK(clReleaseCommandQueue(commandQueue));
+	CL_CHECK(clReleaseContext(context));
 
 	free(devices);
 	double t12 = gettime();

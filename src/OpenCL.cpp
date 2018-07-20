@@ -162,7 +162,8 @@ int main(int argc, char* argv[]) {
     double deltaT1 = t4 - t3;
     cout << "Load R Time:" << deltaT1 << " s.\n";
 
-    FILE* test_fp = fopen("../dataset/movielens/test.ratings", "r");
+    char test_file_name[1024] = "../dataset/movielens/test.ratings";
+    FILE* test_fp = fopen(test_file_name, "r");
     if (test_fp == NULL) {
         printf("can't open output file.\n");
         exit(1);
@@ -311,8 +312,8 @@ int main(int argc, char* argv[]) {
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint1));
         clWaitForEvents(1, &enentPoint1);
         clReleaseEvent(enentPoint1);
-/*	printf("ddd.\n");
-
+/*
+        printf("ddd.\n");
         status=clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
         status=clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
         cout<<"update_H_over_W   W:\n";
@@ -365,14 +366,14 @@ int main(int argc, char* argv[]) {
         num_insts++;
         rmse += (pred_v - v) * (pred_v - v);
     }
+
     rmse = sqrt(rmse / num_insts);
     printf("test RMSE = %lf.\n", rmse);
     double t6 = gettime();
     double deltaT2 = t6 - t5;
     cout << "Predict Time:" << deltaT2 << " s.\n";
 
-    /* Release */
-
+    /* Release Memory*/
     CL_CHECK(clReleaseKernel(updateHOverW_kernel));
     CL_CHECK(clReleaseKernel(updateWOverH_kernel));
     CL_CHECK(clReleaseProgram(program));
@@ -387,8 +388,8 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clReleaseMemObject(subMatrixBuffer));
     CL_CHECK(clReleaseCommandQueue(commandQueue));
     CL_CHECK(clReleaseContext(context));
-
     free(devices);
+
     double t12 = gettime();
     double ss = t12 - t11;
     cout << "total time is " << ss << " s.\n";

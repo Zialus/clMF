@@ -391,14 +391,14 @@ int main(int argc, char* argv[])
 	/* Release */
 
 	status = clReleaseKernel(updateHOverW_kernel);
-	status = clReleaseKernel(updateWOverH_kernel);//*Release kernel.
-	status = clReleaseProgram(program);    //Release the program object.
-	status = clReleaseMemObject(row_ptrBuffer);//Release mem object.
-	status = clReleaseMemObject(col_idxBuffer);//Release mem object.
-	status = clReleaseMemObject(col_ptrBuffer);//Release mem object.
+	status = clReleaseKernel(updateWOverH_kernel);
+	status = clReleaseProgram(program);
+	status = clReleaseMemObject(row_ptrBuffer);
+	status = clReleaseMemObject(col_idxBuffer);
+	status = clReleaseMemObject(col_ptrBuffer);
 	status = clReleaseMemObject(row_idxBuffer);
-	status = clReleaseMemObject(colMajored_sparse_idxBuffer);//Release mem object.
-	status = clReleaseMemObject(valBuffer);//Release mem object.
+	status = clReleaseMemObject(colMajored_sparse_idxBuffer);
+	status = clReleaseMemObject(valBuffer);
 	status = clReleaseMemObject(WBuffer);
 	status = clReleaseMemObject(HBuffer);
 	status = clReleaseMemObject(subMatrixBuffer);

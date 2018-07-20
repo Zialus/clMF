@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 	cl_int    status;
 	cl_uint NumDevice;
 	cl_platform_id platform;
-	getPlatform(platform);
+	getPlatform(platform,0);
 	cl_device_id *devices=getCl_device_id(platform);
 	cl_context context = clCreateContext(NULL,1, devices,NULL,NULL,NULL);
 	status=clGetContextInfo(context,CL_CONTEXT_NUM_DEVICES,sizeof(cl_uint),&NumDevice,NULL);

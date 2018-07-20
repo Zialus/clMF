@@ -31,7 +31,7 @@ int convertToString(const char *filename,string &s)
   return -1;
 }
 
-int getPlatform(cl_platform_id &platform)
+int getPlatform(cl_platform_id &platform, int id)
 {
   platform=NULL;
   cl_uint numPlatforms;
@@ -45,9 +45,14 @@ int getPlatform(cl_platform_id &platform)
   {
     cl_platform_id* platforms=(cl_platform_id*)malloc(numPlatforms*sizeof(cl_platform_id));
     status=clGetPlatformIDs(numPlatforms,platforms,NULL);
-    //platform=platforms[1];
-    platform=platforms[0]; 
-   free(platforms);
+    if(status!=CL_SUCCESS)
+    {
+      cout<<"ERROR:Getting platform IDs!\n";
+      return -1;
+    }
+    platform=platforms[id];
+    free(platforms);
+    return 0;
   }
   else
     return -1;

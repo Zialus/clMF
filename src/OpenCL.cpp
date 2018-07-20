@@ -121,6 +121,7 @@ int main(int argc, char* argv[])
 {
     double t11=gettime();
 	char device_type[4]={'g', 'p', 'u', '\0'};
+	const char *filename = "../kcode/ALS.cl";
 
 	cl_int    status;
 	cl_uint NumDevice;
@@ -131,7 +132,6 @@ int main(int argc, char* argv[])
 	status=clGetContextInfo(context,CL_CONTEXT_NUM_DEVICES,sizeof(cl_uint),&NumDevice,NULL);
 	cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
 
-	const char *filename = "ALS.cl";
 	string sourceStr;
 	status = convertToString(filename, sourceStr);
 	const char *source = sourceStr.c_str();

@@ -26,6 +26,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS}")
 # Source code of application
 file(GLOB source_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
 file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
+file(GLOB source_cl "${PROJECT_SOURCE_DIR}/src/*.cl")
+
 
 # Compiler flags
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -37,5 +39,5 @@ file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
 
 # Set up executable
 include_directories(${OpenCL_INCLUDE_DIR})
-add_executable(clMF ${source_src} ${source_hdr})
+add_executable(clMF ${source_src} ${source_hdr} ${source_cl})
 target_link_libraries(clMF ${OpenCL_LIBRARIES} OpenMP::OpenMP_CXX)

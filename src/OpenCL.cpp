@@ -1,9 +1,3 @@
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
-#include <CL/cl.h>
-#endif
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,12 +5,14 @@
 #include <string>
 #include <fstream>
 #include <math.h>
+#include <time.h>
+#include <sys/time.h>
+
 #include "cj.h"
 #include "tools.h"
 #include "pmf.h"
 #include "util.h"
-#include <time.h>
-#include <sys/time.h>
+
 using namespace std;
 
 double gettime()

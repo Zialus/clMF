@@ -1,3 +1,6 @@
+#ifndef CJ_H
+#define CJ_H
+
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
 #else
@@ -10,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
 using namespace std;
 
 /** convert the kernel file into a string */
@@ -21,3 +25,4 @@ int getPlatform(cl_platform_id &platform);
 /**Step 2:Query the platform and choose the first GPU device if has one.*/
 cl_device_id *getCl_device_id(cl_platform_id &platform);
 
+#endif

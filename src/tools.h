@@ -1,3 +1,6 @@
+#ifndef TOOLS_H
+#define TOOLS_H
+
 const char * get_error_string(cl_int err){
          switch(err){
              case 0: return "CL_SUCCESS";
@@ -51,3 +54,5 @@ const char * get_error_string(cl_int err){
              default: return "Unknown OpenCL error";
          }
      }
+
+#endif

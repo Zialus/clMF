@@ -1,7 +1,5 @@
-#ifndef _PMF_H_
-#define _PMF_H_
-
-#include "util.h"
+#ifndef PMF_H
+#define PMF_H
 
 class parameter {
 	public:
@@ -26,6 +24,5 @@ class parameter {
 			nThreadsPerBlock =32;
 		}
 };
-
 
 #endif

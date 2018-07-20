@@ -1,5 +1,6 @@
-#ifndef MATUTIL
-#define MATUTIL
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -273,4 +274,5 @@ class smat_t{
 			return mt;
 		}
 };
+
 #endif

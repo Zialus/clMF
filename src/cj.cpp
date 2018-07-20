@@ -1,11 +1,5 @@
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
-#include <CL/cl.h>
-#endif
+#include "cj.h"
 
-#include <iostream>
-#include <fstream>
 using namespace std;
 
 int convertToString(const char *filename,string &s)

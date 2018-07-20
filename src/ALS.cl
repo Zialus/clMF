@@ -77,7 +77,7 @@ void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float *p) {
 	}
 }
 
-void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float *Result, const long ptr,__global const unsigned *idx){
+__kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float *Result, const long ptr,__global const unsigned *idx){
 	int base = get_group_id(0)*j*j;
 	int ss = get_local_id(0);
 	int gg = get_local_size(0);
@@ -542,7 +542,7 @@ void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float *Result, 
     }
 }
 
-void batchsolve(int i, int j, __global float *H, __global float *val, __global float *result,__global unsigned *colMajored_sparse_idx,__global long *row_ptr,__global unsigned *col_idx){
+__kernel void batchsolve(int i, int j, __global float *H, __global float *val, __global float *result,__global unsigned *colMajored_sparse_idx,__global long *row_ptr,__global unsigned *col_idx){
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
 	int gg = get_local_size(0);
@@ -639,7 +639,7 @@ void batchsolve(int i, int j, __global float *H, __global float *val, __global f
     result[basev+9]=subvector9;
 }
 
-void batchsolve1(int i, int j, __global float *W, __global float *val, __global float *result,__global long *col_ptr,__global unsigned *row_idx){
+__kernel void batchsolve1(int i, int j, __global float *W, __global float *val, __global float *result,__global long *col_ptr,__global unsigned *row_idx){
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
 	int gg = get_local_size(0);

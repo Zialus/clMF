@@ -1,17 +1,17 @@
 #include "util.h"
 
-void load(const char* srcdir, smat_t &R, bool ifALS, bool with_weights){
-	char filename[1024], buf[1024];
-	sprintf(filename,"%s/meta",srcdir);
-	FILE *fp = fopen(filename,"r");
-	long m, n, nnz;
-	fscanf(fp, "%ld %ld", &m, &n);
+void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
+    char filename[1024], buf[1024];
+    sprintf(filename, "%s/meta", srcdir);
+    FILE* fp = fopen(filename, "r");
+    long m, n, nnz;
 
-	fscanf(fp, "%ld %s", &nnz, buf);
-	sprintf(filename,"%s/%s", srcdir, buf);
-	R.load(m, n, nnz, filename, ifALS, with_weights);
-	fclose(fp);
-	return ;
+    fscanf(fp, "%ld %ld", &m, &n);
+    fscanf(fp, "%ld %s", &nnz, buf);
+    sprintf(filename, "%s/%s", srcdir, buf);
+
+    R.load(m, n, nnz, filename, ifALS, with_weights);
+    fclose(fp);
 }
 void initial_col(mat_t &X, long k, long n){
 	X = mat_t(k, vec_t(n));

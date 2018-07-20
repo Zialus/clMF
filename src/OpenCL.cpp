@@ -124,13 +124,14 @@ int main(int argc, char* argv[]) {
     const char* filename = "../kcode/ALS.cl";
 
     cl_int status;
+    cl_int err;
     cl_uint NumDevice;
     cl_platform_id platform;
 
     getPlatform(platform, 0);
     cl_device_id* devices = getCl_device_id(platform, device_type);
     cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
-    status = clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, NULL);
+    CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, NULL));
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
 
     string sourceStr;
@@ -229,7 +230,6 @@ int main(int argc, char* argv[]) {
     cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), NULL, NULL);
     cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), NULL, NULL);
 
-    cl_int err;
     cl_kernel updateWOverH_kernel = clCreateKernel(program, "updateW_overH_kernel", &err);
     cl_kernel updateHOverW_kernel = clCreateKernel(program, "updateH_overW_kernel", &err);
     if (err != CL_SUCCESS) {
@@ -269,7 +269,7 @@ int main(int argc, char* argv[]) {
 
         /** update_W_Over_H */
         cl_event enentPoint;
-        status = clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint);
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint));
         clWaitForEvents(1, &enentPoint);
         clReleaseEvent(enentPoint);
 /*
@@ -308,7 +308,7 @@ int main(int argc, char* argv[]) {
 */
         /** update_H_Over_W */
         cl_event enentPoint1;
-        status = clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint1);
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint1));
         clWaitForEvents(1, &enentPoint1);
         clReleaseEvent(enentPoint1);
 /*	printf("ddd.\n");

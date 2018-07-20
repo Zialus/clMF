@@ -18,7 +18,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/exec/")
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-#set(WARNINGS "-Wno-format -Wno-unused-result -Wno-write-strings -Wno-deprecated-declarations")
+set(WARNINGS "-Wno-deprecated-declarations")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNINGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS}")
 
@@ -26,7 +26,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS}")
 # Source code of application
 file(GLOB source_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
 file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
-file(GLOB source_cl "${PROJECT_SOURCE_DIR}/src/*.cl")
 
 
 # Compiler flags
@@ -39,5 +38,5 @@ file(GLOB source_cl "${PROJECT_SOURCE_DIR}/src/*.cl")
 
 # Set up executable
 include_directories(${OpenCL_INCLUDE_DIR})
-add_executable(clMF ${source_src} ${source_hdr} ${source_cl})
+add_executable(clMF ${source_src} ${source_hdr})
 target_link_libraries(clMF ${OpenCL_LIBRARIES} OpenMP::OpenMP_CXX)

@@ -20,7 +20,6 @@ double gettime()
 	struct timeval t;
 	gettimeofday(&t, NULL);
 	return t.tv_sec + t.tv_usec * 1e-6;
-	return 1;
 }
 
 void choldc1(int n, float** a, float* p) {

@@ -4,11 +4,7 @@
 #include <CL/cl.h>
 #endif
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <string>
 #include <fstream>
 using namespace std;
 

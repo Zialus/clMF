@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "util.h"
 
 void load(const char* srcdir, smat_t &R, bool ifALS, bool with_weights){

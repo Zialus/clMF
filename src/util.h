@@ -13,7 +13,7 @@
 #include <vector>
 #include <cmath>
 #include <omp.h>
-#include <assert.h>
+#include <cassert>
 
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)

@@ -1,11 +1,11 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 
 #include "tools.h"
 #include "pmf.h"

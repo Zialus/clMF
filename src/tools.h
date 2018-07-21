@@ -7,9 +7,9 @@
 #include <CL/cl.h>
 #endif
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <fstream>

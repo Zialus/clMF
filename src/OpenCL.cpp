@@ -273,11 +273,9 @@ int main(int argc, char* argv[]) {
     cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), NULL, NULL);
 
     cl_kernel updateWOverH_kernel = clCreateKernel(program, "updateW_overH_kernel", &err);
+    CHECK_ERROR(err);
     cl_kernel updateHOverW_kernel = clCreateKernel(program, "updateH_overW_kernel", &err);
-    if (err != CL_SUCCESS) {
-        printf("err: %s\n", get_error_string(err));
-        return 1;
-    }
+    CHECK_ERROR(err);
 
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &rows));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer));

@@ -22,6 +22,11 @@
     exit(-1); \
 }
 
+#define CHECK_ERROR(err)    if(err != CL_SUCCESS){ \
+    printf ("[err] %s\n", get_error_string (err)); \
+    exit(-1); \
+}
+
 enum {ROWMAJOR, COLMAJOR};
 
 class rate_t;

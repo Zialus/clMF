@@ -18,13 +18,13 @@
 
 const char* get_error_string(cl_int err);
 
-/** convert the kernel file into a string */
+/** Convert the kernel file into a string */
 int convertToString(const char* filename, string& s);
 
-/**Getting platforms and choose an available one.*/
+/** Getting platforms and choose an available one */
 int getPlatform(cl_platform_id& platform, int id);
 
-/**Step 2:Query the platform and choose the first device given a device type.*/
+/** Query the platform and choose the first device given a device type */
 cl_device_id* getCl_device_id(cl_platform_id& platform, char* device_type);
 
 void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights);

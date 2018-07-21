@@ -91,6 +91,10 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
     char filename[1024], buf[1024];
     sprintf(filename, "%s/meta", srcdir);
     FILE* fp = fopen(filename, "r");
+    if (fp == nullptr) {
+        printf("Can't open input file.\n");
+        exit(1);
+    }
     long m, n, nnz;
 
     fscanf(fp, "%ld %ld", &m, &n);

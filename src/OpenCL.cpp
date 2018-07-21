@@ -118,10 +118,60 @@ void M_byMt_multiply(int i, int j, float** M, float** Result) {
     }
 }
 
+void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
+    double t1 = gettime();
+    int i, j;
+    double v, rmse = 0;
+    size_t num_insts = 0;
+
+    char meta_filename[1024];
+    sprintf(meta_filename, "%s/meta", srcdir);
+    FILE* fp = fopen(meta_filename, "r");
+    if (fp == nullptr) {
+        printf("Can't open meta input file.\n");
+        exit(1);
+    }
+
+    char buf_train[1024], buf_test[1024], test_file_name[1024], train_file_name[1024];
+    unsigned m, n, nnz, nnz_test;
+    fscanf(fp, "%u %u", &m, &n);
+    fscanf(fp, "%u %s", &nnz, buf_train);
+    fscanf(fp, "%u %s", &nnz_test, buf_test);
+    sprintf(test_file_name, "%s/%s", srcdir, buf_test);
+    sprintf(train_file_name, "%s/%s", srcdir, buf_train);
+    fclose(fp);
+
+    FILE* test_fp = fopen(test_file_name, "r");
+    if (test_fp == nullptr) {
+        printf("Can't open test file.\n");
+        exit(1);
+    }
+
+    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
+        double pred_v = 0;
+        for (int t = 0; t < k; t++) {
+            pred_v += W_c[i - 1][t] * H_c[j - 1][t];
+        }
+        num_insts++;
+        rmse += (pred_v - v) * (pred_v - v);
+    }
+    fclose(test_fp);
+
+    rmse = sqrt(rmse / num_insts);
+    printf("test RMSE = %lf.\n", rmse);
+    double t2 = gettime();
+    double deltaT = t2 - t1;
+    cout << "Predict Time:" << deltaT << " s.\n";
+}
+
 int main(int argc, char* argv[]) {
     double t11 = gettime();
     char device_type[4] = {'g', 'p', 'u', '\0'};
-    const char* filename = "../kcode/ALS.cl";
+    const char* opencl_filename = "../kcode/ALS.cl";
+
+    smat_t R;
+    parameter param;
+    mat_t W_c, H_c;
 
     cl_int status;
     cl_int err;
@@ -135,7 +185,7 @@ int main(int argc, char* argv[]) {
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
 
     string sourceStr;
-    status = convertToString(filename, sourceStr);
+    status = convertToString(opencl_filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, NULL);
@@ -150,24 +200,17 @@ int main(int argc, char* argv[]) {
     }
 
     puts("ALS-OpenCL-Parallel Programming: starts!");
-    char input_file_name[1024] = "../dataset/movielens";
-    parameter param;
-    smat_t R;
-    mat_t W_c, H_c;
-    bool with_weights = false;
+
+    char srcdir[1024];
+    sprintf(srcdir, "%s", argv[1]);
 
     double t3 = gettime();
-    load(input_file_name, R, true, with_weights);
+    bool with_weights = false;
+    bool ifALS = true;
+    load(srcdir, R, ifALS, with_weights);
     double t4 = gettime();
     double deltaT1 = t4 - t3;
     cout << "Load R Time:" << deltaT1 << " s.\n";
-
-    char test_file_name[1024] = "../dataset/movielens/test.ratings";
-    FILE* test_fp = fopen(test_file_name, "r");
-    if (test_fp == NULL) {
-        printf("can't open output file.\n");
-        exit(1);
-    }
 
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
@@ -354,24 +397,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    double t5 = gettime();
-    int i, j;
-    double v, rmse = 0;
-    size_t num_insts = 0;
-    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
-        double pred_v = 0;
-        for (int t = 0; t < k; t++) {
-            pred_v += W_c[i - 1][t] * H_c[j - 1][t];
-        }
-        num_insts++;
-        rmse += (pred_v - v) * (pred_v - v);
-    }
-
-    rmse = sqrt(rmse / num_insts);
-    printf("test RMSE = %lf.\n", rmse);
-    double t6 = gettime();
-    double deltaT2 = t6 - t5;
-    cout << "Predict Time:" << deltaT2 << " s.\n";
+    calculate_rmse(W_c, H_c, srcdir, k);
 
     /* Release Memory*/
     CL_CHECK(clReleaseKernel(updateHOverW_kernel));

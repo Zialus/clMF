@@ -51,7 +51,7 @@ class entry_iterator_t{
 	public:
 		bool with_weights;
 		size_t nnz;
-		entry_iterator_t():nnz(0),fp(NULL), with_weights(false){}
+		entry_iterator_t():nnz(0),fp(nullptr), with_weights(false){}
 		entry_iterator_t(size_t nnz_, const char* filename, bool with_weights_=false) {
 			nnz = nnz_;
 			fp = fopen(filename,"r");

@@ -170,24 +170,24 @@ int main(int argc, char* argv[]) {
 
     getPlatform(platform, 0);
     cl_device_id* devices = getCl_device_id(platform, device_type);
-    cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
-    CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, NULL));
-    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
+    cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, nullptr);
+    CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
+    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
 
     std::string sourceStr;
     status = convertToString(opencl_filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
-    cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, NULL);
+    cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
 
-    status = clBuildProgram(program, 1, devices, NULL, NULL, NULL);
+    status = clBuildProgram(program, 1, devices, nullptr, nullptr, nullptr);
 
     size_t length;
-    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &length);
+    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, nullptr, &length);
     char* buffer = (char*) malloc(length + 1);
-    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, NULL);
+    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, nullptr);
 
-    if (buffer != NULL) {
+    if (buffer != nullptr) {
         printf("[build info]: %s\n", buffer);
         free(buffer);
     }
@@ -255,22 +255,40 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) row_ptr, NULL);
-    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, (void*) col_idx, NULL);
-    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, (void*) col_ptr, NULL);
-    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, (void*) row_idx, NULL);
-    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, (void*) colMajored_sparse_idx, NULL);
-    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) val, NULL);
-    cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, (void*) W, NULL);
-    cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, NULL);
+    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) row_ptr,
+                                          nullptr);
+    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, (void*) col_idx,
+                                          nullptr);
+    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, (void*) col_ptr,
+                                          nullptr);
+    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, (void*) row_idx,
+                                          nullptr);
+    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, (void*) colMajored_sparse_idx,
+                                                        nullptr);
+    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) val,
+                                      nullptr);
+    cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, (void*) W, nullptr);
+    cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, nullptr);
 
-    cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), NULL, NULL);
-    cl_mem subVecBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), NULL, NULL);
-    cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), NULL, NULL);
-    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(float), (void*) submatrix, NULL);
-    cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), NULL, NULL);
-    cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), NULL, NULL);
-    cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), NULL, NULL);
+    cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr,
+                                    nullptr);
+    cl_mem subVecBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float),
+                                         nullptr,
+                                         nullptr);
+    cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float),
+                                         nullptr,
+                                         nullptr);
+    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(float), (void*) submatrix,
+                                            nullptr);
+    cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float),
+                                     nullptr,
+                                     nullptr);
+    cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float),
+                                          nullptr,
+                                          nullptr);
+    cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float),
+                                          nullptr,
+                                          nullptr);
 
     cl_kernel updateWOverH_kernel = clCreateKernel(program, "updateW_overH_kernel", &err);
     CHECK_ERROR(err);
@@ -309,7 +327,8 @@ int main(int argc, char* argv[]) {
 
         /** update_W_Over_H */
         cl_event enentPoint;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint));
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0,
+                                        nullptr, &enentPoint));
         clWaitForEvents(1, &enentPoint);
         clReleaseEvent(enentPoint);
 /*
@@ -348,7 +367,8 @@ int main(int argc, char* argv[]) {
 */
         /** update_H_Over_W */
         cl_event enentPoint1;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, &enentPoint1));
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0,
+                                        nullptr, &enentPoint1));
         clWaitForEvents(1, &enentPoint1);
         clReleaseEvent(enentPoint1);
 /*
@@ -379,8 +399,8 @@ int main(int argc, char* argv[]) {
     double deltaT = t2 - t1;
     std::cout << "Training Time:" << deltaT << " s.\n";
 
-    CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL));
-    CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL));
+    CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
+    CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < k; ++j) {

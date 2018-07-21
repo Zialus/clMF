@@ -27,19 +27,9 @@
     exit(-1); \
 }
 
-enum {
-    ROWMAJOR, COLMAJOR
-};
-
 class rate_t;
 
-class rateset_t;
-
-class RateComp;
-
 class smat_t;
-
-class testset_t;
 
 typedef std::vector<double> vec_tDouble;
 typedef std::vector<float> vec_t;

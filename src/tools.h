@@ -15,7 +15,7 @@
 #include <fstream>
 #include <sys/time.h>
 
-#include "util.h"
+#include "pmf_util.h"
 
 double gettime();
 

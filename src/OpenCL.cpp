@@ -9,7 +9,7 @@
 
 #include "tools.h"
 #include "pmf.h"
-#include "util.h"
+#include "pmf_util.h"
 
 void choldc1(int n, float** a, float* p) {
     unsigned i, j;

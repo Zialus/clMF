@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef PMF_UTIL_H
+#define PMF_UTIL_H
 
 #include <iostream>
 #include <cstdio>

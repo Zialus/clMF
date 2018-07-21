@@ -99,7 +99,7 @@ __kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float 
     int p=nh;
     if(i>f)
     {
-        for(p;p>1;p--)
+        for(;p>1;p--)
         {
             for (int K = ss; K < f; K+=gg)
             {
@@ -542,7 +542,7 @@ __kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float 
     }
 }
 
-__kernel void batchsolve(int i, int j, __global float *H, __global float *val, __global float *result,__global unsigned *colMajored_sparse_idx,__global long *row_ptr,__global unsigned *col_idx){
+__kernel void batchsolve(int i, int j, __global float *H, __global const float *val, __global float *result,__global const unsigned *colMajored_sparse_idx,__global const long *row_ptr,__global const unsigned *col_idx){
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
 	int gg = get_local_size(0);
@@ -639,7 +639,7 @@ __kernel void batchsolve(int i, int j, __global float *H, __global float *val, _
     result[basev+9]=subvector9;
 }
 
-__kernel void batchsolve1(int i, int j, __global float *W, __global float *val, __global float *result,__global long *col_ptr,__global unsigned *row_idx){
+__kernel void batchsolve1(int i, int j, __global float *W, __global const float *val, __global float *result,__global const long *col_ptr,__global const unsigned *row_idx){
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
 	int gg = get_local_size(0);

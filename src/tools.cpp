@@ -170,12 +170,10 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
         printf("Can't open input file.\n");
         exit(1);
     }
-    long m, n, nnz;
-
-    fscanf(fp, "%ld %ld", &m, &n);
-    fscanf(fp, "%ld %s", &nnz, buf);
+    unsigned m, n, nnz;
+    fscanf(fp, "%u %u", &m, &n);
+    fscanf(fp, "%u %s", &nnz, buf);
     sprintf(filename, "%s/%s", srcdir, buf);
-
     R.load(m, n, nnz, filename, ifALS, with_weights);
     fclose(fp);
 }

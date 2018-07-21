@@ -191,12 +191,20 @@ int main(int argc, char* argv[]) {
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, NULL);
 
     status = clBuildProgram(program, 1, devices, NULL, NULL, NULL);
+
+    size_t length;
+    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &length);
+    char* buffer = (char*) malloc(length + 1);
+    clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, NULL);
+
+    if (buffer != NULL) {
+        printf("[build info]: %s\n", buffer);
+        free(buffer);
+    }
+
     if (status != CL_SUCCESS) {
-        size_t length;
-        clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &length);
-        char* buffer = (char*) malloc(length + 1);
-        clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, NULL);
-        printf("build info: %s\n", buffer);
+        cout << "ERROR:Could not compile OpenCl code !\n";
+        exit(1);
     }
 
     puts("ALS-OpenCL-Parallel Programming: starts!");

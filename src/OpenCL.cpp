@@ -11,8 +11,6 @@
 #include "pmf.h"
 #include "util.h"
 
-using namespace std;
-
 void choldc1(int n, float** a, float* p) {
     unsigned i, j;
     int k;
@@ -153,7 +151,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     printf("test RMSE = %lf.\n", rmse);
     double t2 = gettime();
     double deltaT = t2 - t1;
-    cout << "Predict Time:" << deltaT << " s.\n";
+    std::cout << "Predict Time:" << deltaT << " s.\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -176,7 +174,7 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, NULL));
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
 
-    string sourceStr;
+    std::string sourceStr;
     status = convertToString(opencl_filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
@@ -195,7 +193,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (status != CL_SUCCESS) {
-        cout << "ERROR:Could not compile OpenCl code !\n";
+        std::cout << "ERROR:Could not compile OpenCl code !\n";
         exit(1);
     }
 
@@ -210,7 +208,7 @@ int main(int argc, char* argv[]) {
     load(srcdir, R, ifALS, with_weights);
     double t4 = gettime();
     double deltaT1 = t4 - t3;
-    cout << "Load R Time:" << deltaT1 << " s.\n";
+    std::cout << "Load R Time:" << deltaT1 << " s.\n";
 
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
@@ -320,34 +318,34 @@ int main(int argc, char* argv[]) {
         status=clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
         status=clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
         status=clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(float), submatrix, 0, NULL, NULL);
-        cout<<"update_W_over_H   W:\n";
+        std::cout<<"update_W_over_H   W:\n";
         for(int df=0;df<10;df++)
         {
             for(int fd=0;fd<5;fd++)
             {
-                cout<<W[df*k+fd]<<"  ";
+                std::cout<<W[df*k+fd]<<"  ";
             }
-            cout<<"\n";
+            std::cout<<"\n";
         }
 
-        cout<<"update_W_over_H   H:\n";
+        std::cout<<"update_W_over_H   H:\n";
         for(int df=0;df<10;df++)
         {
             for(int fd=0;fd<5;fd++)
             {
-                cout<<H[df*k+fd]<<"  ";
+                std::cout<<H[df*k+fd]<<"  ";
             }
-            cout<<"\n";
+            std::cout<<"\n";
         }
 
-        cout<<"update_W_over_H   subMatrix:\n";
+        std::cout<<"update_W_over_H   subMatrix:\n";
         for(int df=0;df<10;df++)
         {
             for(int fd=0;fd<10;fd++)
             {
-                cout<<submatrix[df*k+fd]<<"  ";
+                std::cout<<submatrix[df*k+fd]<<"  ";
             }
-            cout<<"\n";
+            std::cout<<"\n";
         }
 */
         /** update_H_Over_W */
@@ -359,29 +357,29 @@ int main(int argc, char* argv[]) {
         printf("ddd.\n");
         status=clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
         status=clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
-        cout<<"update_H_over_W   W:\n";
+        std::cout<<"update_H_over_W   W:\n";
         for(int df=0;df<10;df++)
         {
             for(int fd=0;fd<5;fd++)
             {
-                cout<<W[df*k+fd]<<"  ";
+                std::cout<<W[df*k+fd]<<"  ";
             }
-            cout<<"\n";
+            std::cout<<"\n";
         }
-        cout<<"update_H_over_W   H:\n";
+        std::cout<<"update_H_over_W   H:\n";
         for(int df=0;df<10;df++)
         {
             for(int fd=0;fd<5;fd++)
             {
-                cout<<H[df*k+fd]<<"  ";
+                std::cout<<H[df*k+fd]<<"  ";
             }
-            cout<<"\n";
+            std::cout<<"\n";
         }
 */
     }
     double t2 = gettime();
     double deltaT = t2 - t1;
-    cout << "Training Time:" << deltaT << " s.\n";
+    std::cout << "Training Time:" << deltaT << " s.\n";
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL));
@@ -418,6 +416,6 @@ int main(int argc, char* argv[]) {
 
     double t12 = gettime();
     double ss = t12 - t11;
-    cout << "total time is " << ss << " s.\n";
+    std::cout << "total time is " << ss << " s.\n";
     return 0;
 }

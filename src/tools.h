@@ -22,7 +22,7 @@ double gettime();
 const char* get_error_string(cl_int err);
 
 /** Convert the kernel file into a string */
-int convertToString(const char* filename, string& s);
+int convertToString(const char* filename, std::string& s);
 
 /** Getting platforms and choose an available one */
 int getPlatform(cl_platform_id& platform, int id);

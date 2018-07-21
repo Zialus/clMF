@@ -24,15 +24,14 @@
 
 enum {ROWMAJOR, COLMAJOR};
 
-using namespace std;
 class rate_t;
 class rateset_t;
 class RateComp;
 class smat_t;
 class testset_t;
-typedef vector<double> vec_tDouble;
-typedef vector<float> vec_t;
-typedef vector<vec_t> mat_t;
+typedef std::vector<double> vec_tDouble;
+typedef std::vector<float> vec_t;
+typedef std::vector<vec_t> mat_t;
 
 class rate_t{
 	public:
@@ -122,16 +121,16 @@ class smat_t{
 			nnz = col_ptr[n];
 			max_row_nnz = max_col_nnz = 0;
 			for(long r=1; r<=rows; ++r)
-				max_row_nnz = max(max_row_nnz, row_ptr[r]);
+				max_row_nnz = std::max(max_row_nnz, row_ptr[r]);
 			for(long c=1; c<=cols; ++c)
-				max_col_nnz = max(max_col_nnz, col_ptr[c]);
+				max_col_nnz = std::max(max_col_nnz, col_ptr[c]);
 		}
 
 		void from_mpi(){
 			mem_alloc_by_me=true;
 			max_col_nnz = 0;
 			for(long c=1; c<=cols; ++c)
-				max_col_nnz = max(max_col_nnz, col_ptr[c]-col_ptr[c-1]);
+				max_col_nnz = std::max(max_col_nnz, col_ptr[c]-col_ptr[c-1]);
 		}
 		void print_mat(int host){
 			for(int c = 0; c < cols; ++c) if(col_ptr[c+1]>col_ptr[c]){
@@ -166,7 +165,7 @@ class smat_t{
 				nbits_colMajored_sparse_idx = SIZEBITS(unsigned, nnz);
 			}
 			// a trick here to utilize the space the have been allocated
-			vector<size_t> perm(_nnz);
+			std::vector<size_t> perm(_nnz);
 			unsigned *tmp_row_idx = col_idx;
 			unsigned *tmp_col_idx = row_idx;
 			float *tmp_val = val;
@@ -195,11 +194,11 @@ class smat_t{
 			// Calculate nnz for each row and col
 			max_row_nnz = max_col_nnz = 0;
 			for(long r=1; r<=rows; ++r) {
-				max_row_nnz = max(max_row_nnz, row_ptr[r]);
+				max_row_nnz = std::max(max_row_nnz, row_ptr[r]);
 				row_ptr[r] += row_ptr[r-1];
 			}
 			for(long c=1; c<=cols; ++c) {
-				max_col_nnz = max(max_col_nnz, col_ptr[c]);
+				max_col_nnz = std::max(max_col_nnz, col_ptr[c]);
 				col_ptr[c] += col_ptr[c-1];
 			}
 			// Transpose CRS into CCS matrix

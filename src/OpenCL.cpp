@@ -8,7 +8,6 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "cj.h"
 #include "tools.h"
 #include "pmf.h"
 #include "util.h"

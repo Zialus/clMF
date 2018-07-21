@@ -192,3 +192,9 @@ void initial_col(mat_t& X, long k, long n) {
         }
     }
 }
+
+double gettime() {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec + t.tv_usec * 1e-6;
+}

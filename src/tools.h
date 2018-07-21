@@ -13,8 +13,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sys/time.h>
 
 #include "util.h"
+
+double gettime();
 
 const char* get_error_string(cl_int err);
 

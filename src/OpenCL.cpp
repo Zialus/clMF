@@ -6,19 +6,12 @@
 #include <fstream>
 #include <math.h>
 #include <time.h>
-#include <sys/time.h>
 
 #include "tools.h"
 #include "pmf.h"
 #include "util.h"
 
 using namespace std;
-
-double gettime() {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return t.tv_sec + t.tv_usec * 1e-6;
-}
 
 void choldc1(int n, float** a, float* p) {
     unsigned i, j;

@@ -1,4 +1,4 @@
-void choldc1(int n, __global float* a, __global float* p) {
+static void choldc1(int n, __global float* a, __global float* p) {
 	int base = get_group_id(0) * n * n;
 	unsigned i, j;
 	int k;
@@ -25,7 +25,7 @@ void choldc1(int n, __global float* a, __global float* p) {
 	}
 }
 
-void choldcsl(int n, __global float* A, __global float *tp) {
+static void choldcsl(int n, __global float* A, __global float *tp) {
 	unsigned i, j, k; double sum;
 	int base = get_group_id(0) * n * n;
 	__global float* p;
@@ -44,7 +44,7 @@ void choldcsl(int n, __global float* A, __global float *tp) {
 	}
 }
 
-void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float *p) {
+static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float *p) {
 	int base = get_group_id(0) * n * n;
 	unsigned i, j, k;
 	choldcsl(n, A, p);
@@ -746,8 +746,8 @@ __kernel void updateW_overH_kernel( const ulong rows,
                                    __global float *subMatrix,
 						__global float *subMatrix_f)
 {
-   int i = get_global_id(0);
-   int j = get_global_size(0);
+   //int i = get_global_id(0);
+   //int j = get_global_size(0);
    int s = get_local_id(0);
    int g = get_local_size(0);
    int a = get_group_id(0);
@@ -813,8 +813,8 @@ __kernel void updateH_overW_kernel( const ulong cols,
                                    __global float *subVector,
                                    __global float *subMatrix)
 {
-   int i = get_global_id(0);
-   int j = get_global_size(0);
+   //int i = get_global_id(0);
+   //int j = get_global_size(0);
    int s = get_local_id(0);
    int g = get_local_size(0);
    int a = get_group_id(0);

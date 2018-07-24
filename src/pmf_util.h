@@ -167,7 +167,6 @@ public:
     }
 
     void load_from_iterator(long _rows, long _cols, long _nnz, entry_iterator_t* entry_it, bool ifALS) {
-        unsigned* mapIDX;
         rows = _rows, cols = _cols, nnz = _nnz;
         mem_alloc_by_me = true;
         with_weights = entry_it->with_weights;
@@ -248,6 +247,7 @@ public:
         col_ptr[0] = 0;
 
         if (ifALS) {
+            unsigned* mapIDX;
             mapIDX = MALLOC(unsigned, rows);
             for (int r = 0; r < rows; ++r) {
                 mapIDX[r] = row_ptr[r];

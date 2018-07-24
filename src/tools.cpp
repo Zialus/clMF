@@ -78,12 +78,12 @@ const char* get_error_string(cl_int err){
 }
 
 int convertToString(const char* filename, std::string& s) {
-    size_t size;
     char* str;
     std::fstream f(filename, (std::fstream::in | std::fstream::binary));
 
     if (f.is_open()) {
         size_t fileSize;
+        size_t size;
         f.seekg(0, std::fstream::end);
         size = fileSize = (size_t) f.tellg();
         f.seekg(0, std::fstream::beg);

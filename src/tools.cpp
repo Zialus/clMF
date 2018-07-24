@@ -116,6 +116,7 @@ int getPlatform(cl_platform_id& platform, int id) {
         status = clGetPlatformIDs(numPlatforms, platforms, nullptr);
         if (status != CL_SUCCESS) {
             std::cout << "ERROR:Getting platform IDs!\n";
+            free(platforms);
             return -1;
         }
         platform = platforms[id];

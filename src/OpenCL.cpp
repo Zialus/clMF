@@ -172,6 +172,7 @@ int main(int argc, char* argv[]) {
     cl_device_id* devices = getCl_device_id(platform, device_type);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, nullptr);
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
+    printf("[info] - %d devices found!\n", NumDevice);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
 
     std::string sourceStr;
@@ -188,13 +189,15 @@ int main(int argc, char* argv[]) {
     clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, nullptr);
 
     if (buffer != nullptr) {
-        printf("[build info]: %s\n", buffer);
+        printf("[build info]:\n%s", buffer);
         free(buffer);
     }
 
     if (status != CL_SUCCESS) {
         std::cout << "ERROR:Could not compile OpenCl code !\n";
         exit(1);
+    } else {
+        std::cout << "[build info]: Compiled OpenCl code !\n";
     }
 
     puts("ALS-OpenCL-Parallel Programming: starts!");

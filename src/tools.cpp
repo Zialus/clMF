@@ -88,10 +88,6 @@ int convertToString(const char* filename, std::string& s) {
         size = fileSize = (size_t) f.tellg();
         f.seekg(0, std::fstream::beg);
         str = new char[size + 1];
-        if (!str) {
-            f.close();
-            return 0;
-        }
         f.read(str, fileSize);
         f.close();
         str[size] = '\0';

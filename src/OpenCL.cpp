@@ -2,10 +2,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <string>
-#include <fstream>
 #include <cmath>
 #include <ctime>
+
+#include <string>
+#include <fstream>
 
 #include "tools.h"
 #include "pmf.h"

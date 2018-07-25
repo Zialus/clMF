@@ -7,13 +7,15 @@
 #include <CL/cl.h>
 #endif
 
+#include <sys/time.h>
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sys/time.h>
 
 #include "pmf_util.h"
 

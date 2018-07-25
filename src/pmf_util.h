@@ -1,19 +1,21 @@
 #ifndef PMF_UTIL_H
 #define PMF_UTIL_H
 
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
+#include <cmath>
+
+#include <iostream>
 #include <algorithm>
 #include <utility>
 #include <map>
 #include <queue>
 #include <set>
 #include <vector>
-#include <cmath>
+
 #include <omp.h>
-#include <cassert>
 
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)

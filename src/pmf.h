@@ -18,7 +18,7 @@ public:
         k = 10;
         maxiter = 5;
         maxinneriter = 1;
-        lambda = 0.1f;
+        lambda = 0.05;
         verbose = 0;
         nBlocks = 8192;
         nThreadsPerBlock = 32;

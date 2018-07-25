@@ -155,13 +155,102 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     std::cout << "Predict Time:" << deltaT << " s.\n";
 }
 
+void exit_with_help() {
+    printf(
+            "Usage: clMF [options] data_dir\n"
+            "options:\n"
+            "    -c : full path to the kernel code (default x)\n"
+            "    -k rank : set the rank (default 10)\n"
+            "    -n threads : set the number of threads (default 4)\n"
+            "    -l lambda : set the regularization parameter lambda (default 0.1)\n"
+            "    -t max_iter: set the number of iterations (default 5)\n"
+            "    -T max_iter: set the number of inner iterations used in CCDR1 (default 5)\n"
+            "    -P platform_id: select a platform (default 0)\n"
+            "    -q verbose: show information or not (default 0)\n"
+            "    -nBlocks: Number of blocks on cuda (default 16)\n"
+            "    -nThreadsPerBlock: Number of threads per block on cuda (default 32)\n"
+    );
+    exit(1);
+}
+
+parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code) {
+    // default values are set by the constructor
+    parameter param;
+
+    // parse options
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            break;
+        }
+        if (++i >= argc) {
+            exit_with_help();
+        }
+        if (strcmp(argv[i - 1], "-nBlocks") == 0) {
+            param.nBlocks = atoi(argv[i]);
+        } else if (strcmp(argv[i - 1], "-nThreadsPerBlock") == 0) {
+            param.nThreadsPerBlock = atoi(argv[i]);
+
+        } else {
+            switch (argv[i - 1][1]) {
+                case 'c':
+                    sprintf(kernel_code, "%s", argv[i]);
+                    break;
+
+                case 'k':
+                    param.k = atoi(argv[i]);
+                    break;
+
+                case 'n':
+                    param.threads = atoi(argv[i]);
+                    break;
+
+                case 'l':
+                    param.lambda = atof(argv[i]);
+                    break;
+
+                case 't':
+                    param.maxiter = atoi(argv[i]);
+                    break;
+
+                case 'T':
+                    param.maxinneriter = atoi(argv[i]);
+                    break;
+
+                case 'P':
+                    param.platform_id = atoi(argv[i]);
+                    break;
+
+                case 'q':
+                    param.verbose = atoi(argv[i]);
+                    break;
+
+                default:
+                    fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
+                    exit_with_help();
+                    break;
+            }
+        }
+
+    }
+
+    if (i >= argc) {
+        exit_with_help();
+    }
+
+    sprintf(input_dir, "%s", argv[i]);
+    return param;
+}
+
+
 int main(int argc, char* argv[]) {
     double t11 = gettime();
     char device_type[4] = {'g', 'p', 'u', '\0'};
     const char* opencl_filename = "../kcode/ALS.cl";
+    char srcdir[1024];
 
     smat_t R;
-    parameter param;
+    parameter param = parse_command_line(argc, argv, srcdir, nullptr);
     mat_t W_c, H_c;
 
     cl_int status;
@@ -169,7 +258,7 @@ int main(int argc, char* argv[]) {
     cl_uint NumDevice;
     cl_platform_id platform;
 
-    getPlatform(platform, 0);
+    getPlatform(platform, param.platform_id);
     cl_device_id* devices = getCl_device_id(platform, device_type);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, nullptr);
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
@@ -203,8 +292,6 @@ int main(int argc, char* argv[]) {
 
     puts("ALS-OpenCL-Parallel Programming: starts!");
 
-    char srcdir[1024];
-    sprintf(srcdir, "%s", argv[1]);
 
     double t3 = gettime();
     bool with_weights = false;

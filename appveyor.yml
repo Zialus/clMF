@@ -1,0 +1,19 @@
+environment:
+  INTELOCLSDKROOT: C:\Intel\OpenCL\sdk\
+
+image:
+  - Visual Studio 2017
+  - Visual Studio 2013
+
+before_build:
+  - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/12527/intel_sdk_for_opencl_2017_7.0.0.2567.exe"
+  - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/12512/opencl_runtime_16.1.2_x64_setup.msi"
+  - start /wait msiexec /i opencl_runtime_16.1.2_x64_setup.msi /qn
+  - start /wait .\intel_sdk_for_opencl_2017_7.0.0.2567.exe install --output=output.log --eula=accept
+  - type output.log
+  - dir %INTELOCLSDKROOT%
+
+build_script:
+  - mkdir build && cd build
+  - cmake ..
+  - cmake --build .

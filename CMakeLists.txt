@@ -18,7 +18,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/exec/")
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(WARNINGS "-Wno-deprecated-declarations")
+#set(WARNINGS "-Wno-deprecated-declarations")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNINGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS}")
 

@@ -7,7 +7,7 @@
 #include <CL/cl.h>
 #endif
 
-#include <sys/time.h>
+#include <sys/timeb.h>
 
 #include <cstring>
 #include <cstdio>

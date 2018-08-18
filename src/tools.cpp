@@ -189,7 +189,7 @@ void initial_col(mat_t& X, long k, long n) {
 }
 
 double gettime() {
-    struct timeval t;
-    gettimeofday(&t, nullptr);
-    return t.tv_sec + t.tv_usec * 1e-6;
+    struct timeb t;
+    ftime(&t);
+    return t.time + t.millitm * 1e-3;
 }

@@ -1,11 +1,6 @@
 # Minimal version of CMake
 cmake_minimum_required (VERSION 3.9)
 
-if(UNIX AND NOT APPLE)
-    message("Importing alternative FindOpenCL for Linux")
-    set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-endif(UNIX AND NOT APPLE)
-
 # Define project name
 project(clMF)
 
@@ -37,6 +32,5 @@ file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
 
 
 # Set up executable
-include_directories(${OpenCL_INCLUDE_DIR})
 add_executable(clMF ${source_src} ${source_hdr})
-target_link_libraries(clMF ${OpenCL_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(clMF OpenMP::OpenMP_CXX OpenCL::OpenCL)

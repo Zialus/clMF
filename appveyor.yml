@@ -2,8 +2,9 @@ environment:
   INTELOCLSDKROOT: C:\Intel\OpenCL\sdk\
 
 image:
-  - Visual Studio 2017
+  - Ubuntu
   - Visual Studio 2013
+  - Visual Studio 2017
 
 before_build:
   - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/12527/intel_sdk_for_opencl_2017_7.0.0.2567.exe"
@@ -16,4 +17,23 @@ before_build:
 build_script:
   - mkdir build && cd build
   - cmake ..
-  - cmake --build .
+  - cmake --build . --config Release
+
+for:
+-
+  matrix:
+    only:
+    - image: Ubuntu
+
+  init:
+  - uname -a
+  before_build:
+  - sudo apt install clinfo opencl-headers -y
+  - source scripts/opencl_install.sh
+  - echo $AMDAPPSDKROOT
+  build_script:
+  - cmake --version
+  - clinfo
+  - mkdir build && cd build
+  - cmake -D CMAKE_BUILD_TYPE=Release ..
+  - make

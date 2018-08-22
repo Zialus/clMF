@@ -19,8 +19,6 @@
 
 #include "pmf_util.h"
 
-double gettime();
-
 const char* get_error_string(cl_int err);
 
 /** Convert the kernel file into a string */

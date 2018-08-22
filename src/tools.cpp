@@ -187,9 +187,3 @@ void initial_col(mat_t& X, long k, long n) {
         }
     }
 }
-
-double gettime() {
-    struct timeb t;
-    ftime(&t);
-    return t.time + t.millitm * 1e-3;
-}

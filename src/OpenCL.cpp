@@ -1,16 +1,17 @@
-#include <cstring>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
-#include <cmath>
+#include <cstring>
 #include <ctime>
 
-#include <string>
+#include <chrono>
 #include <fstream>
+#include <iostream>
+#include <string>
 
-#include "tools.h"
 #include "pmf.h"
 #include "pmf_util.h"
+#include "tools.h"
 
 void choldc1(int n, float** a, float* p) {
     unsigned i, j;
@@ -110,7 +111,7 @@ void M_byMt_multiply(int i, int j, float** M, float** Result) {
 }
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
-    double t1 = gettime();
+    auto t1 = std::chrono::high_resolution_clock::now();
     int i, j;
     double v, rmse = 0;
     size_t num_insts = 0;
@@ -150,9 +151,9 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
 
     rmse = sqrt(rmse / num_insts);
     printf("test RMSE = %lf.\n", rmse);
-    double t2 = gettime();
-    double deltaT = t2 - t1;
-    std::cout << "Predict Time:" << deltaT << " s.\n";
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT12 = t2 - t1;
+    std::cout << "Predict Time: " << deltaT12.count() << " s.\n";
 }
 
 void exit_with_help() {
@@ -244,7 +245,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
 
 
 int main(int argc, char* argv[]) {
-    double t11 = gettime();
+    auto t8 = std::chrono::high_resolution_clock::now();
     char device_type[4] = {'g', 'p', 'u', '\0'};
     const char* opencl_filename = "../kcode/ALS.cl";
     char srcdir[1024];
@@ -292,14 +293,13 @@ int main(int argc, char* argv[]) {
 
     puts("ALS-OpenCL-Parallel Programming: starts!");
 
-
-    double t3 = gettime();
+    auto t3 = std::chrono::high_resolution_clock::now();
     bool with_weights = false;
     bool ifALS = true;
     load(srcdir, R, ifALS, with_weights);
-    double t4 = gettime();
-    double deltaT1 = t4 - t3;
-    std::cout << "Load R Time:" << deltaT1 << " s.\n";
+    auto t4 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT34 = t4 - t3;
+    std::cout << "Load R Time: " << deltaT34.count() << " s.\n";
 
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
@@ -393,7 +393,7 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
-    double t1 = gettime();
+    auto t1 = std::chrono::high_resolution_clock::now();
     for (unsigned int ite = 0; ite < maxiter; ite++) {
         size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};
         size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
@@ -468,9 +468,9 @@ int main(int argc, char* argv[]) {
         }
 */
     }
-    double t2 = gettime();
-    double deltaT = t2 - t1;
-    std::cout << "Training Time:" << deltaT << " s.\n";
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT = t2 - t1;
+    std::cout << "Training Time: " << deltaT.count() << " s.\n";
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
@@ -505,8 +505,8 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clReleaseContext(context));
     free(devices);
 
-    double t12 = gettime();
-    double ss = t12 - t11;
-    std::cout << "total time is " << ss << " s.\n";
+    auto t9 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT89 = t9 - t8;
+    std::cout << "total Time: " << deltaT89.count() << " s.\n";
     return 0;
 }

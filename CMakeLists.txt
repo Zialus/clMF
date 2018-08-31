@@ -34,3 +34,8 @@ file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
 # Set up executable
 add_executable(clMF ${source_src} ${source_hdr})
 target_link_libraries(clMF OpenMP::OpenMP_CXX OpenCL::OpenCL)
+
+
+enable_testing()
+add_test(simple ../exec/clMF -k 10 -t 5 -T 1 -l 0.05 -n 10 -nBlocks 32 -nThreadsPerBlock 256 ../data/simple)
+add_test(toy-example ../exec/clMF -k 10 -t 5 -T 1 -l 0.05 -n 10 -nBlocks 32 -nThreadsPerBlock 256 ../data/toy-example)

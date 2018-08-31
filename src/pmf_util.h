@@ -169,7 +169,9 @@ public:
     }
 
     void load_from_iterator(long _rows, long _cols, long _nnz, entry_iterator_t* entry_it, bool ifALS) {
-        rows = _rows, cols = _cols, nnz = _nnz;
+        rows = _rows;
+        cols = _cols;
+        nnz = _nnz;
         mem_alloc_by_me = true;
         with_weights = entry_it->with_weights;
         val = MALLOC(float, nnz);

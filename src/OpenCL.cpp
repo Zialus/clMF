@@ -127,8 +127,8 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     char buf_train[1024], buf_test[1024], test_file_name[1024], train_file_name[1024];
     unsigned m, n, nnz, nnz_test;
     fscanf(fp, "%u %u", &m, &n);
-    fscanf(fp, "%u %s", &nnz, buf_train);
-    fscanf(fp, "%u %s", &nnz_test, buf_test);
+    fscanf(fp, "%u %1023s", &nnz, buf_train);
+    fscanf(fp, "%u %1023s", &nnz_test, buf_test);
     sprintf(test_file_name, "%s/%s", srcdir, buf_test);
     sprintf(train_file_name, "%s/%s", srcdir, buf_train);
     fclose(fp);
@@ -260,14 +260,17 @@ int main(int argc, char* argv[]) {
     cl_platform_id platform;
 
     getPlatform(platform, param.platform_id);
+    printf("[info] - the selected platform: %d, device type: %s\n", param.platform_id, device_type);
     cl_device_id* devices = getCl_device_id(platform, device_type);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, nullptr);
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     printf("[info] - %d devices found!\n", NumDevice);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
 
+    printf("[info] - The kernel to be compiled: %s\n", opencl_filename);
     std::string sourceStr;
     status = convertToString(opencl_filename, sourceStr);
+    if (status == -1) { exit(-1); }
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);

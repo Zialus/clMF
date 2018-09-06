@@ -29,6 +29,16 @@
     exit(-1); \
 }
 
+#define CHECK_FSCAN(err,num)    if(err != num){ \
+    perror("FSCANF"); \
+    exit(-1); \
+}
+
+#define CHECK_FGET(err)    if(err == nullptr){ \
+    perror("FGET"); \
+    exit(-1); \
+}
+
 class rate_t;
 
 class smat_t;
@@ -67,7 +77,7 @@ public:
         int i = 1, j = 1;
         float v = 0, w = 1.0;
         if (nnz > 0) {
-            fgets(buf, 1000, fp);
+            CHECK_FGET(fgets(buf, 1000, fp));
             if (with_weights) {
                 sscanf(buf, "%d %d %f %f", &i, &j, &v, &w);
             } else {

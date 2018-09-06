@@ -126,9 +126,9 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
 
     char buf_train[1024], buf_test[1024], test_file_name[1024], train_file_name[1024];
     unsigned m, n, nnz, nnz_test;
-    fscanf(fp, "%u %u", &m, &n);
-    fscanf(fp, "%u %1023s", &nnz, buf_train);
-    fscanf(fp, "%u %1023s", &nnz_test, buf_test);
+    CHECK_FSCAN(fscanf(fp, "%u %u", &m, &n),2);
+    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz, buf_train),2);
+    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz_test, buf_test),2);
     sprintf(test_file_name, "%s/%s", srcdir, buf_test);
     sprintf(train_file_name, "%s/%s", srcdir, buf_train);
     fclose(fp);

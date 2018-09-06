@@ -1,10 +1,9 @@
 static void choldc1(int n, __global float* a, __global float* p) {
 	int base = get_group_id(0) * n * n;
-	unsigned i, j;
 	int k;
 	float sum;
-	for (i = 0; i < n; ++i) {
-		for (j = i; j < n; ++j) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = i; j < n; ++j) {
 			//sum = a[i][j];
 			sum =a[base + i * n + j];
 			for (k = i - 1; k >= 0; --k) {
@@ -26,17 +25,17 @@ static void choldc1(int n, __global float* a, __global float* p) {
 }
 
 static void choldcsl(int n, __global float* A, __global float *tp) {
-	unsigned i, j, k; double sum;
+    double sum;
 	int base = get_group_id(0) * n * n;
 	__global float* p;
 	int gid = get_group_id(0);
 	p = &(tp[gid*n]);
 	choldc1(n, A, p);
-	for (i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i) {
 		A[base + i * n + i] = 1 / p[i];
-		for (j = i + 1; j < n; ++j) {
+		for (int j = i + 1; j < n; ++j) {
 			sum = 0;
-			for (k = i; k < j; ++k){
+			for (int k = i; k < j; ++k){
 				sum -= A[base + j * n + k] * A[base + k * n + i];
 			}
 			A[base + j * n + i] = sum / p[j];
@@ -46,7 +45,7 @@ static void choldcsl(int n, __global float* A, __global float *tp) {
 
 static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float *p) {
 	int base = get_group_id(0) * n * n;
-	unsigned i, j, k;
+	int i, j, k;
 	choldcsl(n, A, p);
 	//vecIndex = (i * 3) + j; to ontain index from vector if needed.
 	for (i = 0; i < n; ++i) {
@@ -104,13 +103,13 @@ __kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float 
             for (int K = ss; K < f; K+=gg)
             {
                 offset[K] = idx[ ptr + K + (nh-p)*f ] * j;
-                for(unsigned I=0;I<j;++I)
+                for(int I=0;I<j;++I)
                 {
                     a[K*j+I] = H[offset[K]+I];
                 }
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (unsigned S = 0; S < f; S++)
+            for (int S = 0; S < f; S++)
             {
                 SUM0 += a[S*j]*a[S*j];
                 SUM1 += a[S*j]*a[S*j+1];
@@ -183,14 +182,14 @@ __kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float 
         for(int K = ss;K < i-(nh-1)*f ; K+=gg)
         {
             offset[K] = idx[ptr + K+ (nh-1)*f ] * j;
-        	for(unsigned I=0;I<j;++I)
+        	for(int I=0;I<j;++I)
         	{
                 a[K*j+I] = H[offset[K]+I];
         	}
         }
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        for (unsigned S = 0; S < i-(nh-1)*f ; S++)
+        for (int S = 0; S < i-(nh-1)*f ; S++)
         {
                 SUM0 += a[S*j]*a[S*j];
                 SUM1 += a[S*j]*a[S*j+1];
@@ -365,13 +364,13 @@ __kernel void Mt_byM_multiply_k(int i, int j,  __global float *H,__global float 
         for (int K = ss; K < i; K+=gg)
     	{
             offset[K] = idx[ptr + K] * j;
-        	for(unsigned I=0;I<j;++I)
+        	for(int I=0;I<j;++I)
         	{
                 a[K*j+I] = H[offset[K]+I];
         	}
     	}
     	barrier(CLK_LOCAL_MEM_FENCE);
-        for (unsigned S = 0; S < i; S++)
+        for (int S = 0; S < i; S++)
         {
                 SUM0 += a[S*j]*a[S*j];
                 SUM1 += a[S*j]*a[S*j+1];
@@ -754,7 +753,7 @@ __kernel void updateW_overH_kernel( const ulong rows,
    int v = get_num_groups(0);
    int base = a * k * k;
    int baseV = a * k;
-   for (int Rw = a; Rw < rows; Rw += v){
+   for (ulong Rw = a; Rw < rows; Rw += v){
 		__global float *Wr = &W[Rw*k];
 		unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
 		if (omegaSize>0){
@@ -821,7 +820,7 @@ __kernel void updateH_overW_kernel( const ulong cols,
    int v = get_num_groups(0);
    int base = a * k * k;
    int baseV = a * k;
-   for (int Rh = a; Rh < cols; Rh +=v){
+   for (ulong Rh = a; Rh < cols; Rh +=v){
 		__global float *Hr = &H[Rh*k];
 		unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
 		if (omegaSize>0){

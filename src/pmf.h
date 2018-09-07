@@ -13,7 +13,6 @@ public:
     int threads;
     int platform_id;
 
-
     parameter() {
         k = 10;
         maxiter = 5;

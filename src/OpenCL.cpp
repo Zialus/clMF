@@ -175,9 +175,8 @@ void exit_with_help() {
 }
 
 parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code) {
-    // default values are set by the constructor
+    // default values have been set by the constructor
     parameter param;
-
     // parse options
     int i;
     for (i = 1; i < argc; i++) {
@@ -191,41 +190,32 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
             param.nBlocks = atoi(argv[i]);
         } else if (strcmp(argv[i - 1], "-nThreadsPerBlock") == 0) {
             param.nThreadsPerBlock = atoi(argv[i]);
-
         } else {
             switch (argv[i - 1][1]) {
                 case 'c':
                     sprintf(kernel_code, "%s", argv[i]);
                     break;
-
                 case 'k':
                     param.k = atoi(argv[i]);
                     break;
-
                 case 'n':
                     param.threads = atoi(argv[i]);
                     break;
-
                 case 'l':
                     param.lambda = atof(argv[i]);
                     break;
-
                 case 't':
                     param.maxiter = atoi(argv[i]);
                     break;
-
                 case 'T':
                     param.maxinneriter = atoi(argv[i]);
                     break;
-
                 case 'P':
                     param.platform_id = atoi(argv[i]);
                     break;
-
                 case 'q':
                     param.verbose = atoi(argv[i]);
                     break;
-
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
                     exit_with_help();

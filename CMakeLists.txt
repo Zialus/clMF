@@ -1,5 +1,5 @@
 # Minimal version of CMake
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required(VERSION 3.9)
 
 # Define project name
 project(clMF)
@@ -9,7 +9,7 @@ find_package(OpenMP REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/exec/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exec/")
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -37,5 +37,5 @@ target_link_libraries(clMF OpenMP::OpenMP_CXX OpenCL::OpenCL)
 
 
 enable_testing()
-add_test(simple ../exec/clMF -k 10 -t 5 -T 1 -l 0.05 -n 10 -nBlocks 32 -nThreadsPerBlock 256 ../data/simple)
-add_test(toy-example ../exec/clMF -k 10 -t 5 -T 1 -l 0.05 -n 10 -nBlocks 32 -nThreadsPerBlock 256 ../data/toy-example)
+add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ../data/simple)
+add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ../data/toy-example)

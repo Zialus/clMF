@@ -162,12 +162,9 @@ void exit_with_help() {
             "options:\n"
             "    -c : full path to the kernel code (default x)\n"
             "    -k rank : set the rank (default 10)\n"
-            "    -n threads : set the number of threads (default 4)\n"
             "    -l lambda : set the regularization parameter lambda (default 0.1)\n"
             "    -t max_iter: set the number of iterations (default 5)\n"
-            "    -T max_iter: set the number of inner iterations used in CCDR1 (default 5)\n"
             "    -P platform_id: select a platform (default 0)\n"
-            "    -q verbose: show information or not (default 0)\n"
             "    -nBlocks: Number of blocks on cuda (default 16)\n"
             "    -nThreadsPerBlock: Number of threads per block on cuda (default 32)\n"
     );
@@ -198,23 +195,14 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                 case 'k':
                     param.k = atoi(argv[i]);
                     break;
-                case 'n':
-                    param.threads = atoi(argv[i]);
-                    break;
                 case 'l':
                     param.lambda = atof(argv[i]);
                     break;
                 case 't':
                     param.maxiter = atoi(argv[i]);
                     break;
-                case 'T':
-                    param.maxinneriter = atoi(argv[i]);
-                    break;
                 case 'P':
                     param.platform_id = atoi(argv[i]);
-                    break;
-                case 'q':
-                    param.verbose = atoi(argv[i]);
                     break;
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);

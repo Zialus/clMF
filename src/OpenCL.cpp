@@ -284,6 +284,7 @@ int main(int argc, char* argv[]) {
 
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
+
     int k = param.k;
     float lambda = param.lambda;
     long rows = R.rows;
@@ -310,13 +311,13 @@ int main(int argc, char* argv[]) {
 
     size_t nbits_W_ = R.rows * k * sizeof(float);
     size_t nbits_H_ = R.cols * k * sizeof(float);
+
     int indexPosition = 0;
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < k; ++j) {
             W[indexPosition] = 0.0;
             ++indexPosition;
         }
-
     }
 
     int indexPosition1 = 0;
@@ -335,7 +336,6 @@ int main(int argc, char* argv[]) {
     cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) val, nullptr);
     cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, (void*) W, nullptr);
     cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, nullptr);
-
     cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, nullptr);
     cl_mem subVecBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, nullptr);
     cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), nullptr, nullptr);
@@ -381,8 +381,7 @@ int main(int argc, char* argv[]) {
 
         /** update_W_Over_H */
         cl_event enentPoint;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0,
-                                        nullptr, &enentPoint));
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &enentPoint));
         clWaitForEvents(1, &enentPoint);
         clReleaseEvent(enentPoint);
 /*
@@ -421,8 +420,7 @@ int main(int argc, char* argv[]) {
 */
         /** update_H_Over_W */
         cl_event enentPoint1;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0,
-                                        nullptr, &enentPoint1));
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &enentPoint1));
         clWaitForEvents(1, &enentPoint1);
         clReleaseEvent(enentPoint1);
 /*
@@ -469,7 +467,6 @@ int main(int argc, char* argv[]) {
 
     calculate_rmse(W_c, H_c, srcdir, k);
 
-    /* Release Memory*/
     CL_CHECK(clReleaseKernel(updateHOverW_kernel));
     CL_CHECK(clReleaseKernel(updateWOverH_kernel));
     CL_CHECK(clReleaseProgram(program));

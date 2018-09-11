@@ -114,7 +114,8 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     auto t1 = std::chrono::high_resolution_clock::now();
     int i, j;
     double v, rmse = 0;
-    size_t num_insts = 0;
+    int num_insts = 0;
+    int nans_count = 0;
 
     char meta_filename[1024];
     sprintf(meta_filename, "%s/meta", srcdir);
@@ -145,12 +146,19 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];
         }
         num_insts++;
-        rmse += (pred_v - v) * (pred_v - v);
+        double tmp = (pred_v - v) * (pred_v - v);
+        if (tmp == tmp) {
+            rmse += tmp;
+        } else {
+            nans_count++;
+        }
     }
     fclose(test_fp);
 
+    double nans_percentage = (double) nans_count / (double) num_insts;
+    printf("NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);
-    printf("test RMSE = %lf.\n", rmse);
+    printf("CALCULATED RMSE = %lf.\n", rmse);
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT12 = t2 - t1;
     std::cout << "Predict Time: " << deltaT12.count() << " s.\n";

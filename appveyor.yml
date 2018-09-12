@@ -3,7 +3,7 @@ environment:
 
 image:
   - Ubuntu
-  - Visual Studio 2013
+#  - Visual Studio 2013
   - Visual Studio 2017
 
 before_build:

@@ -274,17 +274,16 @@ int main(int argc, char* argv[]) {
     }
 
     if (status != CL_SUCCESS) {
-        std::cout << "ERROR:Could not compile OpenCl code !\n";
+        std::cout << "[FATAL ERROR]:Could not compile OpenCl code!\n";
         exit(1);
     } else {
-        std::cout << "[build info]: Compiled OpenCl code !\n";
+        std::cout << "[build info]:Compiled OpenCl code!\n";
     }
-
-    puts("ALS-OpenCL-Parallel Programming: starts!");
 
     auto t3 = std::chrono::high_resolution_clock::now();
     bool with_weights = false;
     bool ifALS = true;
+    std::cout << "[info]Loading R...\n";
     load(srcdir, R, ifALS, with_weights);
     auto t4 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT34 = t4 - t3;
@@ -493,6 +492,6 @@ int main(int argc, char* argv[]) {
 
     auto t9 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT89 = t9 - t8;
-    std::cout << "total Time: " << deltaT89.count() << " s.\n";
+    std::cout << "Total Time: " << deltaT89.count() << " s.\n";
     return 0;
 }

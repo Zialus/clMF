@@ -123,7 +123,7 @@ int getPlatform(cl_platform_id& platform, int id) {
     }
 }
 
-cl_device_id* getCl_device_id(cl_platform_id& platform, char* device_type) {
+cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     cl_uint numDevices = 0;
     cl_int status = 0;
     cl_device_id* devices = nullptr;
@@ -157,6 +157,21 @@ cl_device_id* getCl_device_id(cl_platform_id& platform, char* device_type) {
         exit(1);
     }
     return devices;
+}
+
+int report_device(cl_device_id device_id) {
+    int err;
+    cl_char vendor_name[1024] = {0};
+    cl_char device_name[1024] = {0};
+
+    err = clGetDeviceInfo(device_id, CL_DEVICE_VENDOR, sizeof(vendor_name), vendor_name, nullptr);
+    err |= clGetDeviceInfo(device_id, CL_DEVICE_NAME, sizeof(device_name), device_name, nullptr);
+    if (err != CL_SUCCESS) {
+        printf("Error: Failed to retrieve device info! %s\n", get_error_string(err));
+        return -1;
+    }
+    printf("Connecting to %s %s...\n", vendor_name, device_name);
+    return 0;
 }
 
 void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {

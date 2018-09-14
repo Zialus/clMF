@@ -245,12 +245,30 @@ int main(int argc, char* argv[]) {
     cl_uint NumDevice;
     cl_platform_id platform;
 
-    getPlatform(platform, param.platform_id);
-    printf("[info] - the selected platform: %d, device type: %s\n", param.platform_id, device_type);
-    cl_device_id* devices = getCl_device_id(platform, device_type);
-    cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, nullptr);
+    if (param.platform_id == 0) {
+        device_type[0] = 'g';
+        device_type[1] = 'p';
+        device_type[2] = 'u';
+    } else if (param.platform_id == 1) {
+        device_type[0] = 'c';
+        device_type[1] = 'p';
+        device_type[2] = 'u';
+    } else if (param.platform_id == 2) {
+        device_type[0] = 'm';
+        device_type[1] = 'i';
+        device_type[2] = 'c';
+    } else {
+        printf("[info] unknown device type!\n");
+    }
+    printf("[info] - selected device type: %s\n", device_type);
+
+    getPlatform(platform, 0);
+    cl_device_id* devices = getDevice(platform, device_type);
+    report_device(devices[0]);
+    cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);
+    CHECK_ERROR(err);
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
-    printf("[info] - %d devices found!\n", NumDevice);
+    assert(NumDevice == 1);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
 
     printf("[info] - The kernel to be compiled: %s\n", opencl_filename);

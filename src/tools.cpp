@@ -128,11 +128,11 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     cl_int status = 0;
     cl_device_id* devices = nullptr;
 
-    if ((device_type[0] == 'm') && (device_type[1] == 'i') && (device_type[2] == 'c')) {
+    if (strcmp(device_type,"mic") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, 0, nullptr, &numDevices);
-    } else if ((device_type[0] == 'c') && (device_type[1] == 'p') && (device_type[2] == 'u')) {
+    } else if (strcmp(device_type,"cpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 0, nullptr, &numDevices);
-    } else if ((device_type[0] == 'g') && (device_type[1] == 'p') && (device_type[2] == 'u')) {
+    } else if (strcmp(device_type,"gpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices);
     }
 
@@ -143,11 +143,11 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
 
     if (numDevices > 0) {
         devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
-        if ((device_type[0] == 'c') && (device_type[1] == 'p') && (device_type[2] == 'u')) {
+        if (strcmp(device_type,"cpu") == 0) {
             status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, numDevices, devices, nullptr);
-        } else if ((device_type[0] == 'm') && (device_type[1] == 'i') && (device_type[2] == 'c')) {
+        } else if (strcmp(device_type,"mic") == 0) {
             status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, numDevices, devices, nullptr);
-        } else if ((device_type[0] == 'g') && (device_type[1] == 'p') && (device_type[2] == 'u')) {
+        } else if (strcmp(device_type,"gpu") == 0) {
             status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, nullptr);
         }
     }

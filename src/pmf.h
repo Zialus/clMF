@@ -8,7 +8,7 @@ public:
     float lambda;
     int nBlocks;
     int nThreadsPerBlock;
-    int platform_id;
+    int device_id;
 
     parameter() {
         k = 10;
@@ -16,7 +16,7 @@ public:
         lambda = 0.05;
         nBlocks = 8192;
         nThreadsPerBlock = 32;
-        platform_id = 0;
+        device_id = 0;
     }
 };
 

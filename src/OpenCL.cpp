@@ -67,13 +67,13 @@ void exit_with_help() {
     printf(
             "Usage: clMF [options] data_dir\n"
             "options:\n"
-            "    -c : full path to the kernel code (default x)\n"
+            "    -c : path to the kernel code (default \"../kcode/ALS.cl\")\n"
             "    -k rank : set the rank (default 10)\n"
-            "    -l lambda : set the regularization parameter lambda (default 0.1)\n"
+            "    -l lambda : set the regularization parameter lambda (default 0.05)\n"
             "    -t max_iter: set the number of iterations (default 5)\n"
-            "    -P platform_id: select a platform (default 0)\n"
-            "    -nBlocks: Number of blocks on cuda (default 16)\n"
-            "    -nThreadsPerBlock: Number of threads per block on cuda (default 32)\n"
+            "    -P device_id: select a device(0=gpu, 1=cpu, 2=mic) (default 0)\n"
+            "    -nBlocks: Number of blocks(default 8192)\n"
+            "    -nThreadsPerBlock: Number of threads per block(default 32)\n"
     );
     exit(1);
 }
@@ -109,7 +109,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                     param.maxiter = atoi(argv[i]);
                     break;
                 case 'P':
-                    param.platform_id = atoi(argv[i]);
+                    param.device_id = atoi(argv[i]);
                     break;
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
@@ -132,36 +132,33 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
 int main(int argc, char* argv[]) {
     auto t7 = std::chrono::high_resolution_clock::now();
     char device_type[4] = {'g', 'p', 'u', '\0'};
-    const char* opencl_filename = "../kcode/ALS.cl";
+    char opencl_filename[1024] = "../kcode/ALS.cl";
     char srcdir[1024];
 
-    smat_t R;
-    parameter param = parse_command_line(argc, argv, srcdir, nullptr);
+    parameter param = parse_command_line(argc, argv, srcdir, opencl_filename);
 
+    switch (param.device_id) {
+        case 0:
+            snprintf(device_type, sizeof(device_type), "gpu");
+            break;
+        case 1:
+            snprintf(device_type, sizeof(device_type), "cpu");
+            break;
+        case 2:
+            snprintf(device_type, sizeof(device_type), "mic");
+            break;
+        default:
+            printf("[info] unknown device type!\n");
+            break;
+    }
+
+    printf("[info] - selected device type: %s\n", device_type);
+
+    auto tA = std::chrono::high_resolution_clock::now();
     cl_int status;
     cl_int err;
     cl_uint NumDevice;
     cl_platform_id platform;
-
-    if (param.platform_id == 0) {
-        device_type[0] = 'g';
-        device_type[1] = 'p';
-        device_type[2] = 'u';
-    } else if (param.platform_id == 1) {
-        device_type[0] = 'c';
-        device_type[1] = 'p';
-        device_type[2] = 'u';
-    } else if (param.platform_id == 2) {
-        device_type[0] = 'm';
-        device_type[1] = 'i';
-        device_type[2] = 'c';
-    } else {
-        printf("[info] unknown device type!\n");
-    }
-    printf("[info] - selected device type: %s\n", device_type);
-
-
-    auto tA = std::chrono::high_resolution_clock::now();
     getPlatform(platform, 0);
     cl_device_id* devices = getDevice(platform, device_type);
     report_device(devices[0]);
@@ -204,6 +201,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
 
     auto t3 = std::chrono::high_resolution_clock::now();
+    smat_t R;
     bool with_weights = false;
     bool ifALS = true;
     std::cout << "[info]Loading R...\n";

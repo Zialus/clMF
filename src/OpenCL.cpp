@@ -209,21 +209,14 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> deltaT34 = t4 - t3;
     std::cout << "Load R Time: " << deltaT34.count() << " s.\n";
 
-    mat_t W_c, H_c;
-    initial_col(W_c, R.rows, param.k);
-    initial_col(H_c, R.cols, param.k);
-
     int k = param.k;
-    float lambda = param.lambda;
-    long rows = R.rows;
-    long cols = R.cols;
     int nBlocks = param.nBlocks;
     int nThreadsPerBlock = param.nThreadsPerBlock;
-    int maxiter = param.maxiter;
-    long* col_ptr = R.col_ptr, * row_ptr = R.row_ptr;
-    unsigned* row_idx = R.row_idx, * col_idx = R.col_idx;
-    unsigned* colMajored_sparse_idx = R.colMajored_sparse_idx;
-    float* val = R.val;
+
+    mat_t W_c;
+    mat_t H_c;
+    initial_col(W_c, R.rows, param.k);
+    initial_col(H_c, R.cols, param.k);
 
     float* submatrix = (float*) malloc(k * k * sizeof(float));
     for (int i = 0; i < k; i++) {
@@ -234,11 +227,6 @@ int main(int argc, char* argv[]) {
 
     float* W = (float*) malloc(k * R.rows * sizeof(float));
     float* H = (float*) malloc(k * R.cols * sizeof(float));
-
-    size_t nbits_W_ = R.rows * k * sizeof(float);
-    size_t nbits_H_ = R.cols * k * sizeof(float);
-
-
     for (int i = 0; i < R.rows; ++i) {
         for (int j = 0; j < k; ++j) {
             W[i * k + j] = 0.0;
@@ -250,12 +238,15 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) row_ptr, nullptr);
-    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, (void*) col_idx, nullptr);
-    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, (void*) col_ptr, nullptr);
-    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, (void*) row_idx, nullptr);
-    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, (void*) colMajored_sparse_idx, nullptr);
-    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) val, nullptr);
+    size_t nbits_W_ = R.rows * k * sizeof(float);
+    size_t nbits_H_ = R.cols * k * sizeof(float);
+
+    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) R.row_ptr, nullptr);
+    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, (void*) R.col_idx, nullptr);
+    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, (void*) R.col_ptr, nullptr);
+    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, (void*) R.row_idx, nullptr);
+    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, (void*) R.colMajored_sparse_idx, nullptr);
+    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) R.val, nullptr);
     cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, (void*) W, nullptr);
     cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, nullptr);
     cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, nullptr);
@@ -271,12 +262,12 @@ int main(int argc, char* argv[]) {
     cl_kernel updateHOverW_kernel = clCreateKernel(program, "updateH_overW_kernel", &err);
     CHECK_ERROR(err);
 
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &rows));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &R.rows));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), (void*) &col_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), (void*) &colMajored_sparse_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), (void*) &valBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(float), &lambda));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(float), &param.lambda));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), (void*) &WBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), (void*) &HBuffer));
@@ -284,11 +275,11 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), (void*) &subVecBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), (void*) &subMatBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), (void*) &subMatrixBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(long), &cols));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(long), &R.cols));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), (void*) &col_ptrBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), (void*) &row_idxBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), (void*) &valBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(float), &lambda));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(float), &param.lambda));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), (void*) &WBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), (void*) &HBuffer));
@@ -297,7 +288,7 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    for (unsigned int ite = 0; ite < maxiter; ite++) {
+    for (unsigned int ite = 0; ite < param.maxiter; ite++) {
         size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};
         size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
 
@@ -375,7 +366,6 @@ int main(int argc, char* argv[]) {
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
-
 
     for (int i = 0; i < R.rows; ++i) {
         for (int j = 0; j < k; ++j) {

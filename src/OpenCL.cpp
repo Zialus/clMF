@@ -14,11 +14,6 @@
 #include "tools.h"
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
-    int i, j;
-    double v, rmse = 0;
-    int num_insts = 0;
-    int nans_count = 0;
-
     char meta_filename[1024];
     sprintf(meta_filename, "%s/meta", srcdir);
     FILE* fp = fopen(meta_filename, "r");
@@ -41,6 +36,13 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
         printf("Can't open test file.\n");
         exit(1);
     }
+
+    double rmse = 0;
+    int num_insts = 0;
+    int nans_count = 0;
+
+    int i, j;
+    double v;
 
     while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
         double pred_v = 0;

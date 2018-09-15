@@ -141,7 +141,6 @@ int main(int argc, char* argv[]) {
 
     smat_t R;
     parameter param = parse_command_line(argc, argv, srcdir, nullptr);
-    mat_t W_c, H_c;
 
     cl_int status;
     cl_int err;
@@ -210,6 +209,7 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> deltaT34 = t4 - t3;
     std::cout << "Load R Time: " << deltaT34.count() << " s.\n";
 
+    mat_t W_c, H_c;
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
 
@@ -225,34 +225,28 @@ int main(int argc, char* argv[]) {
     unsigned* colMajored_sparse_idx = R.colMajored_sparse_idx;
     float* val = R.val;
 
-    float* submatrix;
-    submatrix = (float*) malloc(k * k * sizeof(float));
+    float* submatrix = (float*) malloc(k * k * sizeof(float));
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < k; j++) {
             submatrix[i * k + j] = 0.0f;
         }
     }
 
-    float* W, * H;
-    W = (float*) malloc(k * R.rows * sizeof(float));
-    H = (float*) malloc(k * R.cols * sizeof(float));
+    float* W = (float*) malloc(k * R.rows * sizeof(float));
+    float* H = (float*) malloc(k * R.cols * sizeof(float));
 
     size_t nbits_W_ = R.rows * k * sizeof(float);
     size_t nbits_H_ = R.cols * k * sizeof(float);
 
-    int indexPosition = 0;
-    for (int i = 0; i < rows; ++i) {
+
+    for (int i = 0; i < R.rows; ++i) {
         for (int j = 0; j < k; ++j) {
-            W[indexPosition] = 0.0;
-            ++indexPosition;
+            W[i * k + j] = 0.0;
         }
     }
-
-    int indexPosition1 = 0;
     for (int i = 0; i < R.cols; ++i) {
         for (int j = 0; j < k; ++j) {
-            H[indexPosition1] = H_c[i][j];
-            ++indexPosition1;
+            H[i * k + j] = H_c[i][j];
         }
     }
 
@@ -382,12 +376,13 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
 
-    for (int i = 0; i < rows; ++i) {
+
+    for (int i = 0; i < R.rows; ++i) {
         for (int j = 0; j < k; ++j) {
             W_c[i][j] = W[i * k + j];
         }
     }
-    for (int i = 0; i < cols; ++i) {
+    for (int i = 0; i < R.cols; ++i) {
         for (int j = 0; j < k; ++j) {
             H_c[i][j] = H[i * k + j];
         }

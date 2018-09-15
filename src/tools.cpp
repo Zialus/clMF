@@ -123,11 +123,11 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     cl_int status = 0;
     cl_device_id* devices = nullptr;
 
-    if (strcmp(device_type,"mic") == 0) {
+    if (strcmp(device_type, "mic") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, 0, nullptr, &numDevices);
-    } else if (strcmp(device_type,"cpu") == 0) {
+    } else if (strcmp(device_type, "cpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 0, nullptr, &numDevices);
-    } else if (strcmp(device_type,"gpu") == 0) {
+    } else if (strcmp(device_type, "gpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices);
     }
 
@@ -136,11 +136,11 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     assert(numDevices > 0);
 
     devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
-    if (strcmp(device_type,"mic") == 0) {
+    if (strcmp(device_type, "mic") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, numDevices, devices, nullptr);
-    } else if (strcmp(device_type,"cpu") == 0) {
+    } else if (strcmp(device_type, "cpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, numDevices, devices, nullptr);
-    } else if (strcmp(device_type,"gpu") == 0) {
+    } else if (strcmp(device_type, "gpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, nullptr);
     }
 
@@ -149,7 +149,7 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     return devices;
 }
 
-void print_all_the_info(){
+void print_all_the_info() {
     int i, j;
     char* value;
     size_t valueSize;
@@ -167,45 +167,45 @@ void print_all_the_info(){
     for (i = 0; i < platformCount; i++) {
 
         // get all devices
-        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &deviceCount);
+        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, nullptr, &deviceCount);
         devices = (cl_device_id*) malloc(sizeof(cl_device_id) * deviceCount);
-        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);
+        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, nullptr);
 
         // for each device print critical attributes
         for (j = 0; j < deviceCount; j++) {
 
             // print device name
-            clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &valueSize);
+            clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DEVICE_NAME, valueSize, value, NULL);
-            printf("%d. Device: %s\n", j+1, value);
+            clGetDeviceInfo(devices[j], CL_DEVICE_NAME, valueSize, value, nullptr);
+            printf("%d. Device: %s\n", j + 1, value);
             free(value);
 
             // print hardware device version
-            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, 0, NULL, &valueSize);
+            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, valueSize, value, NULL);
-            printf(" %d.%d Hardware version: %s\n", j+1, 1, value);
+            clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, valueSize, value, nullptr);
+            printf(" %d.%d Hardware version: %s\n", j + 1, 1, value);
             free(value);
 
             // print software driver version
-            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, 0, NULL, &valueSize);
+            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, valueSize, value, NULL);
-            printf(" %d.%d Software version: %s\n", j+1, 2, value);
+            clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, valueSize, value, nullptr);
+            printf(" %d.%d Software version: %s\n", j + 1, 2, value);
             free(value);
 
             // print c version supported by compiler for device
-            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &valueSize);
+            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
-            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, valueSize, value, NULL);
-            printf(" %d.%d OpenCL C version: %s\n", j+1, 3, value);
+            clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, valueSize, value, nullptr);
+            printf(" %d.%d OpenCL C version: %s\n", j + 1, 3, value);
             free(value);
 
             // print parallel compute units
-            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
-                            sizeof(maxComputeUnits), &maxComputeUnits, NULL);
-            printf(" %d.%d Parallel compute units: %d\n", j+1, 4, maxComputeUnits);
+            clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits,
+                            nullptr);
+            printf(" %d.%d Parallel compute units: %d\n", j + 1, 4, maxComputeUnits);
 
         }
 
@@ -221,11 +221,11 @@ void print_all_the_platforms() {
     char* info;
     size_t infoSize;
     cl_uint platformCount;
-    cl_platform_id *platforms;
-    const char* attributeNames[5] = { "Name", "Vendor",
-                                      "Version", "Profile", "Extensions" };
-    const cl_platform_info attributeTypes[5] = { CL_PLATFORM_NAME, CL_PLATFORM_VENDOR,
-                                                 CL_PLATFORM_VERSION, CL_PLATFORM_PROFILE, CL_PLATFORM_EXTENSIONS };
+    cl_platform_id* platforms;
+    const char* attributeNames[5] = {"Name", "Vendor",
+                                     "Version", "Profile", "Extensions"};
+    const cl_platform_info attributeTypes[5] = {CL_PLATFORM_NAME, CL_PLATFORM_VENDOR,
+                                                CL_PLATFORM_VERSION, CL_PLATFORM_PROFILE, CL_PLATFORM_EXTENSIONS};
     const int attributeCount = sizeof(attributeNames) / sizeof(char*);
 
     // get platform count
@@ -238,7 +238,7 @@ void print_all_the_platforms() {
     // for each platform print all attributes
     for (i = 0; i < platformCount; i++) {
 
-        printf("%d. Platform \n", i+1);
+        printf("%d. Platform \n", i + 1);
 
         for (j = 0; j < attributeCount; j++) {
 
@@ -249,7 +249,7 @@ void print_all_the_platforms() {
             // get platform attribute value
             clGetPlatformInfo(platforms[i], attributeTypes[j], infoSize, info, nullptr);
 
-            printf(" %d.%d %-11s: %s\n", i+1, j+1, attributeNames[j], info);
+            printf(" %d.%d %-11s: %s\n", i + 1, j + 1, attributeNames[j], info);
             free(info);
 
         }
@@ -286,8 +286,8 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
         exit(1);
     }
     unsigned m, n, nnz;
-    CHECK_FSCAN(fscanf(fp, "%u %u", &m, &n),2);
-    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz, buf),2);
+    CHECK_FSCAN(fscanf(fp, "%u %u", &m, &n), 2);
+    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz, buf), 2);
     snprintf(filename, sizeof(filename), "%s/%s", srcdir, buf);
     R.load(m, n, nnz, filename, ifALS, with_weights);
     fclose(fp);

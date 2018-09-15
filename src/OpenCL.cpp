@@ -111,6 +111,9 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                 case 'P':
                     param.device_id = atoi(argv[i]);
                     break;
+                case 'q':
+                    param.verbose = atoi(argv[i]);
+                    break;
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
                     exit_with_help();
@@ -151,8 +154,12 @@ int main(int argc, char* argv[]) {
             printf("[info] unknown device type!\n");
             break;
     }
-
     printf("[info] - selected device type: %s\n", device_type);
+
+    if (param.verbose) {
+        print_all_the_platforms();
+        print_all_the_info();
+    }
 
     auto tA = std::chrono::high_resolution_clock::now();
     cl_int status;

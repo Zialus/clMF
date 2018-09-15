@@ -9,6 +9,7 @@ public:
     int nBlocks;
     int nThreadsPerBlock;
     int device_id;
+    int verbose;
 
     parameter() {
         k = 10;
@@ -17,6 +18,7 @@ public:
         nBlocks = 8192;
         nThreadsPerBlock = 32;
         device_id = 0;
+        verbose = 0;
     }
 };
 

@@ -14,7 +14,6 @@
 #include "tools.h"
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
-    auto t1 = std::chrono::high_resolution_clock::now();
     int i, j;
     double v, rmse = 0;
     int num_insts = 0;
@@ -62,9 +61,6 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     printf("NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);
     printf("CALCULATED RMSE = %lf.\n", rmse);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT12 = t2 - t1;
-    std::cout << "Predict Time: " << deltaT12.count() << " s.\n";
 }
 
 void exit_with_help() {
@@ -134,7 +130,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
 
 
 int main(int argc, char* argv[]) {
-    auto t8 = std::chrono::high_resolution_clock::now();
+    auto t7 = std::chrono::high_resolution_clock::now();
     char device_type[4] = {'g', 'p', 'u', '\0'};
     const char* opencl_filename = "../kcode/ALS.cl";
     char srcdir[1024];
@@ -164,6 +160,8 @@ int main(int argc, char* argv[]) {
     }
     printf("[info] - selected device type: %s\n", device_type);
 
+
+    auto tA = std::chrono::high_resolution_clock::now();
     getPlatform(platform, 0);
     cl_device_id* devices = getDevice(platform, device_type);
     report_device(devices[0]);
@@ -199,6 +197,11 @@ int main(int argc, char* argv[]) {
     } else {
         std::cout << "[build info]:Compiled OpenCl code!\n";
     }
+
+
+    auto tB = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaTAB = tB - tA;
+    std::cout << "Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
 
     auto t3 = std::chrono::high_resolution_clock::now();
     bool with_weights = false;
@@ -361,8 +364,8 @@ int main(int argc, char* argv[]) {
 */
     }
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT = t2 - t1;
-    std::cout << "Training Time: " << deltaT.count() << " s.\n";
+    std::chrono::duration<double> deltaT12 = t2 - t1;
+    std::cout << "Training Time: " << deltaT12.count() << " s.\n";
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
@@ -378,7 +381,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    auto t5 = std::chrono::high_resolution_clock::now();
     calculate_rmse(W_c, H_c, srcdir, k);
+    auto t6 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT56 = t6 - t5;
+    std::cout << "Predict Time: " << deltaT56.count() << " s.\n";
 
     CL_CHECK(clReleaseKernel(updateHOverW_kernel));
     CL_CHECK(clReleaseKernel(updateWOverH_kernel));
@@ -396,8 +403,9 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clReleaseContext(context));
     free(devices);
 
-    auto t9 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT89 = t9 - t8;
-    std::cout << "Total Time: " << deltaT89.count() << " s.\n";
+    auto t8 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT78 = t8 - t7;
+    std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"
+              << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() << " s.\n";
     return 0;
 }

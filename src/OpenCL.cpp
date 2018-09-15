@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
     cl_device_id* devices = getDevice(platform, device_type);
     report_device(devices[0]);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);
-    CHECK_ERROR(err);
+    CL_CHECK(err);
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     assert(NumDevice == 1);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
@@ -268,9 +268,9 @@ int main(int argc, char* argv[]) {
     cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), nullptr, nullptr);
 
     cl_kernel updateWOverH_kernel = clCreateKernel(program, "updateW_overH_kernel", &err);
-    CHECK_ERROR(err);
+    CL_CHECK(err);
     cl_kernel updateHOverW_kernel = clCreateKernel(program, "updateH_overW_kernel", &err);
-    CHECK_ERROR(err);
+    CL_CHECK(err);
 
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(long), &R.rows));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer));

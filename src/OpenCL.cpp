@@ -396,9 +396,16 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clReleaseMemObject(valBuffer));
     CL_CHECK(clReleaseMemObject(WBuffer));
     CL_CHECK(clReleaseMemObject(HBuffer));
+    CL_CHECK(clReleaseMemObject(pBuffer));
+    CL_CHECK(clReleaseMemObject(subVecBuffer));
+    CL_CHECK(clReleaseMemObject(subMatBuffer));
     CL_CHECK(clReleaseMemObject(subMatrixBuffer));
+    CL_CHECK(clReleaseMemObject(p_Buffer));
+    CL_CHECK(clReleaseMemObject(subVec_Buffer));
+    CL_CHECK(clReleaseMemObject(subMat_Buffer));
     CL_CHECK(clReleaseCommandQueue(commandQueue));
     CL_CHECK(clReleaseContext(context));
+    CL_CHECK(clReleaseDevice(devices[0]));
     free(devices);
 
     auto t8 = std::chrono::high_resolution_clock::now();

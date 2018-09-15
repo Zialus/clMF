@@ -100,27 +100,22 @@ int convertToString(const char* filename, std::string& s) {
 }
 
 int getPlatform(cl_platform_id& platform, int id) {
-    platform = nullptr;
+    cl_int status;
     cl_uint numPlatforms;
-    cl_int status = clGetPlatformIDs(0, nullptr, &numPlatforms);
-    if (status != CL_SUCCESS) {
-        std::cout << "ERROR:Getting platforms!\n";
-        return -1;
-    }
-    if (numPlatforms > 0) {
-        cl_platform_id* platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
-        status = clGetPlatformIDs(numPlatforms, platforms, nullptr);
-        if (status != CL_SUCCESS) {
-            std::cout << "ERROR:Getting platform IDs!\n";
-            free(platforms);
-            return -1;
-        }
-        platform = platforms[id];
-        free(platforms);
-        return 0;
-    } else {
-        return -1;
-    }
+    cl_platform_id* platforms;
+
+    status = clGetPlatformIDs(0, nullptr, &numPlatforms);
+    CL_CHECK(status);
+
+    assert(numPlatforms > 0);
+
+    platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
+    status = clGetPlatformIDs(numPlatforms, platforms, nullptr);
+    CL_CHECK(status);
+
+    platform = platforms[id];
+    free(platforms);
+    return 0;
 }
 
 cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
@@ -136,26 +131,21 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices);
     }
 
-    if (status != CL_SUCCESS) {
-        std::cout << "ERROR:Getting numDevices from clGetDeviceIDs!\n";
-        exit(1);
+    CL_CHECK(status);
+
+    assert(numDevices > 0);
+
+    devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
+    if (strcmp(device_type,"mic") == 0) {
+        status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, numDevices, devices, nullptr);
+    } else if (strcmp(device_type,"cpu") == 0) {
+        status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, numDevices, devices, nullptr);
+    } else if (strcmp(device_type,"gpu") == 0) {
+        status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, nullptr);
     }
 
-    if (numDevices > 0) {
-        devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
-        if (strcmp(device_type,"cpu") == 0) {
-            status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, numDevices, devices, nullptr);
-        } else if (strcmp(device_type,"mic") == 0) {
-            status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, numDevices, devices, nullptr);
-        } else if (strcmp(device_type,"gpu") == 0) {
-            status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, nullptr);
-        }
-    }
+    CL_CHECK(status);
 
-    if (status != CL_SUCCESS) {
-        std::cout << "ERROR:Getting devices from clGetDeviceIDs!\n";
-        exit(1);
-    }
     return devices;
 }
 

@@ -17,7 +17,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     FILE* fp = fopen(meta_filename, "r");
     if (fp == nullptr) {
         printf("Can't open meta input file.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     char buf_train[1024], buf_test[1024], test_file_name[1024], train_file_name[1024];
@@ -32,7 +32,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     FILE* test_fp = fopen(test_file_name, "r");
     if (test_fp == nullptr) {
         printf("Can't open test file.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     double rmse = 0;
@@ -108,8 +108,7 @@ int main(int argc, char* argv[]) {
 
     printf("[info] - The kernel to be compiled: %s\n", opencl_filename);
     std::string sourceStr;
-    status = convertToString(opencl_filename, sourceStr);
-    if (status == -1) { exit(-1); }
+    convertToString(opencl_filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
@@ -126,12 +125,8 @@ int main(int argc, char* argv[]) {
         free(buffer);
     }
 
-    if (status != CL_SUCCESS) {
-        std::cout << "[FATAL ERROR]:Could not compile OpenCl code!\n";
-        exit(1);
-    } else {
-        std::cout << "[build info]:Compiled OpenCl code!\n";
-    }
+    CL_CHECK(status);
+    std::cout << "[build info]:Compiled OpenCl code!\n";
 
 
     auto tB = std::chrono::high_resolution_clock::now();

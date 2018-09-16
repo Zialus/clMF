@@ -20,19 +20,14 @@
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)
 
-#define CL_CHECK(res) \
-    {if (res != CL_SUCCESS) {fprintf(stderr,"Error \"%s\" (%d) in file %s on line %d\n", \
-        get_error_string(res), res, __FILE__,__LINE__); abort();}}
-
-
 #define CHECK_FSCAN(err, num)    if(err != num){ \
     perror("FSCANF"); \
-    exit(-1); \
+    exit(EXIT_FAILURE); \
 }
 
-#define CHECK_FGET(err)    if(err == nullptr){ \
-    perror("FGET"); \
-    exit(-1); \
+#define CHECK_FGETS(err)    if(err == nullptr){ \
+    perror("FGETS"); \
+    exit(EXIT_FAILURE); \
 }
 
 class rate_t;
@@ -73,7 +68,7 @@ public:
         int i = 1, j = 1;
         float v = 0, w = 1.0;
         if (nnz > 0) {
-            CHECK_FGET(fgets(buf, 1000, fp));
+            CHECK_FGETS(fgets(buf, 1000, fp));
             if (with_weights) {
                 sscanf(buf, "%d %d %f %f", &i, &j, &v, &w);
             } else {

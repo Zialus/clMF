@@ -77,8 +77,7 @@ const char* get_error_string(cl_int err){
     }
 }
 
-int convertToString(const char* filename, std::string& s) {
-    char* str;
+void convertToString(const char* filename, std::string& s) {
     std::fstream f(filename, (std::fstream::in | std::fstream::binary));
 
     if (f.is_open()) {
@@ -87,16 +86,16 @@ int convertToString(const char* filename, std::string& s) {
         f.seekg(0, std::fstream::end);
         size = fileSize = (size_t) f.tellg();
         f.seekg(0, std::fstream::beg);
-        str = new char[size + 1];
+        char* str = new char[size + 1];
         f.read(str, fileSize);
         f.close();
         str[size] = '\0';
         s = str;
         delete[] str;
-        return 0;
+    } else {
+        std::cout << "Error:failed to open file:" << filename << "\n";
+        exit(EXIT_FAILURE);
     }
-    std::cout << "Error:failed to open file:" << filename << "\n";
-    return -1;
 }
 
 int getPlatform(cl_platform_id& platform, int id) {
@@ -279,7 +278,7 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
     FILE* fp = fopen(filename, "r");
     if (fp == nullptr) {
         printf("Can't open input file.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     unsigned m, n, nnz;
     CHECK_FSCAN(fscanf(fp, "%u %u", &m, &n), 2);
@@ -314,10 +313,8 @@ void exit_with_help() {
             "    -nBlocks: Number of blocks(default 8192)\n"
             "    -nThreadsPerBlock: Number of threads per block(default 32)\n"
     );
-    exit(1);
+    exit(EXIT_FAILURE);
 }
-
-
 
 parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code) {
     // default values have been set by the constructor

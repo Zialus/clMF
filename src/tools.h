@@ -21,9 +21,13 @@
 #include "pmf_util.h"
 #include "pmf.h"
 
+#define CL_CHECK(res) \
+    {if (res != CL_SUCCESS) {fprintf(stderr,"Error \"%s\" (%d) in file %s on line %d\n", \
+        get_error_string(res), res, __FILE__,__LINE__); abort();}}
+
 const char* get_error_string(cl_int err);
 
-int convertToString(const char* filename, std::string& s);
+void convertToString(const char* filename, std::string& s);
 
 int getPlatform(cl_platform_id& platform, int id);
 

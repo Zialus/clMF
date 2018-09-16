@@ -19,6 +19,7 @@
 #include <fstream>
 
 #include "pmf_util.h"
+#include "pmf.h"
 
 const char* get_error_string(cl_int err);
 
@@ -37,5 +38,9 @@ int report_device(cl_device_id device_id);
 void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights);
 
 void initial_col(mat_t& X, long k, long n);
+
+void exit_with_help();
+
+parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code);
 
 #endif

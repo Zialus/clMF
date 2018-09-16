@@ -301,3 +301,73 @@ void initial_col(mat_t& X, long k, long n) {
         }
     }
 }
+
+void exit_with_help() {
+    printf(
+            "Usage: clMF [options] data_dir\n"
+            "options:\n"
+            "    -c : path to the kernel code (default \"../kcode/ALS.cl\")\n"
+            "    -k rank : set the rank (default 10)\n"
+            "    -l lambda : set the regularization parameter lambda (default 0.05)\n"
+            "    -t max_iter: set the number of iterations (default 5)\n"
+            "    -P device_id: select a device(0=gpu, 1=cpu, 2=mic) (default 0)\n"
+            "    -nBlocks: Number of blocks(default 8192)\n"
+            "    -nThreadsPerBlock: Number of threads per block(default 32)\n"
+    );
+    exit(1);
+}
+
+
+
+parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code) {
+    // default values have been set by the constructor
+    parameter param;
+    // parse options
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            break;
+        }
+        if (++i >= argc) {
+            exit_with_help();
+        }
+        if (strcmp(argv[i - 1], "-nBlocks") == 0) {
+            param.nBlocks = atoi(argv[i]);
+        } else if (strcmp(argv[i - 1], "-nThreadsPerBlock") == 0) {
+            param.nThreadsPerBlock = atoi(argv[i]);
+        } else {
+            switch (argv[i - 1][1]) {
+                case 'c':
+                    sprintf(kernel_code, "%s", argv[i]);
+                    break;
+                case 'k':
+                    param.k = atoi(argv[i]);
+                    break;
+                case 'l':
+                    param.lambda = atof(argv[i]);
+                    break;
+                case 't':
+                    param.maxiter = atoi(argv[i]);
+                    break;
+                case 'P':
+                    param.device_id = atoi(argv[i]);
+                    break;
+                case 'q':
+                    param.verbose = atoi(argv[i]);
+                    break;
+                default:
+                    fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
+                    exit_with_help();
+                    break;
+            }
+        }
+
+    }
+
+    if (i >= argc) {
+        exit_with_help();
+    }
+
+    sprintf(input_dir, "%s", argv[i]);
+    return param;
+}

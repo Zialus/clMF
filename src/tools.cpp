@@ -102,14 +102,13 @@ int convertToString(const char* filename, std::string& s) {
 int getPlatform(cl_platform_id& platform, int id) {
     cl_int status;
     cl_uint numPlatforms;
-    cl_platform_id* platforms;
 
     status = clGetPlatformIDs(0, nullptr, &numPlatforms);
     CL_CHECK(status);
 
     assert(numPlatforms > 0);
+    cl_platform_id* platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
 
-    platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
     status = clGetPlatformIDs(numPlatforms, platforms, nullptr);
     CL_CHECK(status);
 
@@ -119,9 +118,8 @@ int getPlatform(cl_platform_id& platform, int id) {
 }
 
 cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
-    cl_uint numDevices = 0;
     cl_int status = 0;
-    cl_device_id* devices = nullptr;
+    cl_uint numDevices = 0;
 
     if (strcmp(device_type, "mic") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, 0, nullptr, &numDevices);
@@ -130,12 +128,11 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     } else if (strcmp(device_type, "gpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices);
     }
-
     CL_CHECK(status);
 
     assert(numDevices > 0);
+    cl_device_id* devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
 
-    devices = (cl_device_id*) malloc(numDevices * sizeof(cl_device_id));
     if (strcmp(device_type, "mic") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ACCELERATOR, numDevices, devices, nullptr);
     } else if (strcmp(device_type, "cpu") == 0) {
@@ -143,7 +140,6 @@ cl_device_id* getDevice(cl_platform_id& platform, char* device_type) {
     } else if (strcmp(device_type, "gpu") == 0) {
         status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, nullptr);
     }
-
     CL_CHECK(status);
 
     return devices;

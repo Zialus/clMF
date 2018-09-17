@@ -240,6 +240,12 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
+    size_t local;
+    CL_CHECK(clGetKernelWorkGroupInfo(updateHOverW_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL));
+    printf("local_work_size for updateHOverW_kernel should be: %zu\n",local);
+    CL_CHECK(clGetKernelWorkGroupInfo(updateWOverH_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL));
+    printf("local_work_size for updateWOverH_kernel should be: %zu\n",local);
+
     auto t1 = std::chrono::high_resolution_clock::now();
     for (int ite = 0; ite < param.maxiter; ite++) {
         size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};

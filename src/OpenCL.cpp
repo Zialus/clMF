@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    for (unsigned int ite = 0; ite < param.maxiter; ite++) {
+    for (int ite = 0; ite < param.maxiter; ite++) {
         size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};
         size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
 

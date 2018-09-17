@@ -1,7 +1,7 @@
 #include "tools.h"
 
-const char* get_error_string(cl_int err){
-    switch(err){
+const char* get_error_string(cl_int err) {
+    switch(err) {
         // run-time and JIT compiler errors
         case 0: return "CL_SUCCESS";
         case -1: return "CL_DEVICE_NOT_FOUND";

@@ -1,6 +1,3 @@
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
 #include "extra.h"
 
 void choldc1(int n, float** a, float* p) {
@@ -99,5 +96,3 @@ void Mt_byM_multiply(int i, int j, float** M, float** Result) {
         }
     }
 }
-
-

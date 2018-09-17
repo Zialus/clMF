@@ -8,8 +8,6 @@
 #include <CL/cl.h>
 #endif
 
-#include <sys/timeb.h>
-
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -47,4 +45,4 @@ void exit_with_help();
 
 parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code);
 
-#endif
+#endif //TOOLS_H

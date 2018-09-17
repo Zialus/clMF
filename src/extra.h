@@ -1,6 +1,10 @@
 #ifndef EXTRA_H
 #define EXTRA_H
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+
 void choldcsl(int n, float** A);
 void choldc1(int n, float** a, float* p);
 void inverseMatrix_CholeskyMethod(int n, float** A);

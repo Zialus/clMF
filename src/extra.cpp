@@ -1,13 +1,10 @@
 #include "extra.h"
 
 void choldc1(int n, float** a, float* p) {
-    unsigned i, j;
-    int k;
-    float sum;
-    for (i = 0; i < n; ++i) {
-        for (j = i; j < n; ++j) {
-            sum = a[i][j];
-            for (k = i - 1; k >= 0; --k) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = i; j < n; ++j) {
+            float sum = a[i][j];
+            for (int k = i - 1; k >= 0; --k) {
                 sum -= a[i][k] * a[j][k];
             }
             if (i == j) {
@@ -23,45 +20,41 @@ void choldc1(int n, float** a, float* p) {
 }
 
 void choldcsl(int n, float** A) {
-    unsigned i, j, k;
-    double sum;
-    float* p;
-    p = (float*) malloc(n * sizeof(float));
+    float* p = (float*) malloc(n * sizeof(float));
     choldc1(n, A, p);
-    for (i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         A[i][i] = 1 / p[i];
-        for (j = i + 1; j < n; ++j) {
-            sum = 0;
-            for (k = i; k < j; ++k) {
+        for (int j = i + 1; j < n; ++j) {
+            double sum = 0;
+            for (int k = i; k < j; ++k) {
                 sum -= A[j][k] * A[k][i];
             }
-            A[j][i] = sum / p[j];
+            A[j][i] = (float) sum / p[j];
         }
     }
     free(p);
 }
 
 void inverseMatrix_CholeskyMethod(int n, float** A) {
-    unsigned i, j, k;
     choldcsl(n, A);
-    for (i = 0; i < n; ++i) {
-        for (j = i + 1; j < n; ++j) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
             A[i][j] = 0.0;
         }
     }
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         A[i][i] *= A[i][i];
-        for (k = i + 1; k < n; ++k) {
+        for (int k = i + 1; k < n; ++k) {
             A[i][i] += A[k][i] * A[k][i];
         }
-        for (j = i + 1; j < n; ++j) {
-            for (k = j; k < n; ++k) {
+        for (int j = i + 1; j < n; ++j) {
+            for (int k = j; k < n; ++k) {
                 A[i][j] += A[k][i] * A[k][j];
             }
         }
     }
-    for (i = 0; i < n; ++i) {
-        for (j = 0; j < i; ++j) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
             A[i][j] = A[j][i];
         }
     }

@@ -14,7 +14,7 @@ public:
     parameter() {
         k = 10;
         maxiter = 5;
-        lambda = 0.05;
+        lambda = 0.05f;
         nBlocks = 8192;
         nThreadsPerBlock = 32;
         device_id = 0;

@@ -205,7 +205,7 @@ public:
         unsigned* tmp_col_idx = row_idx;
         float* tmp_val = val;
         float* tmp_weight = weight;
-        for (size_t idx = 0; idx < _nnz; idx++) {
+        for (long idx = 0; idx < _nnz; idx++) {
             rate_t rate = entry_it->next();
             row_ptr[rate.i + 1]++;
             col_ptr[rate.j + 1]++;
@@ -220,7 +220,7 @@ public:
         // sort entries into row-majored ordering
         sort(perm.begin(), perm.end(), SparseComp(tmp_row_idx, tmp_col_idx, true));
         // Generate CRS format
-        for (size_t idx = 0; idx < _nnz; idx++) {
+        for (long idx = 0; idx < _nnz; idx++) {
             val_t[idx] = tmp_val[perm[idx]];
             col_idx[idx] = tmp_col_idx[perm[idx]];
             if (with_weights) {

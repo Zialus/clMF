@@ -13,17 +13,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exec/")
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-#set(WARNINGS "-Wno-deprecated-declarations")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNINGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS}")
-
-
 # Source code of application
 file(GLOB source_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
 file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
 
 
-# Compiler flags
+# Compiler flags to enable all warnings
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 #    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 #elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")

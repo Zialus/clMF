@@ -269,7 +269,7 @@ int report_device(cl_device_id device_id) {
 }
 
 void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
-    char filename[1024], buf[1024];
+    char filename[2048], buf[1024];
     sprintf(filename, "%s/meta", srcdir);
     FILE* fp = fopen(filename, "r");
     if (fp == nullptr) {

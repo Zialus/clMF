@@ -2,9 +2,9 @@ environment:
   INTELOCLSDKROOT: C:\Intel\OpenCL\sdk\
 
 image:
-  - Ubuntu
 #  - Visual Studio 2013
   - Visual Studio 2017
+  - Ubuntu
 
 before_build:
   - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/12527/intel_sdk_for_opencl_2017_7.0.0.2567.exe"

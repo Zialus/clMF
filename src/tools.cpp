@@ -177,27 +177,27 @@ void print_all_the_info() {
             clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
             clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, valueSize, value, nullptr);
-            printf(" %u.%u Hardware version: %s\n", j + 1, 1, value);
+            printf(" %u.%d Hardware version: %s\n", j + 1, 1, value);
             free(value);
 
             // print software driver version
             clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
             clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, valueSize, value, nullptr);
-            printf(" %u.%u Software version: %s\n", j + 1, 2, value);
+            printf(" %u.%d Software version: %s\n", j + 1, 2, value);
             free(value);
 
             // print c version supported by compiler for device
             clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &valueSize);
             value = (char*) malloc(valueSize);
             clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, valueSize, value, nullptr);
-            printf(" %u.%u OpenCL C version: %s\n", j + 1, 3, value);
+            printf(" %u.%d OpenCL C version: %s\n", j + 1, 3, value);
             free(value);
 
             // print parallel compute units
             clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits,
                             nullptr);
-            printf(" %u.%u Parallel compute units: %u\n", j + 1, 4, maxComputeUnits);
+            printf(" %u.%d Parallel compute units: %u\n", j + 1, 4, maxComputeUnits);
 
         }
 

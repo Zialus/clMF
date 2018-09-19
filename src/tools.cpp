@@ -290,7 +290,7 @@ void initial_col(mat_t& X, long k, long n) {
     long i, j;
     for (i = 0; i < n; ++i) {
         for (j = 0; j < k; ++j) {
-            X[j][i] = 0.1 * (float(rand()) / RAND_MAX) + 0.001;
+            X[j][i] = 0.1f * (float(rand()) / RAND_MAX) + 0.001f;
         }
     }
 }
@@ -335,7 +335,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                     param.k = atoi(argv[i]);
                     break;
                 case 'l':
-                    param.lambda = atof(argv[i]);
+                    param.lambda = (float) atof(argv[i]);
                     break;
                 case 't':
                     param.maxiter = atoi(argv[i]);

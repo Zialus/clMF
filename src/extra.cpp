@@ -63,10 +63,10 @@ void inverseMatrix_CholeskyMethod(int n, float** A) {
 //Multiply matrix M by M transpose
 void M_byMt_multiply(int i, int j, float** M, float** Result) {
     float SUM;
-    for (unsigned I = 0; I < i; ++I) {
-        for (unsigned J = 0; J < i; ++J) {
+    for (int I = 0; I < i; ++I) {
+        for (int J = 0; J < i; ++J) {
             SUM = 0.0;
-            for (unsigned K = 0; K < j; ++K) {
+            for (int K = 0; K < j; ++K) {
                 SUM += M[I][K] * M[J][K];
             }
             Result[I][J] = SUM;
@@ -77,10 +77,10 @@ void M_byMt_multiply(int i, int j, float** M, float** Result) {
 //Multiply matrix M transpose by M
 void Mt_byM_multiply(int i, int j, float** M, float** Result) {
     float SUM;
-    for (unsigned I = 0; I < j; ++I) {
-        for (unsigned J = I; J < j; ++J) {
+    for (int I = 0; I < j; ++I) {
+        for (int J = I; J < j; ++J) {
             SUM = 0.0f;
-            for (unsigned K = 0; K < i; ++K) {
+            for (int K = 0; K < i; ++K) {
                 //printf("%.3f %.3f\n", M[K][I], M[K][J]);
                 SUM += M[K][I] * M[K][J];
             }

@@ -9,33 +9,50 @@ find_package(OpenMP REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exec/")
-
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-# Source code of application
-file(GLOB source_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
-file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
-
+# Compiler flags to enable more warnings
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif ()
 
 # Compiler flags to enable all warnings
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 #elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
-#endif()
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+#endif ()
+
+# Compiler flags to silence some of the warnings
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif ()
 
 # Silence warning C4996 on Microsoft Compilers
 if (MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 endif ()
 
-# Set up executable
+# Source code
+file(GLOB source_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
+file(GLOB source_hdr "${PROJECT_SOURCE_DIR}/src/*.h")
+
+# Executable and libraries
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exec/")
 add_executable(clMF ${source_src} ${source_hdr})
-target_link_libraries(clMF OpenMP::OpenMP_CXX OpenCL::OpenCL)
+target_link_libraries(clMF OpenCL::OpenCL OpenMP::OpenMP_CXX)
 
-
+# Tests
 enable_testing()
-add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ../data/simple)
-add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ../data/toy-example)
+add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ${CMAKE_SOURCE_DIR}/data/simple)
+add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ${CMAKE_SOURCE_DIR}/data/toy-example)

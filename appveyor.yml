@@ -1,5 +1,6 @@
 environment:
-  INTELOCLSDKROOT: 'C:\Intel\OpenCL\sdk\'
+  INTELOCLSDKROOT: 'C:\Intel\OpenCL\sdk'
+  SIZE_FLAG: '2'
 
 image:
 #  - Visual Studio 2013
@@ -21,6 +22,7 @@ build_script:
   - mkdir build && cd build
   - cmake ..
   - cmake --build . --config Release
+  - ctest -V -C Release
 
 for:
 -
@@ -39,4 +41,5 @@ for:
   - clinfo
   - mkdir build && cd build
   - cmake -D CMAKE_BUILD_TYPE=Release ..
-  - make
+  - cmake --build . --config Release
+  - ctest -V -C Release

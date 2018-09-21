@@ -54,5 +54,5 @@ target_link_libraries(clMF OpenCL::OpenCL OpenMP::OpenMP_CXX)
 
 # Tests
 enable_testing()
-add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ${CMAKE_SOURCE_DIR}/data/simple)
-add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 ${CMAKE_SOURCE_DIR}/data/toy-example)
+add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 1 -q 1  -nThreadsPerBlock $ENV{SIZE_FLAG} ${CMAKE_SOURCE_DIR}/data/simple)
+#add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 1 -q 1  -nThreadsPerBlock $ENV{SIZE_FLAG} ${CMAKE_SOURCE_DIR}/data/toy-example)

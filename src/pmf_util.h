@@ -107,7 +107,7 @@ public:
 // Access column fomat only when you use it..
 class smat_t {
 public:
-    long rows, cols;
+    int rows, cols;
     long nnz, max_row_nnz, max_col_nnz;
     float* val, * val_t;
     size_t nbits_val, nbits_val_t;

@@ -24,7 +24,7 @@ static void choldc1(int n, __global float* a, __global float* p) {
 }
 
 static void choldcsl(int n, __global float* A, __global float* tp) {
-    double sum;
+    float sum;
     int base = get_group_id(0) * n * n;
     __global float* p;
     int gid = get_group_id(0);
@@ -695,7 +695,7 @@ __kernel void batchsolve1(int i, int j, __global float* W, __global const float*
     result[basev + 9] = subvector9;
 }
 
-__kernel void updateW_overH_kernel(const ulong rows,
+__kernel void updateW_overH_kernel(const int rows,
                                    __global const long* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
@@ -716,7 +716,7 @@ __kernel void updateW_overH_kernel(const ulong rows,
     int v = get_num_groups(0);
     int base = a * k * k;
     int baseV = a * k;
-    for (ulong Rw = a; Rw < rows; Rw += v) {
+    for (int Rw = a; Rw < rows; Rw += v) {
         __global float* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
         if (omegaSize > 0) {
@@ -761,7 +761,7 @@ __kernel void updateW_overH_kernel(const ulong rows,
     }
 }
 
-__kernel void updateH_overW_kernel(const ulong cols,
+__kernel void updateH_overW_kernel(const int cols,
                                    __global const long* col_ptr,
                                    __global const unsigned* row_idx,
                                    __global const float* val,
@@ -780,7 +780,7 @@ __kernel void updateH_overW_kernel(const ulong cols,
     int v = get_num_groups(0);
     int base = a * k * k;
     int baseV = a * k;
-    for (ulong Rh = a; Rh < cols; Rh += v) {
+    for (int Rh = a; Rh < cols; Rh += v) {
         __global float* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
         if (omegaSize > 0) {

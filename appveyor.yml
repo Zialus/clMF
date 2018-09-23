@@ -1,6 +1,7 @@
 environment:
   INTELOCLSDKROOT: 'C:\Intel\OpenCL\sdk'
-  SIZE_FLAG: '2'
+  BLOCKS_FLAG: '2'
+  THREADS_FLAG: '2'
 
 image:
 #  - Visual Studio 2013
@@ -24,6 +25,9 @@ build_script:
   - cmake --build . --config Release
   - ctest -V -C Release
 
+artifacts:
+  - path: exec
+
 for:
 -
   matrix:
@@ -36,6 +40,9 @@ for:
   - sudo apt install clinfo opencl-headers -y
   - source scripts/opencl_install.sh
   - echo $AMDAPPSDKROOT
+  - echo $BLOCKS_FLAG
+  - echo $THREADS_FLAG
+
   build_script:
   - cmake --version
   - clinfo

@@ -17,8 +17,8 @@ before_build:
   - ps: appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/12527/intel_sdk_for_opencl_2017_7.0.0.2567.exe"
   - ps: appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/12512/opencl_runtime_16.1.2_x64_setup.msi"
   - ps: appveyor DownloadFile "https://ci.appveyor.com/api/projects/oblomov/clinfo/artifacts/clinfo.exe?job=platform:+x64" -FileName clinfo.exe
-  - start /wait msiexec /i opencl_runtime_16.1.2_x64_setup.msi /qn
-  - start /wait .\intel_sdk_for_opencl_2017_7.0.0.2567.exe install --output=output.log --eula=accept
+  - opencl_runtime_16.1.2_x64_setup.msi /qn
+  - intel_sdk_for_opencl_2017_7.0.0.2567.exe install --output=output.log --eula=accept
   - type output.log
   - set INTELOCLSDKROOT=C:\Intel\OpenCL\sdk
   - dir %INTELOCLSDKROOT%
@@ -125,8 +125,8 @@ for:
     - wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
     - sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
     - sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-    - sudo apt-get remove openjdk-11-jre-headless -y --allow-change-held-packages
     - sudo apt-get update
+    - sudo apt-get remove openjdk-11-jre-headless -y --allow-change-held-packages
     - sudo apt-get install cuda -y -o Dpkg::Options::="--force-confnew"
     - sudo apt-get clean
     - sudo apt-get install clinfo -y

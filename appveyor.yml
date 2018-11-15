@@ -9,7 +9,7 @@ environment:
   - WHATOPENCL: AMD
     APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1604
   - WHATOPENCL: INTEL
-    APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1604
   - WHATOPENCL: INTEL
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
@@ -41,11 +41,12 @@ for:
   matrix:
     only:
     - WHATOPENCL: INTEL
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1604
 
   init:
     - uname -a
   before_build:
+    - sudo apt-get update
     - sudo apt-get install clinfo opencl-headers -y
     - source scripts/opencl_install.sh
     - echo $AMDAPPSDKROOT
@@ -71,6 +72,7 @@ for:
   init:
     - uname -a
   before_build:
+    - sudo apt-get update
     - sudo apt-get install clinfo opencl-headers -y
     - source scripts/amdappsdk_install.sh
     - echo $AMDAPPSDKROOT
@@ -96,6 +98,7 @@ for:
   init:
     - uname -a
   before_build:
+    - sudo apt-get update
     - sudo apt-get install libpocl-dev -y
     - sudo apt-get install opencl-headers clinfo -y
     - echo $AMDAPPSDKROOT

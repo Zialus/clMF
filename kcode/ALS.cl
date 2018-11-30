@@ -31,12 +31,15 @@ static void choldcsl(int n, __global float* A, __global float* tp) {
     p = &(tp[gid * n]);
     choldc1(n, A, p);
     for (int i = 0; i < n; ++i) {
+        //A[i][i] = 1 / p[i];
         A[base + i * n + i] = 1 / p[i];
         for (int j = i + 1; j < n; ++j) {
             sum = 0;
             for (int k = i; k < j; ++k) {
+                //sum -= A[j][k] * A[k][i];
                 sum -= A[base + j * n + k] * A[base + k * n + i];
             }
+            //A[j][i] = sum / p[j];
             A[base + j * n + i] = sum / p[j];
         }
     }
@@ -537,9 +540,12 @@ __kernel void batchsolve(int i, int j, __global float* H, __global const float* 
     __local float a[300];
     __local float b[30];
     float subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
+    //printf("enter batchsolve.\n");
     unsigned n = row_ptr[i + 1] - row_ptr[i];
+    //printf("n=%d.\n",n);
     long nn = n / 30;
     if (nn > 0) {
+        //printf("inner enter.\n");
         for (unsigned nm = 0; nm < nn; nm++) {
             for (unsigned idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
                 unsigned idx2 = colMajored_sparse_idx[idx];
@@ -719,6 +725,7 @@ __kernel void updateW_overH_kernel(const int rows,
     for (int Rw = a; Rw < rows; Rw += v) {
         __global float* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
+        //printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
@@ -731,19 +738,21 @@ __kernel void updateW_overH_kernel(const int rows,
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_LOCAL_MEM_FENCE);
+            /*
             for (unsigned c = s; c < k; c += g) {
                 for (unsigned aa = 0; aa < k; aa++) {
                     subMatrix_f[c * k + aa] = subMatrix[base + c * k + aa];
                 }
             }
-            /*
-            for (unsigned c = s; c < k; c+=g){
+
+            for (unsigned c = s; c < k; c += g) {
                 subVector[baseV + c] = 0;
-                for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx){
+                for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
                     unsigned idx2 = colMajored_sparse_idx[idx];
                     subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
                 }
-            }*/
+            }
+            */
             batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
             for (unsigned c = s; c < k; c += g) {

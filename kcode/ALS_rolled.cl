@@ -1,10 +1,9 @@
-void choldc1(int n, __global float* a, __global float* p) {
+static void choldc1(int n, __global float* a, __global float* p) {
     int base = get_group_id(0) * n * n;
-    unsigned i, j;
     int k;
     float sum;
-    for (i = 0; i < n; ++i) {
-        for (j = i; j < n; ++j) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = i; j < n; ++j) {
             //sum = a[i][j];
             sum = a[base + i * n + j];
             for (k = i - 1; k >= 0; --k) {
@@ -24,21 +23,19 @@ void choldc1(int n, __global float* a, __global float* p) {
     }
 }
 
-void choldcsl(int n, __global float* A, __global float* tp) {
-    unsigned i, j, k;
-    double sum;
+static void choldcsl(int n, __global float* A, __global float* tp) {
+    float sum;
     int base = get_group_id(0) * n * n;
     __global float* p;
-    //p = (float *)malloc(n * sizeof(float));
     int gid = get_group_id(0);
     p = &(tp[gid * n]);
     choldc1(n, A, p);
-    for (i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         //A[i][i] = 1 / p[i];
         A[base + i * n + i] = 1 / p[i];
-        for (j = i + 1; j < n; ++j) {
+        for (int j = i + 1; j < n; ++j) {
             sum = 0;
-            for (k = i; k < j; ++k) {
+            for (int k = i; k < j; ++k) {
                 //sum -= A[j][k] * A[k][i];
                 sum -= A[base + j * n + k] * A[base + k * n + i];
             }
@@ -46,12 +43,11 @@ void choldcsl(int n, __global float* A, __global float* tp) {
             A[base + j * n + i] = sum / p[j];
         }
     }
-    //free(p);
 }
 
-void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float* p) {
+static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float* p) {
     int base = get_group_id(0) * n * n;
-    unsigned i, j, k;
+    int i, j, k;
     choldcsl(n, A, p);
     //vecIndex = (i * 3) + j; to ontain index from vector if needed.
     for (i = 0; i < n; ++i) {
@@ -82,8 +78,8 @@ void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float* p) {
     }
 }
 
-void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, const long ptr,
-                       __global const unsigned* idx) {
+static void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, const long ptr,
+                              __global const unsigned* idx) {
     int base = get_group_id(0) * j * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
@@ -91,9 +87,9 @@ void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, 
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                       0};
-    for (unsigned I = ss; I < j; I += gg) {
-        for (unsigned J = I; J < j; ++J) {
-            for (unsigned K = 0; K < i; ++K) {
+    for (int I = ss; I < j; I += gg) {
+        for (int J = I; J < j; ++J) {
+            for (int K = 0; K < i; ++K) {
                 unsigned offset = idx[ptr + K] * j;
                 SUM[I * j + J] += H[offset + I] * H[offset + J];
             }
@@ -103,8 +99,9 @@ void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, 
     }
 }
 
-__kernel void batchsolve(int i, int j, __global float* H, __global float* val, __global float* result,
-                __global unsigned* colMajored_sparse_idx, __global long* row_ptr, __global unsigned* col_idx) {
+__kernel void batchsolve(int i, int j, __global float* H, __global const float* val, __global float* result,
+                         __global const unsigned* colMajored_sparse_idx, __global const long* row_ptr,
+                         __global const unsigned* col_idx) {
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
@@ -191,7 +188,7 @@ __kernel void batchsolve(int i, int j, __global float* H, __global float* val, _
     result[basev + 9] = subvector9;
 }
 
-__kernel void updateW_overH_kernel(const ulong rows,
+__kernel void updateW_overH_kernel(const int rows,
                                    __global const long* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
@@ -202,9 +199,10 @@ __kernel void updateW_overH_kernel(const ulong rows,
                                    __global float* H,
                                    __global float* p,
                                    __global float* subVector,
-                                   __global float* subMatrix) {
-    int i = get_global_id(0);
-    int j = get_global_size(0);
+                                   __global float* subMatrix,
+                                   __global float* subMatrix_f) {
+    //int i = get_global_id(0);
+    //int j = get_global_size(0);
     int s = get_local_id(0);
     int g = get_local_size(0);
     int a = get_group_id(0);
@@ -217,37 +215,40 @@ __kernel void updateW_overH_kernel(const ulong rows,
         //printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
-            barrier(CLK_GLOBAL_MEM_FENCE);
+            barrier(CLK_LOCAL_MEM_FENCE);
+
             for (unsigned c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
-            barrier(CLK_GLOBAL_MEM_FENCE);
+            barrier(CLK_LOCAL_MEM_FENCE);
             if (s == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
-            barrier(CLK_GLOBAL_MEM_FENCE);
+            barrier(CLK_LOCAL_MEM_FENCE);
             /*
-            for (unsigned c = s; c < k; c+=g){
-                    subVector[baseV + c] = 0;
-                    for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx){
-                        unsigned idx2 = colMajored_sparse_idx[idx];
-                        subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
-                    }
+            for (unsigned c = s; c < k; c += g) {
+                for (unsigned aa = 0; aa < k; aa++) {
+                    subMatrix_f[c * k + aa] = subMatrix[base + c * k + aa];
                 }
-                */
+            }
+
+            for (unsigned c = s; c < k; c += g) {
+                subVector[baseV + c] = 0;
+                for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
+                    unsigned idx2 = colMajored_sparse_idx[idx];
+                    subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
+                }
+            }
+            */
             batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
-
-            barrier(CLK_GLOBAL_MEM_FENCE);
-
+            barrier(CLK_LOCAL_MEM_FENCE);
             for (unsigned c = s; c < k; c += g) {
                 Wr[c] = 0.0f;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
                 }
             }
-
-            barrier(CLK_GLOBAL_MEM_FENCE);
-
+            barrier(CLK_LOCAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
                 Wr[c] = 0.0f;
@@ -256,7 +257,7 @@ __kernel void updateW_overH_kernel(const ulong rows,
     }
 }
 
-__kernel void updateH_overW_kernel(const ulong cols,
+__kernel void updateH_overW_kernel(const int cols,
                                    __global const long* col_ptr,
                                    __global const unsigned* row_idx,
                                    __global const float* val,
@@ -267,8 +268,8 @@ __kernel void updateH_overW_kernel(const ulong cols,
                                    __global float* p,
                                    __global float* subVector,
                                    __global float* subMatrix) {
-    int i = get_global_id(0);
-    int j = get_global_size(0);
+    //int i = get_global_id(0);
+    //int j = get_global_size(0);
     int s = get_local_id(0);
     int g = get_local_size(0);
     int a = get_group_id(0);

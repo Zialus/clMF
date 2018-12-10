@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     cl_int err;
     cl_uint NumDevice;
     cl_platform_id platform;
-    getPlatform(platform, 0);
+    getPlatform(platform, param.platform_id);
     cl_device_id* devices = getDevice(platform, device_type);
     report_device(devices[0]);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);

@@ -343,6 +343,9 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                 case 'P':
                     param.device_id = atoi(argv[i]);
                     break;
+                case 'p':
+                    param.platform_id = atoi(argv[i]);
+                    break;
                 case 'q':
                     param.verbose = atoi(argv[i]);
                     break;

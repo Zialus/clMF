@@ -65,27 +65,8 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
 
 int main(int argc, char* argv[]) {
     auto t7 = std::chrono::high_resolution_clock::now();
-    char device_type[4] = {'g', 'p', 'u', '\0'};
-    char opencl_filename[1024] = "../kcode/ALS.cl";
-    char srcdir[1024];
 
-    parameter param = parse_command_line(argc, argv, srcdir, opencl_filename);
-
-    switch (param.device_id) {
-        case 0:
-            snprintf(device_type, sizeof(device_type), "gpu");
-            break;
-        case 1:
-            snprintf(device_type, sizeof(device_type), "cpu");
-            break;
-        case 2:
-            snprintf(device_type, sizeof(device_type), "mic");
-            break;
-        default:
-            printf("[info] unknown device type!\n");
-            break;
-    }
-    printf("[info] - selected device type: %s\n", device_type);
+    parameter param = parse_command_line(argc, argv);
 
     if (param.verbose) {
         print_all_the_platforms();
@@ -98,7 +79,7 @@ int main(int argc, char* argv[]) {
     cl_uint NumDevice;
     cl_platform_id platform;
     getPlatform(platform, param.platform_id);
-    cl_device_id* devices = getDevice(platform, device_type);
+    cl_device_id* devices = getDevice(platform, param.device_type);
     report_device(devices[0]);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);
     CL_CHECK(err);
@@ -106,9 +87,9 @@ int main(int argc, char* argv[]) {
     assert(NumDevice == 1);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
 
-    printf("[info] - The kernel to be compiled: %s\n", opencl_filename);
+    printf("[info] - The kernel to be compiled: %s\n", param.opencl_filename);
     std::string sourceStr;
-    convertToString(opencl_filename, sourceStr);
+    convertToString(param.opencl_filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
@@ -138,7 +119,7 @@ int main(int argc, char* argv[]) {
     bool with_weights = false;
     bool ifALS = true;
     std::cout << "[info]Loading R...\n";
-    load(srcdir, R, ifALS, with_weights);
+    load(param.src_dir, R, ifALS, with_weights);
     auto t4 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT34 = t4 - t3;
     std::cout << "Load R Time: " << deltaT34.count() << " s.\n";
@@ -340,7 +321,7 @@ int main(int argc, char* argv[]) {
     }
 
     auto t5 = std::chrono::high_resolution_clock::now();
-    calculate_rmse(W_c, H_c, srcdir, k);
+    calculate_rmse(W_c, H_c, param.src_dir, k);
     auto t6 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT56 = t6 - t5;
     std::cout << "Predict Time: " << deltaT56.count() << " s.\n";

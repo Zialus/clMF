@@ -3,25 +3,17 @@
 
 class parameter {
 public:
-    int k;
-    int maxiter;
-    float lambda;
-    int nBlocks;
-    int nThreadsPerBlock;
-    int device_id;
-    int platform_id;
-    int verbose;
-
-    parameter() {
-        k = 10;
-        maxiter = 5;
-        lambda = 0.05f;
-        nBlocks = 8192;
-        nThreadsPerBlock = 32;
-        device_id = 0;
-        platform_id = 0;
-        verbose = 0;
-    }
+    int k = 10;
+    int maxiter = 5;
+    float lambda = 0.05f;
+    int nBlocks = 8192;
+    int nThreadsPerBlock = 32;
+    int device_id = 0;
+    int platform_id = 0;
+    int verbose = 0;
+    char device_type[4] = {'g', 'p', 'u', '\0'};
+    char opencl_filename[1024] = "../kcode/ALS.cl";
+    char src_dir[1024] = "../data/simple";
 };
 
 #endif

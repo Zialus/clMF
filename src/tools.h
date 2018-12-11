@@ -44,6 +44,6 @@ void initial_col(mat_t& X, long k, long n);
 
 void exit_with_help();
 
-parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code);
+parameter parse_command_line(int argc, char** argv);
 
 #endif //TOOLS_H

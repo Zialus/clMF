@@ -303,17 +303,19 @@ void exit_with_help() {
             "    -k rank : set the rank (default 10)\n"
             "    -l lambda : set the regularization parameter lambda (default 0.05)\n"
             "    -t max_iter: set the number of iterations (default 5)\n"
-            "    -P device_id: select a device(0=gpu, 1=cpu, 2=mic) (default 0)\n"
-            "    -nBlocks: Number of blocks(default 8192)\n"
-            "    -nThreadsPerBlock: Number of threads per block(default 32)\n"
+            "    -P device_type: select a device (0=gpu, 1=cpu, 2=mic) (default 0)\n"
+            "    -p platform_id: select an opencl platform id (default 0)\n"
+            "    -nBlocks: Number of blocks (default 8192)\n"
+            "    -nThreadsPerBlock: Number of threads per block (default 32)\n"
     );
     exit(EXIT_FAILURE);
 }
 
-parameter parse_command_line(int argc, char** argv, char* input_dir, char* kernel_code) {
+parameter parse_command_line(int argc, char** argv) {
     // default values have been set by the constructor
     parameter param;
     // parse options
+    int device_id = 0;
     int i;
     for (i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
@@ -329,7 +331,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
         } else {
             switch (argv[i - 1][1]) {
                 case 'c':
-                    sprintf(kernel_code, "%s", argv[i]);
+                    snprintf(param.opencl_filename, 1024, "%s", argv[i]);
                     break;
                 case 'k':
                     param.k = atoi(argv[i]);
@@ -341,7 +343,7 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
                     param.maxiter = atoi(argv[i]);
                     break;
                 case 'P':
-                    param.device_id = atoi(argv[i]);
+                    device_id = atoi(argv[i]);
                     break;
                 case 'p':
                     param.platform_id = atoi(argv[i]);
@@ -358,10 +360,27 @@ parameter parse_command_line(int argc, char** argv, char* input_dir, char* kerne
 
     }
 
+    switch (device_id) {
+        case 0:
+            snprintf(param.device_type, 4, "gpu");
+            break;
+        case 1:
+            snprintf(param.device_type, 4, "cpu");
+            break;
+        case 2:
+            snprintf(param.device_type, 4, "mic");
+            break;
+        default:
+            printf("[info] unknown device type!\n");
+            break;
+    }
+    printf("[info] - selected device type: %s\n", param.device_type);
+
     if (i >= argc) {
         exit_with_help();
     }
 
-    sprintf(input_dir, "%s", argv[i]);
+    snprintf(param.src_dir, 1024, "%s", argv[i]);
+
     return param;
 }

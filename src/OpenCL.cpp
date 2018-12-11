@@ -69,7 +69,6 @@ int main(int argc, char* argv[]) {
     parameter param = parse_command_line(argc, argv);
 
     if (param.verbose) {
-        print_all_the_platforms();
         print_all_the_info();
     }
 
@@ -77,9 +76,8 @@ int main(int argc, char* argv[]) {
     cl_int status;
     cl_int err;
     cl_uint NumDevice;
-    cl_platform_id platform;
-    getPlatform(platform, param.platform_id);
-    cl_device_id* devices = getDevice(platform, param.device_type);
+    cl_platform_id platform = getPlatform(param.platform_id);
+    cl_device_id* devices = getDevices(platform, param.device_type);
     report_device(devices[0]);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);
     CL_CHECK(err);
@@ -94,7 +92,9 @@ int main(int argc, char* argv[]) {
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
 
-    status = clBuildProgram(program, 1, devices, nullptr, nullptr, nullptr);
+    char options[1024];
+    sprintf(options, " ");
+    status = clBuildProgram(program, 1, devices, options, nullptr, nullptr);
 
     size_t length;
     clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, 0, nullptr, &length);

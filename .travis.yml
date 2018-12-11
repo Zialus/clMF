@@ -2,20 +2,20 @@ language: cpp
 dist: xenial
 
 script:
-- echo $AMDAPPSDKROOT
-- cmake --version
-- clinfo
-- mkdir build && cd build
-- cmake -DCMAKE_BUILD_TYPE=Release ..
-- make
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ctest -V; fi
+  - echo $AMDAPPSDKROOT
+  - cmake --version
+  - clinfo
+  - mkdir build && cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
+  - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ctest -V; fi
 
 before_install:
-- eval "${MATRIX_EVAL}"
+  - eval "${MATRIX_EVAL}"
 
 install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=8; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=8; fi
 
 matrix:
   include:

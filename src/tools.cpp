@@ -284,12 +284,11 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
     fclose(fp);
 }
 
-void initial_col(mat_t& X, long k, long n) {
+void initial_col(mat_t& X, unsigned int k, unsigned int n) {
     X = mat_t(k, vec_t(n));
     srand(0L);
-    long i, j;
-    for (i = 0; i < n; ++i) {
-        for (j = 0; j < k; ++j) {
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < k; ++j) {
             X[j][i] = 0.1f * (float(rand()) / RAND_MAX) + 0.001f;
         }
     }

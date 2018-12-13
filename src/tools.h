@@ -42,7 +42,7 @@ int report_device(cl_device_id device_id);
 
 void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights);
 
-void initial_col(mat_t& X, long k, long n);
+void initial_col(mat_t& X, unsigned int k, unsigned int n);
 
 void exit_with_help();
 

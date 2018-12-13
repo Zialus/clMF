@@ -8,7 +8,6 @@ public:
     float lambda = 0.05f;
     int nBlocks = 8192;
     int nThreadsPerBlock = 32;
-    int device_id = 0;
     int platform_id = 0;
     int verbose = 0;
     char device_type[4] = {'g', 'p', 'u', '\0'};

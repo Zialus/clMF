@@ -1,11 +1,11 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define CL_SILENCE_DEPRECATION
 #ifdef __APPLE__
+#define CL_SILENCE_DEPRECATION
 #include <OpenCL/cl.h>
 #else
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 #endif
 
@@ -34,9 +34,9 @@ cl_device_id* getDevices(cl_platform_id& platform, char* device_type);
 
 void print_all_the_info();
 
-void print_platform_info(cl_platform_id* platforms, unsigned int id);
-
 void print_device_info(cl_device_id* devices, unsigned int j);
+
+void print_platform_info(cl_platform_id* platforms, unsigned int id);
 
 int report_device(cl_device_id device_id);
 

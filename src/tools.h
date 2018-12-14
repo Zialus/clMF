@@ -17,7 +17,7 @@
 #include <string>
 #include <fstream>
 
-#include "pmf_util.h"
+#include "util.h"
 #include "pmf.h"
 
 const char* get_error_string(cl_int err);

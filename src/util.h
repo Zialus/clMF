@@ -1,5 +1,5 @@
-#ifndef PMF_UTIL_H
-#define PMF_UTIL_H
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <cstdio>
 #include <cstdlib>
@@ -313,4 +313,4 @@ public:
     }
 };
 
-#endif
+#endif //UTIL_H

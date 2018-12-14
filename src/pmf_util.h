@@ -30,11 +30,6 @@
     exit(EXIT_FAILURE); \
 }
 
-class rate_t;
-
-class smat_t;
-
-typedef std::vector<double> vec_tDouble;
 typedef std::vector<float> vec_t;
 typedef std::vector<vec_t> mat_t;
 
@@ -86,7 +81,6 @@ public:
     }
 };
 
-
 // Comparator for sorting rates into row/column comopression storage
 class SparseComp {
 public:
@@ -130,40 +124,6 @@ public:
         mem_alloc_by_me = false;
     }
 
-    // For matlab (Almost deprecated)
-    smat_t(long m, long n, unsigned* ir, long* jc, float* v, unsigned* ir_t, long* jc_t, float* v_t) :
-    //smat_t(long m, long n, unsigned long *ir, long *jc, float *v, unsigned long *ir_t, long *jc_t, float *v_t):
-            rows(m), cols(n), val(v), val_t(v_t), col_ptr(jc), row_ptr(jc_t), row_idx(ir), col_idx(ir_t),
-            mem_alloc_by_me(false) {
-        if (col_ptr[n] != row_ptr[m]) {
-            fprintf(stderr, "Error occurs! two nnz do not match (%ld, %ld)\n", col_ptr[n], row_ptr[n]);
-        }
-        nnz = col_ptr[n];
-        max_row_nnz = max_col_nnz = 0;
-        for (long r = 1; r <= rows; ++r) {
-            max_row_nnz = std::max(max_row_nnz, row_ptr[r]);
-        }
-        for (long c = 1; c <= cols; ++c) {
-            max_col_nnz = std::max(max_col_nnz, col_ptr[c]);
-        }
-    }
-
-    void from_mpi() {
-        mem_alloc_by_me = true;
-        max_col_nnz = 0;
-        for (long c = 1; c <= cols; ++c) {
-            max_col_nnz = std::max(max_col_nnz, col_ptr[c] - col_ptr[c - 1]);
-        }
-    }
-
-    void print_mat(int host) {
-        for (int c = 0; c < cols; ++c) {
-            if (col_ptr[c + 1] > col_ptr[c]) {
-                printf("%d: %ld at host %d\n", c, col_ptr[c + 1] - col_ptr[c], host);
-            }
-        }
-    }
-
     void load(long _rows, long _cols, long _nnz, const char* filename, bool ifALS, bool use_weights = false) {
         entry_iterator_t entry_it(_nnz, filename, use_weights);
         load_from_iterator(_rows, _cols, _nnz, &entry_it, ifALS);
@@ -199,6 +159,7 @@ public:
             colMajored_sparse_idx = MALLOC(unsigned, nnz);
             nbits_colMajored_sparse_idx = SIZEBITS(unsigned, nnz);
         }
+
         // a trick here to utilize the space the have been allocated
         std::vector<size_t> perm(_nnz);
         unsigned* tmp_row_idx = col_idx;
@@ -219,6 +180,7 @@ public:
         }
         // sort entries into row-majored ordering
         sort(perm.begin(), perm.end(), SparseComp(tmp_row_idx, tmp_col_idx, true));
+
         // Generate CRS format
         for (long idx = 0; idx < _nnz; idx++) {
             val_t[idx] = tmp_val[perm[idx]];
@@ -238,6 +200,7 @@ public:
             max_col_nnz = std::max(max_col_nnz, col_ptr[c]);
             col_ptr[c] += col_ptr[c - 1];
         }
+
         // Transpose CRS into CCS matrix
         for (long r = 0; r < rows; ++r) {
             for (long i = row_ptr[r]; i < row_ptr[r + 1]; ++i) {

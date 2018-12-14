@@ -20,6 +20,10 @@
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)
 
+#define CL_CHECK(res) \
+    {if (res != CL_SUCCESS) {fprintf(stderr,"Error \"%s\" (%d) in file %s on line %d\n", \
+        get_error_string(res), res, __FILE__,__LINE__); abort();}}
+
 #define CHECK_FSCAN(err, num)    if(err != num){ \
     perror("FSCANF"); \
     exit(EXIT_FAILURE); \
@@ -101,7 +105,7 @@ public:
 // Access column fomat only when you use it..
 class smat_t {
 public:
-    int rows, cols;
+    long rows, cols;
     long nnz, max_row_nnz, max_col_nnz;
     float* val, * val_t;
     size_t nbits_val, nbits_val_t;
@@ -215,13 +219,13 @@ public:
         col_ptr[0] = 0;
 
         if (ifALS) {
-            unsigned* mapIDX;
-            mapIDX = MALLOC(unsigned, rows);
+            long* mapIDX;
+            mapIDX = MALLOC(long, rows);
             for (int r = 0; r < rows; ++r) {
                 mapIDX[r] = row_ptr[r];
             }
 
-            for (int r = 0; r < nnz; ++r) {
+            for (unsigned r = 0; r < nnz; ++r) {
                 colMajored_sparse_idx[mapIDX[row_idx[r]]] = r;
                 ++mapIDX[row_idx[r]];
             }

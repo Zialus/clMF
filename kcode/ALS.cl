@@ -78,7 +78,7 @@ static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global floa
     }
 }
 
-__kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, const long ptr,
+__kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, const unsigned ptr,
                                 __global const unsigned* idx) {
     int base = get_group_id(0) * j * j;
     int ss = get_local_id(0);
@@ -532,7 +532,7 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float*
 }
 
 __kernel void batchsolve(int i, int j, __global float* H, __global const float* val, __global float* result,
-                         __global const unsigned* colMajored_sparse_idx, __global const long* row_ptr,
+                         __global const unsigned* colMajored_sparse_idx, __global const unsigned* row_ptr,
                          __global const unsigned* col_idx) {
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
@@ -621,7 +621,7 @@ __kernel void batchsolve(int i, int j, __global float* H, __global const float* 
 }
 
 __kernel void batchsolve1(int i, int j, __global float* W, __global const float* val, __global float* result,
-                          __global const long* col_ptr, __global const unsigned* row_idx) {
+                          __global const unsigned* col_ptr, __global const unsigned* row_idx) {
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
@@ -702,7 +702,7 @@ __kernel void batchsolve1(int i, int j, __global float* W, __global const float*
 }
 
 __kernel void updateW_overH_kernel(const int rows,
-                                   __global const long* row_ptr,
+                                   __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
                                    __global const float* val,
@@ -771,7 +771,7 @@ __kernel void updateW_overH_kernel(const int rows,
 }
 
 __kernel void updateH_overW_kernel(const int cols,
-                                   __global const long* col_ptr,
+                                   __global const unsigned* col_ptr,
                                    __global const unsigned* row_idx,
                                    __global const float* val,
                                    const float lambda,

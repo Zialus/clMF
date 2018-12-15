@@ -11,58 +11,6 @@
 
 #include "tools.h"
 
-void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
-    char meta_filename[1024];
-    sprintf(meta_filename, "%s/meta", srcdir);
-    FILE* fp = fopen(meta_filename, "r");
-    if (fp == nullptr) {
-        printf("Can't open meta input file.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    char buf_train[1024], buf_test[1024], test_file_name[2048], train_file_name[2048];
-    unsigned m, n, nnz, nnz_test;
-    CHECK_FSCAN(fscanf(fp, "%u %u", &m, &n), 2);
-    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz, buf_train), 2);
-    CHECK_FSCAN(fscanf(fp, "%u %1023s", &nnz_test, buf_test), 2);
-    snprintf(test_file_name, sizeof(test_file_name), "%s/%s", srcdir, buf_test);
-    snprintf(train_file_name, sizeof(train_file_name), "%s/%s", srcdir, buf_train);
-    fclose(fp);
-
-    FILE* test_fp = fopen(test_file_name, "r");
-    if (test_fp == nullptr) {
-        printf("Can't open test file.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    double rmse = 0;
-    int num_insts = 0;
-    int nans_count = 0;
-
-    int i, j;
-    double v;
-
-    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
-        double pred_v = 0;
-        for (int t = 0; t < k; t++) {
-            pred_v += W_c[i - 1][t] * H_c[j - 1][t];
-        }
-        num_insts++;
-        double tmp = (pred_v - v) * (pred_v - v);
-        if (tmp == tmp) {
-            rmse += tmp;
-        } else {
-            nans_count++;
-        }
-    }
-    fclose(test_fp);
-
-    double nans_percentage = (double) nans_count / (double) num_insts;
-    printf("NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
-    rmse = sqrt(rmse / num_insts);
-    printf("CALCULATED RMSE = %lf.\n", rmse);
-}
-
 int main(int argc, char* argv[]) {
     auto t7 = std::chrono::high_resolution_clock::now();
 

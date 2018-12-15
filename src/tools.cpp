@@ -302,8 +302,9 @@ void exit_with_help() {
             "    -k rank : set the rank (default 10)\n"
             "    -l lambda : set the regularization parameter lambda (default 0.05)\n"
             "    -t max_iter: set the number of iterations (default 5)\n"
-            "    -P device_type: select a device (0=gpu, 1=cpu, 2=mic) (default 0)\n"
-            "    -p platform_id: select an opencl platform id (default 0)\n"
+            "    -d device_type: select a device (0=gpu, 1=cpu, 2=mic) (default 0)\n"
+            "    -P platform_id: select an opencl platform id (default 0)\n"
+            "    -q verbose: show information or not (default 0)\n"
             "    -nBlocks: Number of blocks (default 8192)\n"
             "    -nThreadsPerBlock: Number of threads per block (default 32)\n"
     );
@@ -340,10 +341,10 @@ parameter parse_command_line(int argc, char** argv) {
                 case 't':
                     param.maxiter = atoi(argv[i]);
                     break;
-                case 'P':
+                case 'd':
                     device_id = atoi(argv[i]);
                     break;
-                case 'p':
+                case 'P':
                     param.platform_id = atoi(argv[i]);
                     break;
                 case 'q':
@@ -373,7 +374,7 @@ parameter parse_command_line(int argc, char** argv) {
             exit_with_help();
             break;
     }
-    printf("[info] - selected device type: %s\n", param.device_type);
+    printf("[info] - selected device type: %s, on platform with index: %d\n", param.device_type, param.platform_id);
 
     if (i >= argc) {
         exit_with_help();

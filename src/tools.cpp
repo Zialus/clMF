@@ -264,7 +264,7 @@ int report_device(cl_device_id device_id) {
         printf("Error: Failed to retrieve device info! %s\n", get_error_string(err));
         return -1;
     }
-    printf("Connecting to %s...\n", device_name);
+    printf("[info] Connecting to %s...\n", device_name);
     return 0;
 }
 
@@ -311,7 +311,7 @@ void exit_with_help() {
 }
 
 parameter parse_command_line(int argc, char** argv) {
-    parameter param;
+    parameter param{};
 
     int device_id = 0;
     int i;
@@ -369,7 +369,8 @@ parameter parse_command_line(int argc, char** argv) {
             snprintf(param.device_type, 4, "mic");
             break;
         default:
-            printf("[info] unknown device type!\n");
+            fprintf(stderr, "unknown device type!\n");
+            exit_with_help();
             break;
     }
     printf("[info] - selected device type: %s\n", param.device_type);
@@ -430,7 +431,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     fclose(test_fp);
 
     double nans_percentage = (double) nans_count / (double) num_insts;
-    printf("NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
+    printf("[INFO] NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);
-    printf("CALCULATED RMSE = %lf.\n", rmse);
+    printf("[INFO] Test RMSE = %lf.\n", rmse);
 }

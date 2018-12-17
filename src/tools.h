@@ -9,14 +9,6 @@
 #include <CL/cl.h>
 #endif
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-
-#include <iostream>
-#include <string>
-#include <fstream>
-
 #include "util.h"
 #include "pmf.h"
 

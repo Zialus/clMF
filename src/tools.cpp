@@ -385,7 +385,7 @@ parameter parse_command_line(int argc, char** argv) {
     return param;
 }
 
-void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k) {
+void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, const int k) {
     char meta_filename[1024];
     sprintf(meta_filename, "%s/meta", srcdir);
     FILE* fp = fopen(meta_filename, "r");
@@ -434,5 +434,5 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int 
     double nans_percentage = (double) nans_count / (double) num_insts;
     printf("[INFO] NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);
-    printf("[INFO] Test RMSE = %lf.\n", rmse);
+    printf("[INFO] Test RMSE = %lf\n", rmse);
 }

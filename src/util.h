@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <string>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <utility>

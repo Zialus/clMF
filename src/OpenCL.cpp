@@ -10,6 +10,7 @@
 #include <string>
 
 #include "tools.h"
+#include "extra.h"
 
 int main(int argc, char* argv[]) {
     auto t7 = std::chrono::high_resolution_clock::now();
@@ -308,8 +309,23 @@ int main(int argc, char* argv[]) {
     auto t6 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT56 = t6 - t5;
     std::cout << "[info] Predict Time: " << deltaT56.count() << " s.\n";
-    std::cout << "------------------------------------------------------" << std::endl;
 
+    // Compare OpenCL results with reference OpenMP results
+    if (param.do_ref == 1) {
+        std::cout << "------------------------------------------------------" << std::endl;
+        std::cout << "[info] Computing clMF OpenMP reference results on CPU." << std::endl;
+        mat_t W_ref;
+        mat_t H_ref;
+        initial_col(W_ref, R.rows, param.k);
+        initial_col(H_ref, R.cols, param.k);
+        ALS_multicore(R, W_ref, H_ref, param);
+        std::cout << "[info] validate the results." << std::endl;
+        golden_compare(W_c, W_ref, param.k, R.rows);
+        golden_compare(H_c, H_ref, param.k, R.cols);
+        calculate_rmse(W_ref, H_ref, param.src_dir, param.k);
+    }
+
+    std::cout << "------------------------------------------------------" << std::endl;
     auto t8 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT78 = t8 - t7;
     std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"

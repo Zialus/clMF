@@ -350,6 +350,9 @@ parameter parse_command_line(int argc, char** argv) {
                 case 'q':
                     param.verbose = atoi(argv[i]);
                     break;
+                case 'r':
+                    param.do_ref = atoi(argv[i]);
+                    break;
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);
                     exit_with_help();
@@ -383,6 +386,26 @@ parameter parse_command_line(int argc, char** argv) {
     snprintf(param.src_dir, 1024, "%s", argv[i]);
 
     return param;
+}
+
+void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
+    int error_count = 0;
+    for (unsigned i = 0; i < k; i++) {
+        for (unsigned j = 0; j < m; j++) {
+            if (fabs((double) W[i][j] - (double) W_ref[i][j]) > 0.1 * fabs((double) W_ref[i][j])) {
+//                std::cout << i << "|" << j << "\t";
+//                std::cout << W[i][j] << "," << W_ref[i][j] << "\t";
+                error_count++;
+            }
+        }
+//        std::cout << std::endl;
+    }
+//    std::cout << std::endl;
+    if (error_count == 0) {
+        std::cout << "Check... PASS!" << std::endl;
+    } else {
+        std::cout << "Check... NO PASS! #Error = " << error_count << " out of " << k * m << " entries." << std::endl;
+    }
 }
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, const int k) {

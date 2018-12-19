@@ -36,6 +36,8 @@ void exit_with_help();
 
 parameter parse_command_line(int argc, char** argv);
 
+void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m);
+
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k);
 
 #endif //TOOLS_H

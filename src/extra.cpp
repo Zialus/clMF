@@ -11,7 +11,7 @@ void choldc1(int n, float** a, float* p) {
                 if (sum <= 0) {
                     printf(" a is not positive definite!\n");
                 }
-                p[i] = sqrtf(sum);//float square root
+                p[i] = sqrtf(sum);
             } else {
                 a[j][i] = sum / p[i];
             }
@@ -118,10 +118,8 @@ void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 
                 //a trick to avoid malloc
                 float** H_Omega = (float**) malloc(omegaSize * sizeof(float*));
-                unsigned i = 0;
-                for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx) {
+                for (unsigned idx = R.row_ptr[Rw], i = 0; idx < R.row_ptr[Rw + 1]; ++idx, ++i) {
                     H_Omega[i] = &H[R.col_idx[idx]][0];
-                    ++i;
                 }
 
                 Mt_byM_multiply(omegaSize, k, H_Omega, subMatrix);
@@ -184,10 +182,8 @@ void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 
                 //a trick to avoid malloc
                 float** W_Omega = (float**) malloc(omegaSize * sizeof(float*));
-                unsigned i = 0;
-                for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
+                for (unsigned idx = R.col_ptr[Rh], i = 0; idx < R.col_ptr[Rh + 1]; ++idx, ++i) {
                     W_Omega[i] = &W[R.row_idx[idx]][0];
-                    ++i;
                 }
 
                 Mt_byM_multiply(omegaSize, k, W_Omega, subMatrix);
@@ -204,7 +200,7 @@ void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
                 //sparse multiplication
                 for (int c = 0; c < k; ++c) {
                     subVector[c] = 0;
-                    for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
+                    for (unsigned idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
                         subVector[c] += R.val[idx] * W[R.row_idx[idx]][c];
                     }
                 }

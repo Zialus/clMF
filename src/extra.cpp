@@ -92,7 +92,7 @@ void Mt_byM_multiply(int i, int j, float** M, float** Result) {
 
 #define kind dynamic,500
 
-void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
+void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
     int maxIter = param.maxiter;
     float lambda = param.lambda;
     int k = param.k;
@@ -100,26 +100,26 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
 
     omp_set_num_threads(param.threads);
 
-    for (int iter = 0; iter < maxIter; ++iter){
+    for (int iter = 0; iter < maxIter; ++iter) {
 
         //optimize W over H
 #pragma omp parallel for schedule(kind)
-        for (long Rw = 0; Rw < R.rows; ++Rw){
-            float *Wr = &W[Rw][0];
+        for (long Rw = 0; Rw < R.rows; ++Rw) {
+            float* Wr = &W[Rw][0];
             int omegaSize = R.row_ptr[Rw + 1] - R.row_ptr[Rw];
-            float ** subMatrix;
+            float** subMatrix;
 
-            if (omegaSize>0){
-                float * subVector = (float *)malloc(k * sizeof(float));
-                subMatrix = (float **)malloc(k * sizeof(float *));
-                for (int i = 0; i < k; ++i){
-                    subMatrix[i] = (float *)malloc(k * sizeof(float));
+            if (omegaSize > 0) {
+                float* subVector = (float*) malloc(k * sizeof(float));
+                subMatrix = (float**) malloc(k * sizeof(float*));
+                for (int i = 0; i < k; ++i) {
+                    subMatrix[i] = (float*) malloc(k * sizeof(float));
                 }
 
                 //a trick to avoid malloc
-                float ** H_Omega = (float **)malloc(omegaSize * sizeof(float *));
+                float** H_Omega = (float**) malloc(omegaSize * sizeof(float*));
                 unsigned i = 0;
-                for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx){
+                for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx) {
                     H_Omega[i] = &H[R.col_idx[idx]][0];
                     ++i;
                 }
@@ -127,7 +127,7 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
                 Mt_byM_multiply(omegaSize, k, H_Omega, subMatrix);
 
                 //add lambda to diag of sub-matrix
-                for (int c = 0; c < k; c++){
+                for (int c = 0; c < k; c++) {
                     subMatrix[c][c] = subMatrix[c][c] + lambda;
                 }
 
@@ -136,32 +136,31 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
 
 
                 //sparse multiplication
-                for (int c=0; c < k; ++c){
+                for (int c = 0; c < k; ++c) {
                     subVector[c] = 0;
-                    for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx){
+                    for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx) {
                         unsigned idx2 = R.colMajored_sparse_idx[idx];
                         subVector[c] += R.val[idx2] * H[R.col_idx[idx]][c];
                     }
                 }
 
                 //multiply subVector by subMatrix
-                for (int c = 0; c < k; ++c){
+                for (int c = 0; c < k; ++c) {
                     Wr[c] = 0;
-                    for (int subVid = 0; subVid < k; ++subVid){
+                    for (int subVid = 0; subVid < k; ++subVid) {
                         Wr[c] += subVector[subVid] * subMatrix[c][subVid];
                     }
                 }
 
 
-                for (int i = 0; i < k; ++i){
+                for (int i = 0; i < k; ++i) {
                     free(subMatrix[i]);
                 }
                 free(subMatrix);
                 free(subVector);
                 free(H_Omega);
-            }
-            else{
-                for (int c = 0; c < k; ++c){
+            } else {
+                for (int c = 0; c < k; ++c) {
                     Wr[c] = 0.0f;
                     //printf("%.3f ", Wr[c]);
                 }
@@ -171,22 +170,22 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
 
         //optimize H over W
 #pragma omp parallel for schedule(kind)
-        for (long Rh = 0; Rh < R.cols; ++Rh){
-            float *Hr = &H[Rh][0];
+        for (long Rh = 0; Rh < R.cols; ++Rh) {
+            float* Hr = &H[Rh][0];
             unsigned omegaSize = R.col_ptr[Rh + 1] - R.col_ptr[Rh];
-            float ** subMatrix;
+            float** subMatrix;
 
-            if (omegaSize>0){
-                float * subVector = (float *)malloc(k * sizeof(float));
-                subMatrix = (float **)malloc(k * sizeof(float *));
-                for (int i = 0; i < k; ++i){
-                    subMatrix[i] = (float *)malloc(k * sizeof(float));
+            if (omegaSize > 0) {
+                float* subVector = (float*) malloc(k * sizeof(float));
+                subMatrix = (float**) malloc(k * sizeof(float*));
+                for (int i = 0; i < k; ++i) {
+                    subMatrix[i] = (float*) malloc(k * sizeof(float));
                 }
 
                 //a trick to avoid malloc
-                float ** W_Omega = (float **)malloc(omegaSize * sizeof(float *));
+                float** W_Omega = (float**) malloc(omegaSize * sizeof(float*));
                 unsigned i = 0;
-                for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx){
+                for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
                     W_Omega[i] = &W[R.row_idx[idx]][0];
                     ++i;
                 }
@@ -194,7 +193,7 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
                 Mt_byM_multiply(omegaSize, k, W_Omega, subMatrix);
 
                 //add lambda to diag of sub-matrix
-                for (int c = 0; c < k; c++){
+                for (int c = 0; c < k; c++) {
                     subMatrix[c][c] = subMatrix[c][c] + lambda;
                 }
 
@@ -203,31 +202,30 @@ void ALS_multicore(smat_t &R, mat_t &W, mat_t &H, parameter &param){
 
 
                 //sparse multiplication
-                for (int c = 0; c < k; ++c){
+                for (int c = 0; c < k; ++c) {
                     subVector[c] = 0;
-                    for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx){
+                    for (long idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
                         subVector[c] += R.val[idx] * W[R.row_idx[idx]][c];
                     }
                 }
 
                 //multiply subVector by subMatrix
-                for (int c = 0; c < k; ++c){
+                for (int c = 0; c < k; ++c) {
                     Hr[c] = 0;
-                    for (int subVid = 0; subVid < k; ++subVid){
+                    for (int subVid = 0; subVid < k; ++subVid) {
                         Hr[c] += subVector[subVid] * subMatrix[c][subVid];
                     }
                 }
 
 
-                for (int i = 0; i < k; ++i){
+                for (int i = 0; i < k; ++i) {
                     free(subMatrix[i]);
                 }
                 free(subMatrix);
                 free(subVector);
                 free(W_Omega);
-            }
-            else{
-                for (int c = 0; c < k; ++c){
+            } else {
+                for (int c = 0; c < k; ++c) {
                     Hr[c] = 0.0f;
                 }
             }

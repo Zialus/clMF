@@ -3,8 +3,9 @@
 
 class parameter {
 public:
-    int threads = 4;
+    int threads = 16;
     int do_ref = 0; // compare opencl results to reference results
+    int do_predict = 0;
     int k = 10;
     int maxiter = 5;
     float lambda = 0.05f;

@@ -344,6 +344,9 @@ parameter parse_command_line(int argc, char** argv) {
                 case 'd':
                     device_id = atoi(argv[i]);
                     break;
+                case 'p':
+                    param.do_predict = atoi(argv[i]);
+                    break;
                 case 'P':
                     param.platform_id = atoi(argv[i]);
                     break;
@@ -392,15 +395,15 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
     int error_count = 0;
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < m; j++) {
-            if (fabs((double) W[i][j] - (double) W_ref[i][j]) > 0.1 * fabs((double) W_ref[i][j])) {
-//                std::cout << i << "|" << j << "\t";
-//                std::cout << W[i][j] << "," << W_ref[i][j] << "\t";
+            double delta = fabs((double) W[i][j] - (double) W_ref[i][j]);
+            if (delta > 0.1 * fabs((double) W_ref[i][j])) {
+//                std::cout << i << "|" << j << " = " << delta << "\n\t";
+//                std::cout << W[i][j] << "\n\t" << W_ref[i][j];
+//                std::cout << std::endl;
                 error_count++;
             }
         }
-//        std::cout << std::endl;
     }
-//    std::cout << std::endl;
     if (error_count == 0) {
         std::cout << "Check... PASS!" << std::endl;
     } else {

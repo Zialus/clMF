@@ -93,6 +93,11 @@ int main(int argc, char* argv[]) {
     initial_col(W_c, R.rows, param.k);
     initial_col(H_c, R.cols, param.k);
 
+    mat_t W_ref;
+    mat_t H_ref;
+    initial_col(W_ref, R.rows, param.k);
+    initial_col(H_ref, R.cols, param.k);
+
     float* submatrix = (float*) malloc(k * k * sizeof(float));
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < k; j++) {
@@ -303,25 +308,31 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::cout << "------------------------------------------------------" << std::endl;
-    auto t5 = std::chrono::high_resolution_clock::now();
-    calculate_rmse(W_c, H_c, param.src_dir, k);
-    auto t6 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT56 = t6 - t5;
-    std::cout << "[info] Predict Time: " << deltaT56.count() << " s.\n";
+    std::chrono::duration<double> deltaT56{};
+    std::chrono::duration<double> deltaT9_10{};
+
+    // Predict RMSE with the W and H matrices produced by OpenCL kernels
+    if (param.do_predict == 1) {
+        std::cout << "------------------------------------------------------" << std::endl;
+        auto t5 = std::chrono::high_resolution_clock::now();
+        calculate_rmse(W_c, H_c, param.src_dir, k);
+        auto t6 = std::chrono::high_resolution_clock::now();
+        deltaT56 = t6 - t5;
+        std::cout << "[info] Predict Time: " << deltaT56.count() << " s.\n";
+    }
 
     // Compare OpenCL results with reference OpenMP results
     if (param.do_ref == 1) {
         std::cout << "------------------------------------------------------" << std::endl;
         std::cout << "[info] Computing clMF OpenMP reference results on CPU." << std::endl;
-        mat_t W_ref;
-        mat_t H_ref;
-        initial_col(W_ref, R.rows, param.k);
-        initial_col(H_ref, R.cols, param.k);
+        auto t9 = std::chrono::high_resolution_clock::now();
         ALS_multicore(R, W_ref, H_ref, param);
+        auto t10 = std::chrono::high_resolution_clock::now();
+        deltaT9_10 = t10 - t9;
+        std::cout << "[info] OMP Predict Time: " << deltaT9_10.count() << " s.\n";
         std::cout << "[info] validate the results." << std::endl;
-        golden_compare(W_c, W_ref, param.k, R.rows);
-        golden_compare(H_c, H_ref, param.k, R.cols);
+        golden_compare(W_c, W_ref, R.rows, param.k);
+        golden_compare(H_c, H_ref, R.cols, param.k);
         calculate_rmse(W_ref, H_ref, param.src_dir, param.k);
     }
 
@@ -329,6 +340,6 @@ int main(int argc, char* argv[]) {
     auto t8 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT78 = t8 - t7;
     std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"
-              << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() << " s.\n";
+              << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() + deltaT9_10.count() << " s.\n";
     return 0;
 }

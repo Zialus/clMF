@@ -462,3 +462,13 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     rmse = sqrt(rmse / num_insts);
     printf("[INFO] Test RMSE = %lf\n", rmse);
 }
+
+void print_matrix(mat_t M, unsigned k, unsigned n) {
+    printf("------------------------------------------------------------------------\n");
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < k; ++j) {
+            printf("|%f", M[j][i]);
+        }
+        printf("|\n------------------------------------------------------------------------\n");
+    }
+}

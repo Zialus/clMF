@@ -40,4 +40,6 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m);
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, int k);
 
+void print_matrix(mat_t M, unsigned k, unsigned n);
+
 #endif //TOOLS_H

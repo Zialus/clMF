@@ -337,6 +337,14 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "------------------------------------------------------" << std::endl;
+
+    // Some print debugging
+//    print_matrix(W_c, R.rows, param.k);
+//    print_matrix(H_c, R.cols, param.k);
+//
+//    print_matrix(W_ref, R.rows, param.k);
+//    print_matrix(H_ref, R.cols, param.k);
+
     auto t8 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT78 = t8 - t7;
     std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"

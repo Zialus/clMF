@@ -25,11 +25,11 @@ void choldcsl(int n, float** A) {
     for (int i = 0; i < n; ++i) {
         A[i][i] = 1 / p[i];
         for (int j = i + 1; j < n; ++j) {
-            double sum = 0;
+            float sum = 0;
             for (int k = i; k < j; ++k) {
                 sum -= A[j][k] * A[k][i];
             }
-            A[j][i] = (float) sum / p[j];
+            A[j][i] = sum / p[j];
         }
     }
     free(p);

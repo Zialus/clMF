@@ -98,19 +98,20 @@ void convertToString(const char* filename, std::string& s) {
     }
 }
 
-cl_platform_id getPlatform(int id) {
+cl_platform_id getPlatform(unsigned id) {
     cl_int status;
     cl_uint numPlatforms;
 
     status = clGetPlatformIDs(0, nullptr, &numPlatforms);
     CL_CHECK(status);
 
-    assert(numPlatforms > 0);
+    assert(numPlatforms > 0); // make sure at least one platform is available
     cl_platform_id* platforms = (cl_platform_id*) malloc(numPlatforms * sizeof(cl_platform_id));
 
     status = clGetPlatformIDs(numPlatforms, platforms, nullptr);
     CL_CHECK(status);
 
+    assert(id < numPlatforms); // make sure id is within bounds
     cl_platform_id platform = platforms[id];
     free(platforms);
     return platform;
@@ -176,7 +177,7 @@ void print_all_the_info() {
     free(platforms);
 }
 
-void print_device_info(cl_device_id* devices, unsigned int j) {
+void print_device_info(cl_device_id* devices, unsigned j) {
     char* value;
     size_t valueSize;
     cl_uint maxComputeUnits;
@@ -233,7 +234,7 @@ void print_device_info(cl_device_id* devices, unsigned int j) {
     free(value);
 }
 
-void print_platform_info(cl_platform_id* platforms, unsigned int id) {
+void print_platform_info(cl_platform_id* platforms, unsigned id) {
     const char* attributeNames[5] = {"Name", "Vendor",
                                      "Version", "Profile", "Extensions"};
     const cl_platform_info attributeTypes[5] = {CL_PLATFORM_NAME, CL_PLATFORM_VENDOR,
@@ -284,7 +285,7 @@ void load(const char* srcdir, smat_t& R, bool ifALS, bool with_weights) {
     fclose(fp);
 }
 
-void initial_col(mat_t& X, unsigned int k, unsigned int n) {
+void initial_col(mat_t& X, unsigned k, unsigned n) {
     X = mat_t(k, vec_t(n));
     srand(0L);
     for (unsigned i = 0; i < n; ++i) {
@@ -395,8 +396,8 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
     int error_count = 0;
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < m; j++) {
-            double delta = fabs((double) W[i][j] - (double) W_ref[i][j]);
-            if (delta > 0.1 * fabs((double) W_ref[i][j])) {
+            float delta = fabsf(W[i][j] - W_ref[i][j]);
+            if (delta > 0.1 * fabs(W_ref[i][j])) {
 //                std::cout << i << "|" << j << " = " << delta << "\n\t";
 //                std::cout << W[i][j] << "\n\t" << W_ref[i][j];
 //                std::cout << std::endl;
@@ -435,20 +436,20 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
         exit(EXIT_FAILURE);
     }
 
-    double rmse = 0;
+    float rmse = 0;
     int num_insts = 0;
     int nans_count = 0;
 
     int i, j;
-    double v;
+    float v;
 
-    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
-        double pred_v = 0;
+    while (fscanf(test_fp, "%d %d %f", &i, &j, &v) != EOF) {
+        float pred_v = 0;
         for (int t = 0; t < k; t++) {
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];
         }
         num_insts++;
-        double tmp = (pred_v - v) * (pred_v - v);
+        float tmp = (pred_v - v) * (pred_v - v);
         if (tmp == tmp) {
             rmse += tmp;
         } else {
@@ -457,9 +458,9 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     }
     fclose(test_fp);
 
-    double nans_percentage = (double) nans_count / (double) num_insts;
+    float nans_percentage = (float) nans_count / num_insts;
     printf("[INFO] NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
-    rmse = sqrt(rmse / num_insts);
+    rmse = sqrtf(rmse / num_insts);
     printf("[INFO] Test RMSE = %lf\n", rmse);
 }
 

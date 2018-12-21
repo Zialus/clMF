@@ -396,7 +396,7 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
     int error_count = 0;
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < m; j++) {
-            float delta = fabsf(W[i][j] - W_ref[i][j]);
+            double delta = fabs(W[i][j] - W_ref[i][j]);
             if (delta > 0.1 * fabs(W_ref[i][j])) {
 //                std::cout << i << "|" << j << " = " << delta << "\n\t";
 //                std::cout << W[i][j] << "\n\t" << W_ref[i][j];
@@ -436,20 +436,20 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
         exit(EXIT_FAILURE);
     }
 
-    float rmse = 0;
+    double rmse = 0;
     int num_insts = 0;
     int nans_count = 0;
 
     int i, j;
-    float v;
+    double v;
 
-    while (fscanf(test_fp, "%d %d %f", &i, &j, &v) != EOF) {
-        float pred_v = 0;
+    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
+        double pred_v = 0;
         for (int t = 0; t < k; t++) {
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];
         }
         num_insts++;
-        float tmp = (pred_v - v) * (pred_v - v);
+        double tmp = (pred_v - v) * (pred_v - v);
         if (tmp == tmp) {
             rmse += tmp;
         } else {
@@ -458,7 +458,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     }
     fclose(test_fp);
 
-    float nans_percentage = (float) nans_count / num_insts;
+    double nans_percentage = (double) nans_count / num_insts;
     printf("[INFO] NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrtf(rmse / num_insts);
     printf("[INFO] Test RMSE = %lf\n", rmse);

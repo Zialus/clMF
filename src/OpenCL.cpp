@@ -46,7 +46,7 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     char* buffer = (char*) malloc(length + 1);
     clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, length, buffer, nullptr);
 
-    if (buffer != nullptr && strcmp(buffer,"") != 0) {
+    if (buffer != nullptr && strcmp(buffer, "") != 0 && strcmp(buffer, "\n") != 0) {
         printf("[OpenCL Compiler INFO]:\n%s\n", buffer);
         free(buffer);
     } else {

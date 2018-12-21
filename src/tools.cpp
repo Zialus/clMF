@@ -414,7 +414,7 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, const int k) {
     char meta_filename[1024];
-    sprintf(meta_filename, "%s/meta", srcdir);
+    snprintf(meta_filename, sizeof(meta_filename), "%s/meta", srcdir);
     FILE* fp = fopen(meta_filename, "r");
     if (fp == nullptr) {
         printf("Can't open meta input file.\n");
@@ -448,13 +448,14 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
         for (int t = 0; t < k; t++) {
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];
         }
-        num_insts++;
         double tmp = (pred_v - v) * (pred_v - v);
         if (tmp == tmp) {
             rmse += tmp;
         } else {
             nans_count++;
         }
+//        printf("%d - %d,%d,%lf,%lf,%lf\n", num_insts, i, j, tmp, v, pred_v);
+        num_insts++;
     }
     fclose(test_fp);
 

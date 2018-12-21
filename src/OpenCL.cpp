@@ -15,7 +15,7 @@
 std::chrono::duration<double> deltaT12;
 std::chrono::duration<double> deltaTAB;
 
-void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks, int nThreadsPerBlock){
+void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
 
     auto tA = std::chrono::high_resolution_clock::now();
     cl_int status;
@@ -67,6 +67,10 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlock
     auto tB = std::chrono::high_resolution_clock::now();
     deltaTAB = tB - tA;
     std::cout << "[INFO] Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
+
+    int k = param.k;
+    int nBlocks = param.nBlocks;
+    int nThreadsPerBlock = param.nThreadsPerBlock;
 
     float* submatrix = (float*) malloc(k * k * sizeof(float));
     for (int i = 0; i < k; i++) {
@@ -301,10 +305,6 @@ int main(int argc, char* argv[]) {
     std::cout << "[INFO] Loading rating data time: " << deltaT34.count() << "s.\n";
     std::cout << "------------------------------------------------------" << std::endl;
 
-    int k = param.k;
-    int nBlocks = param.nBlocks;
-    int nThreadsPerBlock = param.nThreadsPerBlock;
-
     mat_t W_c;
     mat_t H_c;
     initial_col(W_c, R.rows, param.k);
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
     initial_col(W_ref, R.rows, param.k);
     initial_col(H_ref, R.cols, param.k);
 
-    doit(R, W_c, H_c, param, k, nBlocks, nThreadsPerBlock);
+    doit(R, W_c, H_c, param);
 
     std::chrono::duration<double> deltaT56{};
     std::chrono::duration<double> deltaT9_10{};
@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
     if (param.do_predict == 1) {
         std::cout << "------------------------------------------------------" << std::endl;
         auto t5 = std::chrono::high_resolution_clock::now();
-        calculate_rmse(W_c, H_c, param.src_dir, k);
+        calculate_rmse(W_c, H_c, param.src_dir, param.k);
         auto t6 = std::chrono::high_resolution_clock::now();
         deltaT56 = t6 - t5;
         std::cout << "[info] Predict Time: " << deltaT56.count() << " s.\n";

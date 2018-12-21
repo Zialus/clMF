@@ -12,14 +12,7 @@
 #include "tools.h"
 #include "extra.h"
 
-int main(int argc, char* argv[]) {
-    auto t7 = std::chrono::high_resolution_clock::now();
-
-    parameter param = parse_command_line(argc, argv);
-
-    if (param.verbose) {
-        print_all_the_info();
-    }
+int doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks, int nThreadsPerBlock){
 
     auto tA = std::chrono::high_resolution_clock::now();
     cl_int status;
@@ -71,32 +64,6 @@ int main(int argc, char* argv[]) {
     auto tB = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaTAB = tB - tA;
     std::cout << "[INFO] Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
-
-    std::cout << "------------------------------------------------------" << std::endl;
-    auto t3 = std::chrono::high_resolution_clock::now();
-    smat_t R;
-    bool with_weights = false;
-    bool ifALS = true;
-    std::cout << "[info] Loading R matrix..." << std::endl;
-    load(param.src_dir, R, ifALS, with_weights);
-    auto t4 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT34 = t4 - t3;
-    std::cout << "[INFO] Loading rating data time: " << deltaT34.count() << "s.\n";
-    std::cout << "------------------------------------------------------" << std::endl;
-
-    int k = param.k;
-    int nBlocks = param.nBlocks;
-    int nThreadsPerBlock = param.nThreadsPerBlock;
-
-    mat_t W_c;
-    mat_t H_c;
-    initial_col(W_c, R.rows, param.k);
-    initial_col(H_c, R.cols, param.k);
-
-    mat_t W_ref;
-    mat_t H_ref;
-    initial_col(W_ref, R.rows, param.k);
-    initial_col(H_ref, R.cols, param.k);
 
     float* submatrix = (float*) malloc(k * k * sizeof(float));
     for (int i = 0; i < k; i++) {
@@ -307,6 +274,45 @@ int main(int argc, char* argv[]) {
             H_c[i][j] = H[i * k + j];
         }
     }
+
+}
+
+int main(int argc, char* argv[]) {
+    auto t7 = std::chrono::high_resolution_clock::now();
+
+    parameter param = parse_command_line(argc, argv);
+
+    if (param.verbose) {
+        print_all_the_info();
+    }
+
+    std::cout << "------------------------------------------------------" << std::endl;
+    auto t3 = std::chrono::high_resolution_clock::now();
+    smat_t R;
+    bool with_weights = false;
+    bool ifALS = true;
+    std::cout << "[info] Loading R matrix..." << std::endl;
+    load(param.src_dir, R, ifALS, with_weights);
+    auto t4 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltaT34 = t4 - t3;
+    std::cout << "[INFO] Loading rating data time: " << deltaT34.count() << "s.\n";
+    std::cout << "------------------------------------------------------" << std::endl;
+
+    int k = param.k;
+    int nBlocks = param.nBlocks;
+    int nThreadsPerBlock = param.nThreadsPerBlock;
+
+    mat_t W_c;
+    mat_t H_c;
+    initial_col(W_c, R.rows, param.k);
+    initial_col(H_c, R.cols, param.k);
+
+    mat_t W_ref;
+    mat_t H_ref;
+    initial_col(W_ref, R.rows, param.k);
+    initial_col(H_ref, R.cols, param.k);
+
+    doit(R, W_c, H_c, param, k , nBlocks, nThreadsPerBlock);
 
     std::chrono::duration<double> deltaT56{};
     std::chrono::duration<double> deltaT9_10{};

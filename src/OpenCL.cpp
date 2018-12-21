@@ -12,7 +12,10 @@
 #include "tools.h"
 #include "extra.h"
 
-int doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks, int nThreadsPerBlock){
+std::chrono::duration<double> deltaT12;
+std::chrono::duration<double> deltaTAB;
+
+void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks, int nThreadsPerBlock){
 
     auto tA = std::chrono::high_resolution_clock::now();
     cl_int status;
@@ -62,7 +65,7 @@ int doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks
     }
 
     auto tB = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaTAB = tB - tA;
+    deltaTAB = tB - tA;
     std::cout << "[INFO] Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
 
     float* submatrix = (float*) malloc(k * k * sizeof(float));
@@ -235,7 +238,7 @@ int doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, int k, int nBlocks
 */
     }
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaT12 = t2 - t1;
+    deltaT12 = t2 - t1;
     std::cout << "[info] Training Time: " << deltaT12.count() << " s.\n";
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
@@ -312,7 +315,7 @@ int main(int argc, char* argv[]) {
     initial_col(W_ref, R.rows, param.k);
     initial_col(H_ref, R.cols, param.k);
 
-    doit(R, W_c, H_c, param, k , nBlocks, nThreadsPerBlock);
+    doit(R, W_c, H_c, param, k, nBlocks, nThreadsPerBlock);
 
     std::chrono::duration<double> deltaT56{};
     std::chrono::duration<double> deltaT9_10{};
@@ -354,6 +357,7 @@ int main(int argc, char* argv[]) {
     auto t8 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT78 = t8 - t7;
     std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"
-              << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() + deltaT9_10.count() << " s.\n";
+              << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() + deltaT9_10.count()
+              << " s.\n";
     return 0;
 }

@@ -68,13 +68,13 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     deltaTAB = tB - tA;
     std::cout << "[INFO] Initiating OpenCL Time: " << deltaTAB.count() << " s.\n";
 
-    int k = param.k;
+    unsigned k = param.k;
     int nBlocks = param.nBlocks;
     int nThreadsPerBlock = param.nThreadsPerBlock;
 
     float* submatrix = (float*) malloc(k * k * sizeof(float));
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < k; j++) {
+    for (unsigned i = 0; i < k; i++) {
+        for (unsigned j = 0; j < k; j++) {
             submatrix[i * k + j] = 0.0f;
         }
     }
@@ -82,12 +82,12 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     float* W = (float*) malloc(k * R.rows * sizeof(float));
     float* H = (float*) malloc(k * R.cols * sizeof(float));
     for (unsigned i = 0; i < R.rows; ++i) {
-        for (int j = 0; j < k; ++j) {
+        for (unsigned j = 0; j < k; ++j) {
             W[i * k + j] = 0.0;
         }
     }
     for (unsigned i = 0; i < R.cols; ++i) {
-        for (int j = 0; j < k; ++j) {
+        for (unsigned j = 0; j < k; ++j) {
             H[i * k + j] = H_c[i][j];
         }
     }
@@ -272,12 +272,12 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     free(devices);
 
     for (unsigned i = 0; i < R.rows; ++i) {
-        for (int j = 0; j < k; ++j) {
+        for (unsigned j = 0; j < k; ++j) {
             W_c[i][j] = W[i * k + j];
         }
     }
     for (unsigned i = 0; i < R.cols; ++i) {
-        for (int j = 0; j < k; ++j) {
+        for (unsigned j = 0; j < k; ++j) {
             H_c[i][j] = H[i * k + j];
         }
     }

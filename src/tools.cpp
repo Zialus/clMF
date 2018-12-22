@@ -381,7 +381,7 @@ parameter parse_command_line(int argc, char** argv) {
             exit_with_help();
             break;
     }
-    printf("[info] - selected device type: %s, on platform with index: %d\n", param.device_type, param.platform_id);
+    printf("[info] - selected device type: %s, on platform with index: %u\n", param.device_type, param.platform_id);
 
     if (i >= argc) {
         exit_with_help();
@@ -440,10 +440,10 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     int num_insts = 0;
     int nans_count = 0;
 
-    int i, j;
+    unsigned i, j;
     double v;
 
-    while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
+    while (fscanf(test_fp, "%u %u %lf", &i, &j, &v) != EOF) {
         double pred_v = 0;
         for (unsigned t = 0; t < k; t++) {
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];

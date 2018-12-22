@@ -1,7 +1,7 @@
 #include "tools.h"
 
 const char* get_error_string(cl_int err) {
-    switch(err) {
+    switch (err) {
         // run-time and JIT compiler errors
         case 0: return "CL_SUCCESS";
         case -1: return "CL_DEVICE_NOT_FOUND";
@@ -211,8 +211,7 @@ void print_device_info(cl_device_id* devices, unsigned j) {
     free(value);
 
     // print parallel compute units
-    clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits,
-                    nullptr);
+    clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits, nullptr);
     printf(" %u.%d Parallel compute units: %u\n", j + 1, 4, maxComputeUnits);
 
     clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, nullptr, &valueSize);
@@ -265,7 +264,7 @@ int report_device(cl_device_id device_id) {
         printf("Error: Failed to retrieve device info! %s\n", get_error_string(err));
         return -1;
     }
-    printf("[info] Connecting to %s...\n", device_name);
+    printf("[INFO] - Connecting to %s...\n", device_name);
     return 0;
 }
 
@@ -301,6 +300,7 @@ void exit_with_help() {
             "options:\n"
             "    -c : path to the kernel code (default \"../kcode/ALS.cl\")\n"
             "    -k rank : set the rank (default 10)\n"
+            "    -n threads : set the number of threads for OpenMP (default 16)\n"
             "    -l lambda : set the regularization parameter lambda (default 0.05)\n"
             "    -t max_iter: set the number of iterations (default 5)\n"
             "    -d device_type: select a device (0=gpu, 1=cpu, 2=mic) (default 0)\n"
@@ -412,7 +412,7 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
     }
 }
 
-void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, const int k) {
+void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, const unsigned k) {
     char meta_filename[1024];
     snprintf(meta_filename, sizeof(meta_filename), "%s/meta", srcdir);
     FILE* fp = fopen(meta_filename, "r");
@@ -445,7 +445,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
 
     while (fscanf(test_fp, "%d %d %lf", &i, &j, &v) != EOF) {
         double pred_v = 0;
-        for (int t = 0; t < k; t++) {
+        for (unsigned t = 0; t < k; t++) {
             pred_v += W_c[i - 1][t] * H_c[j - 1][t];
         }
         double tmp = (pred_v - v) * (pred_v - v);

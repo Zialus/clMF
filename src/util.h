@@ -17,8 +17,6 @@
 #include <set>
 #include <vector>
 
-#include <omp.h>
-
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)
 
@@ -55,31 +53,27 @@ public:
     bool with_weights;
     size_t nnz;
 
-    entry_iterator_t() : fp(nullptr), with_weights(false), nnz(0) {}
-
     entry_iterator_t(size_t nnz_, const char* filename, bool with_weights_ = false) {
         nnz = nnz_;
         fp = fopen(filename, "r");
         with_weights = with_weights_;
     }
 
-    size_t size() { return nnz; }
-
     virtual rate_t next() {
-        int i = 1, j = 1;
+        unsigned i = 1, j = 1;
         float v = 0, w = 1.0;
         if (nnz > 0) {
             CHECK_FGETS(fgets(buf, 1000, fp));
             if (with_weights) {
-                sscanf(buf, "%d %d %f %f", &i, &j, &v, &w);
+                sscanf(buf, "%u %u %f %f", &i, &j, &v, &w);
             } else {
-                sscanf(buf, "%d %d %f", &i, &j, &v);
+                sscanf(buf, "%u %u %f", &i, &j, &v);
             }
             --nnz;
         } else {
             fprintf(stderr, "Error: no more entry to iterate !!\n");
         }
-        return rate_t(i - 1, j - 1, v, w);
+        return {i - 1, j - 1, v, w};
     }
 
     virtual ~entry_iterator_t() {
@@ -283,7 +277,6 @@ public:
         }
         mem_alloc_by_me = false;
         with_weights = false;
-
     }
 
     smat_t transpose() {

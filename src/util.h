@@ -44,7 +44,7 @@ public:
     unsigned i, j;
     float v, weight;
 
-    rate_t(int ii = 0, int jj = 0, float vv = 0, float ww = 1.0) : i(ii), j(jj), v(vv), weight(ww) {}
+    rate_t(unsigned ii = 0, unsigned jj = 0, float vv = 0, float ww = 1.0) : i(ii), j(jj), v(vv), weight(ww) {}
 };
 
 class entry_iterator_t {

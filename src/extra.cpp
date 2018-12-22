@@ -106,7 +106,7 @@ void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 #pragma omp parallel for schedule(kind)
         for (long Rw = 0; Rw < R.rows; ++Rw) {
             float* Wr = &W[Rw][0];
-            int omegaSize = R.row_ptr[Rw + 1] - R.row_ptr[Rw];
+            unsigned omegaSize = R.row_ptr[Rw + 1] - R.row_ptr[Rw];
             float** subMatrix;
 
             if (omegaSize > 0) {

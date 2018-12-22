@@ -1,10 +1,6 @@
 #ifndef EXTRA_H
 #define EXTRA_H
 
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-
 #include <omp.h>
 
 #include "pmf.h"

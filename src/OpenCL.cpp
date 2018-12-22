@@ -1,13 +1,4 @@
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-
 #include <chrono>
-#include <fstream>
-#include <iostream>
-#include <string>
 
 #include "tools.h"
 #include "extra.h"

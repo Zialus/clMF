@@ -8,7 +8,7 @@
 #include <omp.h>
 
 #include "pmf.h"
-#include "util.h"
+#include "pmf_util.h"
 
 void choldcsl(int n, float** A);
 void choldc1(int n, float** a, float* p);

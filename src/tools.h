@@ -9,7 +9,7 @@
 #include <CL/cl.h>
 #endif
 
-#include "util.h"
+#include "pmf_util.h"
 #include "pmf.h"
 
 const char* get_error_string(cl_int err);

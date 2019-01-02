@@ -2,6 +2,15 @@ language: cpp
 dist: xenial
 
 script:
+  - mkdir build && cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
+  - cmake --build . --config Release
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ctest -V -C Release; fi
+
+before_script:
+  - eval "${MATRIX_EVAL}"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=8; fi
   - cmake --version
   - python --version
   - clinfo
@@ -17,15 +26,6 @@ script:
 #  - cd data/c/
 #  - python c.py
 #  - popd
-  - mkdir build && cd build
-  - cmake -DCMAKE_BUILD_TYPE=Release ..
-  - cmake --build . --config Release
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ctest -V; fi
-
-before_script:
-  - eval "${MATRIX_EVAL}"
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=8; fi
 
 matrix:
   include:
@@ -224,3 +224,53 @@ matrix:
           packages:
             - g++-8
       install: *linux_extras
+
+
+    # SONARCLOUD
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+        sonarcloud:
+          organization: "zialus-github"
+          token:
+            secure: "iG5OD6txJ2Cu3ICKKGtpLGCeP/Tq53r5YKpZvP9rdfmumNKSVCFH2+XGSwMr9PQKXo+oYPuJ82Bt7tGc2lkK5N+qwHiGPJckbd0+uzqqAsm/HifElgxKLSkftk9wemxyOnQZDm34T8/6yskypXnVnOtTufa8CgV0KFHSgrzXMx0yfm8tFnSkgVX58JDF6EuZRAweau92QOdvHRID/h8VNWeQL+nU1vigdxroJ/jaJDpucpqQo3OgHPrZRaBh/f1DLDYL8Mu1xEb3NAfHrMExOdfBMD0+8MSUKxkqvR9ZiPSPLyLf6FriiEMFPpBIhtZ0PQC3NY/mKd1XITXkYQZrYmwSKoAz0Gc/3YTJcYi44WbcdgaxYiHpvtJz3toxFd9kEOo+PxkWHaam/1RCEOO/0LEckJRWAR+o95qQTD0ZZD3s8jYQhNQU8sOiLziWm4aUsnB7khqG/um2q3K3F3oQF+jPCY1iCQDcdc08PGH42l6IKlxe0ucntQuT8rUCBhRoLSFVN9W7GB2Id4cEyCZHDSAlkf8YtnKl38O8/zqiGCgtNhKsRccIH8TOeOFRXcxSSXbN/dw98ydKxYV0D8+tPQBCBLxFgatEIfCA6OOox3y39OWynaYkJnMVTv/Pp8F8D1Hr8QPY2foL2ODMInluaDo2Rg/1SgFVaLr+ERw4HO4="
+      script:
+        - git fetch --unshallow
+        - mkdir build && cd build
+        - cmake -DCMAKE_BUILD_TYPE=Release ..
+        - build-wrapper-linux-x86-64 --out-dir bw-output make clean all
+        - ctest -V -C Release
+        - cd ..
+        - sonar-scanner
+      install: *linux_extras
+      env:
+        - SONAR_CLOUD="YUP"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+
+    # COVERITY_SCAN
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7 # Max version supported by coverity scan right now
+        coverity_scan:
+          project:
+            name: "Zialus/clMF"
+            description: "clMF"
+          notification_email: raulmendesferreira@gmail.com
+          build_command_prepend: "git fetch --unshallow && cov-configure --comptype gcc --compiler gcc-7 --template && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .."
+          build_command: "make"
+          branch_pattern: master
+      install: *linux_extras
+      script:
+        - cat $TRAVIS_BUILD_DIR/build/cov-int/build-log.txt
+        - cat $TRAVIS_BUILD_DIR/build/cov-int/scm_log.txt
+      env:
+        - secure: "hlr1miuQzTT0d1PadVmhHeruokuHqHmGTKCMaqFIem+nO6TkL6oZCqD+SQ4WTeBTvQtdEr6k2YP97s1lm39UNjnFIgrccinNogtTBjlEeSO8yljWRcFjIDfToXEuRDXKixxYzKUB7/PxdUuGFIFTxyjQ4UjYWIYq9Y2h+qCSDTxtlI1z2RvIeVukMS0qYt4+ahU/3BNnCcQX/EJmbopZDBv9NqjitIwPesqK0CkXJdu640zaXlw5C+Aba3v+1fr4wbffXHiYQWEj9E39JYwokLmyiKJj5KJPz1tkA7iztDvvZ+cxTC5MIJCBmQNJskYQLul27O52vLvAJDlPMHkW9dZ5DEWZPtJrSyHWwaXNimMwZ+JOpum+RTfc9Mg1DPy4QrSudxokJQdSRj5BmCp71AAWzXkesA4RNMVS0A31Fv4HxW/yTpOPcZ1IBIadTygpG+pFSRzpKo5SREBBE0rzDHeNiqoibkMRSCBuyp8qud7eT+M/FzmpYAj+KxHeGQbB4Pwsgjq/ltxT4WhjDg6xtmK/4VCfwDR4aEMUzQPHFviwXZcfKWLhkr5R1Hnk8SZH63VTcufL1UKs1cKKt1lgY9AGFUUAf5VgbZWWE0XvVx2Oe5R/1YW9M9X7N6JUWxuK1jzvQLf/JdiHl13M83uUCWuwDB09QJ6nZs+ynOvofrE="
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"

@@ -14,18 +14,18 @@ before_script:
   - cmake --version
   - python --version
   - clinfo
-#  - pushd .
-#  - cd data/a/
-#  - python a.py
-#  - popd
-#  - pushd .
-#  - cd data/b/
-#  - python b.py
-#  - popd
-#  - pushd .
-#  - cd data/c/
-#  - python c.py
-#  - popd
+  - pushd .
+  - cd data/a/
+  - python a.py
+  - popd
+  - pushd .
+  - cd data/b/
+  - python b.py
+  - popd
+  - pushd .
+  - cd data/c/
+  - python c.py
+  - popd
 
 matrix:
   include:
@@ -262,7 +262,6 @@ matrix:
         coverity_scan:
           project:
             name: "Zialus/clMF"
-            description: "clMF"
           notification_email: raulmendesferreira@gmail.com
           build_command_prepend: "git fetch --unshallow && cov-configure --comptype gcc --compiler gcc-7 --template && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .."
           build_command: "make"

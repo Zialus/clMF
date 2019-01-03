@@ -54,6 +54,9 @@ target_link_libraries(clMF OpenCL::OpenCL OpenMP::OpenMP_CXX)
 
 # Tests
 enable_testing()
+add_test(NAME a COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/a)
+add_test(NAME b COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/b)
+add_test(NAME c COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/c)
 add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/simple)
 add_test(NAME simple_rolled COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} -c ${CMAKE_SOURCE_DIR}/kcode/ALS_rolled.cl ${CMAKE_SOURCE_DIR}/data/simple)
 #add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/toy-example)

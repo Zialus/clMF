@@ -29,7 +29,7 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
 
     char options[1024];
-    sprintf(options, " ");
+    snprintf(options, sizeof(options), " ");
     status = clBuildProgram(program, 1, devices, options, nullptr, nullptr);
 
     size_t length;

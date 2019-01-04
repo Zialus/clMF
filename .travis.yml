@@ -10,7 +10,7 @@ script:
 before_script:
   - eval "${MATRIX_EVAL}"
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=8; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=1; fi
   - cmake --version
   - python --version
   - clinfo

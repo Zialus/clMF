@@ -1,6 +1,6 @@
 environment:
-  BLOCKS_FLAG: '2'
-  THREADS_FLAG: '2'
+  BLOCKS_FLAG: '8'
+  THREADS_FLAG: '1'
   matrix:
   - WHATOPENCL: INTEL
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017

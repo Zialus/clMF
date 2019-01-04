@@ -35,15 +35,15 @@ build_script:
   - cmake -G "Visual Studio 15 2017 Win64" ..
   - cmake --build . --config Release
 
-#before_test:
-#  - python --version
-#  - cd ../data/a/
-#  - python a.py
-#  - cd ../b/
-#  - python b.py
-#  - cd ../c/
-#  - python c.py
-#  - cd ../../build/
+before_test:
+ - python --version
+ - cd ../data/a/
+ - python a.py
+ - cd ../b/
+ - python b.py
+ - cd ../c/
+ - python c.py
+ - cd ../../build/
 
 test_script:
   - ctest -V -C Release

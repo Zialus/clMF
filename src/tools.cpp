@@ -459,6 +459,7 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     }
     fclose(test_fp);
 
+    if (num_insts == 0) { exit(EXIT_FAILURE); }
     double nans_percentage = (double) nans_count / num_insts;
     printf("[INFO] NaNs percentage: %lf, NaNs Count: %d, Total Insts: %d\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);

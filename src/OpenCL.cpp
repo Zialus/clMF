@@ -6,24 +6,25 @@
 std::chrono::duration<double> deltaT12;
 std::chrono::duration<double> deltaTAB;
 
-void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
-
+void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) {
     auto tA = std::chrono::high_resolution_clock::now();
+
     cl_int status;
     cl_int err;
-    cl_uint NumDevice;
     cl_platform_id platform = getPlatform(param.platform_id);
     cl_device_id* devices = getDevices(platform, param.device_type);
     report_device(devices[0]);
     cl_context context = clCreateContext(nullptr, 1, devices, nullptr, nullptr, &err);
     CL_CHECK(err);
+    cl_uint NumDevice;
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     assert(NumDevice == 1);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
     printf("[info] Connected!\n");
-    printf("[info] - The kernel to be compiled: %s\n", param.opencl_filename);
+
+    printf("[info] - The kernel to be compiled: %s\n", filename);
     std::string sourceStr;
-    convertToString(param.opencl_filename, sourceStr);
+    convertToString(filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
@@ -71,12 +72,13 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param) {
     }
 
     float* W = (float*) malloc(k * R.rows * sizeof(float));
-    float* H = (float*) malloc(k * R.cols * sizeof(float));
     for (unsigned i = 0; i < R.rows; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             W[i * k + j] = 0.0;
         }
     }
+
+    float* H = (float*) malloc(k * R.cols * sizeof(float));
     for (unsigned i = 0; i < R.cols; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             H[i * k + j] = H_c[i][j];
@@ -285,11 +287,11 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "------------------------------------------------------" << std::endl;
+    std::cout << "[info] Loading R matrix..." << std::endl;
     auto t3 = std::chrono::high_resolution_clock::now();
     smat_t R;
     bool with_weights = false;
     bool ifALS = true;
-    std::cout << "[info] Loading R matrix..." << std::endl;
     load(param.src_dir, R, ifALS, with_weights);
     auto t4 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaT34 = t4 - t3;
@@ -306,7 +308,7 @@ int main(int argc, char* argv[]) {
     initial_col(W_ref, R.rows, param.k);
     initial_col(H_ref, R.cols, param.k);
 
-    doit(R, W_c, H_c, param);
+    doit(R, W_c, H_c, param, param.opencl_filename);
 
     std::chrono::duration<double> deltaT56{};
     std::chrono::duration<double> deltaT9_10{};
@@ -335,7 +337,6 @@ int main(int argc, char* argv[]) {
         golden_compare(H_c, H_ref, R.cols, param.k);
         calculate_rmse(W_ref, H_ref, param.src_dir, param.k);
     }
-
     std::cout << "------------------------------------------------------" << std::endl;
 
     // Some print debugging
@@ -350,5 +351,5 @@ int main(int argc, char* argv[]) {
     std::cout << "Total Time: " << deltaT78.count() << " Parcial Sums:"
               << deltaT12.count() + deltaT34.count() + deltaT56.count() + deltaTAB.count() + deltaT9_10.count()
               << " s.\n";
-    return 0;
+    return EXIT_SUCCESS;
 }

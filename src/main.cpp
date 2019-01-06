@@ -1,6 +1,6 @@
 #include "tools.h"
-#include "extra.h"
-#include "clmf.h"
+#include "clmf_ref.h"
+#include "clmf_ocl.h"
 
 std::chrono::duration<double> deltaT12;
 std::chrono::duration<double> deltaTAB;

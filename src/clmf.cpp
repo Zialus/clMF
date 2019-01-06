@@ -6,7 +6,7 @@
 extern std::chrono::duration<double> deltaT12;
 extern std::chrono::duration<double> deltaTAB;
 
-void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) {
+void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) {
     auto tA = std::chrono::high_resolution_clock::now();
 
     cl_int status;
@@ -20,9 +20,9 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     assert(NumDevice == 1);
     cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
-    printf("[info] Connected!\n");
+    printf("[INFO] Connected!\n");
 
-    printf("[info] - The kernel to be compiled: %s\n", filename);
+    printf("[INFO] - The kernel to be compiled: %s\n", filename);
     std::string sourceStr;
     convertToString(filename, sourceStr);
     const char* source = sourceStr.c_str();
@@ -155,7 +155,7 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
 
     size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};
     size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
-    printf("[info] - blocks: %d | threads per block: %d | global_work_size: %zu | local_work_size: %zu !\n",
+    printf("[INFO] - blocks: %d | threads per block: %d | global_work_size: %zu | local_work_size: %zu !\n",
            param.nBlocks, param.nThreadsPerBlock, global_work_size[0], local_work_size[0]);
 
     size_t local;
@@ -164,6 +164,8 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(clGetKernelWorkGroupInfo(updateWOverH_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL));
     printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
 
+    std::cout << "------------------------------------------------------" << std::endl;
+    std::cout << "[INFO] Computing clMF OpenCL..." << std::endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     for (int ite = 0; ite < param.maxiter; ite++) {
         /** update_W_Over_H */
@@ -236,7 +238,7 @@ void doit(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     deltaT12 = t2 - t1;
-    std::cout << "[info] Training Time: " << deltaT12.count() << " s.\n";
+    std::cout << "[INFO] OCL Training Time: " << deltaT12.count() << " s.\n";
 
     CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
     CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));

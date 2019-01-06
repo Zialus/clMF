@@ -92,7 +92,7 @@ void Mt_byM_multiply(int i, int j, float** M, float** Result) {
 
 #define kind dynamic,500
 
-void ALS_multicore(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
+void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
     int maxIter = param.maxiter;
     float lambda = param.lambda;
     int k = param.k;

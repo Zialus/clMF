@@ -12,6 +12,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <chrono>
 
 #define MALLOC(type, size) (type*)malloc(sizeof(type)*(size))
 #define SIZEBITS(type, size) sizeof(type)*(size)

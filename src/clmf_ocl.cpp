@@ -48,7 +48,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, nullptr, &length);
     char* buffer2 = (char*) malloc(length + 1);
     clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, length, buffer2, nullptr);
-    if (buffer2 != nullptr) {
+    if (buffer2 != nullptr && param.verbose) {
         printf("[Kernels]: %s\n", buffer2);
         free(buffer2);
     }
@@ -150,30 +150,32 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
 
-    size_t global_work_size[1] = {static_cast<size_t>(nBlocks * nThreadsPerBlock)};
-    size_t local_work_size[1] = {static_cast<size_t>(nThreadsPerBlock)};
+    size_t global_work_size[1] = {static_cast<size_t>(param.nBlocks * param.nThreadsPerBlock)};
+    size_t local_work_size[1] = {static_cast<size_t>(param.nThreadsPerBlock)};
     printf("[INFO] - blocks: %d | threads per block: %d | global_work_size: %zu | local_work_size: %zu !\n",
            param.nBlocks, param.nThreadsPerBlock, global_work_size[0], local_work_size[0]);
 
-    size_t local;
-    CL_CHECK(clGetKernelWorkGroupInfo(updateHOverW_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL));
-    printf("[VERBOSE] local_work_size for updateHOverW_kernel should be: %zu\n",local);
-    CL_CHECK(clGetKernelWorkGroupInfo(updateWOverH_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL));
-    printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
+    if (param.verbose) {
+        size_t local;
+        CL_CHECK(clGetKernelWorkGroupInfo(updateHOverW_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, nullptr));
+        printf("[VERBOSE] local_work_size for updateHOverW_kernel should be: %zu\n",local);
+        CL_CHECK(clGetKernelWorkGroupInfo(updateWOverH_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, nullptr));
+        printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
+    }
 
     std::cout << "------------------------------------------------------" << std::endl;
     std::cout << "[INFO] Computing clMF OpenCL..." << std::endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     for (int ite = 0; ite < param.maxiter; ite++) {
         /** update_W_Over_H */
-        cl_event enentPoint;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &enentPoint));
-        clWaitForEvents(1, &enentPoint);
-        clReleaseEvent(enentPoint);
+        cl_event eventPoint0;
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint0));
+        clWaitForEvents(1, &eventPoint0);
+        clReleaseEvent(eventPoint0);
 /*
-        status=clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
-        status=clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
-        status=clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(float), submatrix, 0, NULL, NULL);
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(float), submatrix, 0, nullptr, nullptr));
         std::cout<<"update_W_over_H   W:\n";
         for(int df=0;df<10;df++)
         {
@@ -205,14 +207,14 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         }
 */
         /** update_H_Over_W */
-        cl_event enentPoint1;
-        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &enentPoint1));
-        clWaitForEvents(1, &enentPoint1);
-        clReleaseEvent(enentPoint1);
+        cl_event eventPoint1;
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint1));
+        clWaitForEvents(1, &eventPoint1);
+        clReleaseEvent(eventPoint1);
 /*
         printf("ddd.\n");
-        status=clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, NULL, NULL);
-        status=clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, NULL, NULL);
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
         std::cout<<"update_H_over_W   W:\n";
         for(int df=0;df<10;df++)
         {

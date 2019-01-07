@@ -17,7 +17,7 @@ public:
 class entry_iterator_t {
 private:
     FILE* fp;
-    char buf[1000];
+    char buf[1000]{};
 public:
     bool with_weights;
     size_t nnz;
@@ -50,7 +50,7 @@ public:
     }
 };
 
-// Comparator for sorting rates into row/column comopression storage
+// Comparator for sorting rates into row/column compression storage
 class SparseComp {
 public:
     const unsigned* row_idx;
@@ -219,7 +219,7 @@ public:
 
     ~smat_t() {
         if (mem_alloc_by_me) {
-            //puts("Warnning: Somebody just free me.");
+            //puts("Warning: Somebody just freed me.");
             free(val);
             free(val_t);
             free(row_ptr);

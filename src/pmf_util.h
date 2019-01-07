@@ -3,15 +3,15 @@
 
 #include "util.h"
 
-typedef std::vector<float> vec_t;
+typedef std::vector<VALUE_TYPE> vec_t;
 typedef std::vector<vec_t> mat_t;
 
 class rate_t {
 public:
     unsigned i, j;
-    float v, weight;
+    VALUE_TYPE v, weight;
 
-    rate_t(unsigned ii = 0, unsigned jj = 0, float vv = 0, float ww = 1.0) : i(ii), j(jj), v(vv), weight(ww) {}
+    rate_t(unsigned ii = 0, unsigned jj = 0, VALUE_TYPE vv = 0, VALUE_TYPE ww = 1.0) : i(ii), j(jj), v(vv), weight(ww) {}
 };
 
 class entry_iterator_t {
@@ -30,13 +30,13 @@ public:
 
     virtual rate_t next() {
         unsigned i = 1, j = 1;
-        float v = 0, w = 1.0;
+        VALUE_TYPE v = 0, w = 1.0;
         if (nnz > 0) {
             CHECK_FGETS(fgets(buf, 1000, fp));
             if (with_weights) {
-                sscanf(buf, "%u %u %f %f", &i, &j, &v, &w);
+                (sizeof(VALUE_TYPE) == 8) ? (sscanf(buf, "%u %u %lf %lf", &i, &j, &v, &w)) : (sscanf(buf, "%u %u %f %f", &i, &j, &v, &w));
             } else {
-                sscanf(buf, "%u %u %f", &i, &j, &v);
+                (sizeof(VALUE_TYPE) == 8) ? (sscanf(buf, "%u %u %lf", &i, &j, &v)) : (sscanf(buf, "%u %u %f", &i, &j, &v));
             }
             --nnz;
         } else {
@@ -72,9 +72,9 @@ class smat_t {
 public:
     unsigned rows, cols;
     unsigned nnz, max_row_nnz, max_col_nnz;
-    float* val, * val_t;
+    VALUE_TYPE* val, * val_t;
     size_t nbits_val, nbits_val_t;
-    float* weight, * weight_t;
+    VALUE_TYPE* weight, * weight_t;
     size_t nbits_weight, nbits_weight_t;
     unsigned* col_ptr, * row_ptr;
     size_t nbits_col_ptr, nbits_row_ptr;
@@ -104,15 +104,15 @@ public:
         nnz = _nnz;
         mem_alloc_by_me = true;
         with_weights = entry_it->with_weights;
-        val = MALLOC(float, nnz);
-        val_t = MALLOC(float, nnz);
-        nbits_val = SIZEBITS(float, nnz);
-        nbits_val_t = SIZEBITS(float, nnz);
+        val = MALLOC(VALUE_TYPE, nnz);
+        val_t = MALLOC(VALUE_TYPE, nnz);
+        nbits_val = SIZEBITS(VALUE_TYPE, nnz);
+        nbits_val_t = SIZEBITS(VALUE_TYPE, nnz);
         if (with_weights) {
-            weight = MALLOC(float, nnz);
-            weight_t = MALLOC(float, nnz);
-            nbits_weight = SIZEBITS(float, nnz);
-            nbits_weight_t = SIZEBITS(float, nnz);
+            weight = MALLOC(VALUE_TYPE, nnz);
+            weight_t = MALLOC(VALUE_TYPE, nnz);
+            nbits_weight = SIZEBITS(VALUE_TYPE, nnz);
+            nbits_weight_t = SIZEBITS(VALUE_TYPE, nnz);
         }
         row_idx = MALLOC(unsigned, nnz);
         col_idx = MALLOC(unsigned, nnz);  // switch to this for memory
@@ -133,8 +133,8 @@ public:
         std::vector<size_t> perm(_nnz);
         unsigned* tmp_row_idx = col_idx;
         unsigned* tmp_col_idx = row_idx;
-        float* tmp_val = val;
-        float* tmp_weight = weight;
+        VALUE_TYPE* tmp_val = val;
+        VALUE_TYPE* tmp_weight = weight;
         for (unsigned idx = 0; idx < _nnz; idx++) {
             rate_t rate = entry_it->next();
             row_ptr[rate.i + 1]++;
@@ -202,13 +202,13 @@ public:
 
     unsigned nnz_of_col(int i) const { return (col_ptr[i + 1] - col_ptr[i]); }
 
-    float get_global_mean() {
-        float sum = 0;
+    VALUE_TYPE get_global_mean() {
+        VALUE_TYPE sum = 0;
         for (unsigned i = 0; i < nnz; ++i) { sum += val[i]; }
         return sum / nnz;
     }
 
-    void remove_bias(float bias = 0) {
+    void remove_bias(VALUE_TYPE bias = 0) {
         if (bias) {
             for (unsigned i = 0; i < nnz; ++i) { val[i] -= bias; }
             for (unsigned i = 0; i < nnz; ++i) { val_t[i] -= bias; }

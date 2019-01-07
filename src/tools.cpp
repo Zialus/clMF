@@ -289,7 +289,7 @@ void initial_col(mat_t& X, unsigned k, unsigned n) {
     srand(0L);
     for (unsigned i = 0; i < n; ++i) {
         for (unsigned j = 0; j < k; ++j) {
-            X[j][i] = 0.1f * (float(rand()) / RAND_MAX) + 0.001f;
+            X[j][i] = 0.1 * (VALUE_TYPE(rand()) / RAND_MAX) + 0.001;
         }
     }
 }
@@ -337,7 +337,7 @@ parameter parse_command_line(int argc, char** argv) {
                     param.k = atoi(argv[i]);
                     break;
                 case 'l':
-                    param.lambda = (float) atof(argv[i]);
+                    param.lambda = (VALUE_TYPE) atof(argv[i]);
                     break;
                 case 't':
                     param.maxiter = atoi(argv[i]);
@@ -381,8 +381,8 @@ parameter parse_command_line(int argc, char** argv) {
             exit_with_help();
             break;
     }
-    printf("[info] - selected device type: %s, on platform with index: %u\n", param.device_type, param.platform_id);
-
+    printf("[info] - selected device type: %s, on platform with index: %u | Will be using %d threads | Value type is %s\n"
+            , param.device_type, param.platform_id, param.threads, getT(sizeof(VALUE_TYPE)));
     if (i >= argc) {
         exit_with_help();
     }
@@ -409,7 +409,7 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
         std::cout << "Check... PASS!" << std::endl;
     } else {
         int entries = k * m;
-        float error_percentage = (float) error_count / entries;
+        double error_percentage = (double) error_count / entries;
         printf("Check... NO PASS! [%f%%] #Error = %d out of %d entries.\n", error_percentage, error_count, entries);
     }
 }

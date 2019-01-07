@@ -12,6 +12,12 @@
 #include "pmf_util.h"
 #include "pmf.h"
 
+inline char* getT(unsigned sz) {
+    if (sz == 8) { return (char*) "double"; }
+    if (sz == 4) { return (char*) "float"; }
+    return (char*) "float";
+}
+
 const char* get_error_string(cl_int err);
 
 void convertToString(const char* filename, std::string& s);

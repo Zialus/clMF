@@ -27,7 +27,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
 
     char options[1024];
-    snprintf(options, sizeof(options), " ");
+    snprintf(options, sizeof(options), "-DVALUE_TYPE=%s", getT(sizeof(VALUE_TYPE)));
     status = clBuildProgram(program, 1, devices, options, nullptr, nullptr);
 
     size_t length;
@@ -61,29 +61,29 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     int nBlocks = param.nBlocks;
     int nThreadsPerBlock = param.nThreadsPerBlock;
 
-    float* submatrix = (float*) malloc(k * k * sizeof(float));
+    VALUE_TYPE* submatrix = (VALUE_TYPE*) malloc(k * k * sizeof(VALUE_TYPE));
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < k; j++) {
-            submatrix[i * k + j] = 0.0f;
+            submatrix[i * k + j] = 0.0;
         }
     }
 
-    float* W = (float*) malloc(k * R.rows * sizeof(float));
+    VALUE_TYPE* W = (VALUE_TYPE*) malloc(k * R.rows * sizeof(VALUE_TYPE));
     for (unsigned i = 0; i < R.rows; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             W[i * k + j] = 0.0;
         }
     }
 
-    float* H = (float*) malloc(k * R.cols * sizeof(float));
+    VALUE_TYPE* H = (VALUE_TYPE*) malloc(k * R.cols * sizeof(VALUE_TYPE));
     for (unsigned i = 0; i < R.cols; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             H[i * k + j] = H_c[i][j];
         }
     }
 
-    size_t nbits_W_ = R.rows * k * sizeof(float);
-    size_t nbits_H_ = R.cols * k * sizeof(float);
+    size_t nbits_W_ = R.rows * k * sizeof(VALUE_TYPE);
+    size_t nbits_H_ = R.cols * k * sizeof(VALUE_TYPE);
 
     // creating buffers
     cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) R.row_ptr, &err);
@@ -102,19 +102,19 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(err);
     cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, &err);
     CL_CHECK(err);
-    cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, &err);
+    cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subVecBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, &err);
+    cl_mem subVecBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), nullptr, &err);
+    cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(float), (void*) submatrix, &err);
+    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(VALUE_TYPE), (void*) submatrix, &err);
     CL_CHECK(err);
-    cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, &err);
+    cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(float), nullptr, &err);
+    cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(float), nullptr, &err);
+    cl_mem subMat_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
 
     // creating and building kernels
@@ -129,7 +129,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), (void*) &col_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), (void*) &colMajored_sparse_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), (void*) &valBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(float), &param.lambda));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(VALUE_TYPE), &param.lambda));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), (void*) &WBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), (void*) &HBuffer));
@@ -142,7 +142,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), (void*) &col_ptrBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), (void*) &row_idxBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), (void*) &valBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(float), &param.lambda));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(VALUE_TYPE), &param.lambda));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), (void*) &WBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), (void*) &HBuffer));
@@ -175,7 +175,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
 /*
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
         CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
-        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(float), submatrix, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(VALUE_TYPE), submatrix, 0, nullptr, nullptr));
         std::cout<<"update_W_over_H   W:\n";
         for(int df=0;df<10;df++)
         {

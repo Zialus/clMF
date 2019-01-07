@@ -11,6 +11,11 @@ set(CMAKE_CXX_STANDARD 14)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# Add some compilation flags
+set(VALUE "-DVALUE_TYPE=float")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${VALUE}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${VALUE}")
+
 # Compiler flags to enable more warnings
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -31,11 +36,11 @@ endif ()
 
 # Compiler flags to silence/or add some warnings
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w44365")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4477 /w44365")
 endif ()
 
 # Silence warning C4996 on Microsoft Compilers

@@ -1,9 +1,9 @@
 #include "clmf_ref.h"
 
-void choldc1(int n, float** a, float* p) {
+void choldc1(int n, VALUE_TYPE** a, VALUE_TYPE* p) {
     for (int i = 0; i < n; ++i) {
         for (int j = i; j < n; ++j) {
-            float sum = a[i][j];
+            VALUE_TYPE sum = a[i][j];
             for (int k = i - 1; k >= 0; --k) {
                 sum -= a[i][k] * a[j][k];
             }
@@ -19,13 +19,13 @@ void choldc1(int n, float** a, float* p) {
     }
 }
 
-void choldcsl(int n, float** A) {
-    float* p = (float*) malloc(n * sizeof(float));
+void choldcsl(int n, VALUE_TYPE** A) {
+    VALUE_TYPE* p = (VALUE_TYPE*) malloc(n * sizeof(VALUE_TYPE));
     choldc1(n, A, p);
     for (int i = 0; i < n; ++i) {
         A[i][i] = 1 / p[i];
         for (int j = i + 1; j < n; ++j) {
-            float sum = 0;
+            VALUE_TYPE sum = 0;
             for (int k = i; k < j; ++k) {
                 sum -= A[j][k] * A[k][i];
             }
@@ -35,7 +35,7 @@ void choldcsl(int n, float** A) {
     free(p);
 }
 
-void inverseMatrix_CholeskyMethod(int n, float** A) {
+void inverseMatrix_CholeskyMethod(int n, VALUE_TYPE** A) {
     choldcsl(n, A);
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
@@ -61,8 +61,8 @@ void inverseMatrix_CholeskyMethod(int n, float** A) {
 }
 
 //Multiply matrix M by M transpose
-void M_byMt_multiply(int i, int j, float** M, float** Result) {
-    float SUM;
+void M_byMt_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
+    VALUE_TYPE SUM;
     for (int I = 0; I < i; ++I) {
         for (int J = 0; J < i; ++J) {
             SUM = 0.0;
@@ -75,11 +75,11 @@ void M_byMt_multiply(int i, int j, float** M, float** Result) {
 }
 
 //Multiply matrix M transpose by M
-void Mt_byM_multiply(int i, int j, float** M, float** Result) {
-    float SUM;
+void Mt_byM_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
+    VALUE_TYPE SUM;
     for (int I = 0; I < j; ++I) {
         for (int J = I; J < j; ++J) {
-            SUM = 0.0f;
+            SUM = 0.0;
             for (int K = 0; K < i; ++K) {
                 //printf("%.3f %.3f\n", M[K][I], M[K][J]);
                 SUM += M[K][I] * M[K][J];
@@ -94,7 +94,7 @@ void Mt_byM_multiply(int i, int j, float** M, float** Result) {
 
 void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
     int maxIter = param.maxiter;
-    float lambda = param.lambda;
+    VALUE_TYPE lambda = param.lambda;
     int k = param.k;
     int num_threads_old = omp_get_num_threads();
 
@@ -105,19 +105,19 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
         //optimize W over H
 #pragma omp parallel for schedule(kind)
         for (long Rw = 0; Rw < R.rows; ++Rw) {
-            float* Wr = &W[Rw][0];
+            VALUE_TYPE* Wr = &W[Rw][0];
             unsigned omegaSize = R.row_ptr[Rw + 1] - R.row_ptr[Rw];
-            float** subMatrix;
+            VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
-                float* subVector = (float*) malloc(k * sizeof(float));
-                subMatrix = (float**) malloc(k * sizeof(float*));
+                VALUE_TYPE* subVector = (VALUE_TYPE*) malloc(k * sizeof(VALUE_TYPE));
+                subMatrix = (VALUE_TYPE**) malloc(k * sizeof(VALUE_TYPE*));
                 for (int i = 0; i < k; ++i) {
-                    subMatrix[i] = (float*) malloc(k * sizeof(float));
+                    subMatrix[i] = (VALUE_TYPE*) malloc(k * sizeof(VALUE_TYPE));
                 }
 
                 //a trick to avoid malloc
-                float** H_Omega = (float**) malloc(omegaSize * sizeof(float*));
+                VALUE_TYPE** H_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
                 for (unsigned idx = R.row_ptr[Rw], i = 0; idx < R.row_ptr[Rw + 1]; ++idx, ++i) {
                     H_Omega[i] = &H[R.col_idx[idx]][0];
                 }
@@ -159,7 +159,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
                 free(H_Omega);
             } else {
                 for (int c = 0; c < k; ++c) {
-                    Wr[c] = 0.0f;
+                    Wr[c] = 0.0;
                     //printf("%.3f ", Wr[c]);
                 }
                 //printf("\n");
@@ -169,19 +169,19 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
         //optimize H over W
 #pragma omp parallel for schedule(kind)
         for (long Rh = 0; Rh < R.cols; ++Rh) {
-            float* Hr = &H[Rh][0];
+            VALUE_TYPE* Hr = &H[Rh][0];
             unsigned omegaSize = R.col_ptr[Rh + 1] - R.col_ptr[Rh];
-            float** subMatrix;
+            VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
-                float* subVector = (float*) malloc(k * sizeof(float));
-                subMatrix = (float**) malloc(k * sizeof(float*));
+                VALUE_TYPE* subVector = (VALUE_TYPE*) malloc(k * sizeof(VALUE_TYPE));
+                subMatrix = (VALUE_TYPE**) malloc(k * sizeof(VALUE_TYPE*));
                 for (int i = 0; i < k; ++i) {
-                    subMatrix[i] = (float*) malloc(k * sizeof(float));
+                    subMatrix[i] = (VALUE_TYPE*) malloc(k * sizeof(VALUE_TYPE));
                 }
 
                 //a trick to avoid malloc
-                float** W_Omega = (float**) malloc(omegaSize * sizeof(float*));
+                VALUE_TYPE** W_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
                 for (unsigned idx = R.col_ptr[Rh], i = 0; idx < R.col_ptr[Rh + 1]; ++idx, ++i) {
                     W_Omega[i] = &W[R.row_idx[idx]][0];
                 }
@@ -222,7 +222,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
                 free(W_Omega);
             } else {
                 for (int c = 0; c < k; ++c) {
-                    Hr[c] = 0.0f;
+                    Hr[c] = 0.0;
                 }
             }
         }

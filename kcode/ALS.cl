@@ -1,7 +1,7 @@
-static void choldc1(int n, __global float* a, __global float* p) {
+static void choldc1(int n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
     int base = get_group_id(0) * n * n;
     int k;
-    float sum;
+    VALUE_TYPE sum;
     for (int i = 0; i < n; ++i) {
         for (int j = i; j < n; ++j) {
             //sum = a[i][j];
@@ -23,10 +23,10 @@ static void choldc1(int n, __global float* a, __global float* p) {
     }
 }
 
-static void choldcsl(int n, __global float* A, __global float* tp) {
-    float sum;
+static void choldcsl(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
+    VALUE_TYPE sum;
     int base = get_group_id(0) * n * n;
-    __global float* p;
+    __global VALUE_TYPE* p;
     int gid = get_group_id(0);
     p = &(tp[gid * n]);
     choldc1(n, A, p);
@@ -45,7 +45,7 @@ static void choldcsl(int n, __global float* A, __global float* tp) {
     }
 }
 
-static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global float* p) {
+static void inverseMatrix_CholeskyMethod(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* p) {
     int base = get_group_id(0) * n * n;
     int i, j, k;
     choldcsl(n, A, p);
@@ -78,13 +78,13 @@ static void inverseMatrix_CholeskyMethod(int n, __global float* A, __global floa
     }
 }
 
-__kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float* Result, const unsigned ptr,
+__kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result, const unsigned ptr,
                                 __global const unsigned* idx) {
     int base = get_group_id(0) * j * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
-    //__local float SUM[100];
-    float SUM0 = 0, SUM1 = 0, SUM2 = 0, SUM3 = 0, SUM4 = 0, SUM5 = 0, SUM6 = 0, SUM7 = 0, SUM8 = 0, SUM9 = 0,
+    //__local VALUE_TYPE SUM[100];
+    VALUE_TYPE SUM0 = 0, SUM1 = 0, SUM2 = 0, SUM3 = 0, SUM4 = 0, SUM5 = 0, SUM6 = 0, SUM7 = 0, SUM8 = 0, SUM9 = 0,
             SUM11 = 0, SUM12 = 0, SUM13 = 0, SUM14 = 0, SUM15 = 0, SUM16 = 0, SUM17 = 0, SUM18 = 0, SUM19 = 0,
             SUM22 = 0, SUM23 = 0, SUM24 = 0, SUM25 = 0, SUM26 = 0, SUM27 = 0, SUM28 = 0, SUM29 = 0,
             SUM33 = 0, SUM34 = 0, SUM35 = 0, SUM36 = 0, SUM37 = 0, SUM38 = 0, SUM39 = 0,
@@ -94,7 +94,7 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float*
             SUM77 = 0, SUM78 = 0, SUM79 = 0,
             SUM88 = 0, SUM89 = 0,
             SUM99 = 0;
-    __local float a[300];
+    __local VALUE_TYPE a[300];
     __local int offset[30];
     int f = 300 / j;
     int nh = (i / f) + 1;
@@ -531,15 +531,15 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global float* H, __global float*
     }
 }
 
-__kernel void batchsolve(int i, int j, __global float* H, __global const float* val, __global float* result,
+__kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
                          __global const unsigned* colMajored_sparse_idx, __global const unsigned* row_ptr,
                          __global const unsigned* col_idx) {
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
-    __local float a[300];
-    __local float b[30];
-    float subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
+    __local VALUE_TYPE a[300];
+    __local VALUE_TYPE b[30];
+    VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
     //printf("enter batchsolve.\n");
     unsigned n = row_ptr[i + 1] - row_ptr[i];
     //printf("n=%d.\n",n);
@@ -620,14 +620,14 @@ __kernel void batchsolve(int i, int j, __global float* H, __global const float* 
     result[basev + 9] = subvector9;
 }
 
-__kernel void batchsolve1(int i, int j, __global float* W, __global const float* val, __global float* result,
+__kernel void batchsolve1(int i, int j, __global VALUE_TYPE* W, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
                           __global const unsigned* col_ptr, __global const unsigned* row_idx) {
     int basev = get_group_id(0) * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
-    __local float a[300];
-    __local float b[30];
-    float subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
+    __local VALUE_TYPE a[300];
+    __local VALUE_TYPE b[30];
+    VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
     unsigned n = col_ptr[i + 1] - col_ptr[i];
     long nn = n / 30;
     if (nn > 0) {
@@ -705,15 +705,15 @@ __kernel void updateW_overH_kernel(const int rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
-                                   __global const float* val,
-                                   const float lambda,
+                                   __global const VALUE_TYPE* val,
+                                   const VALUE_TYPE lambda,
                                    const uint k,
-                                   __global float* W,
-                                   __global float* H,
-                                   __global float* p,
-                                   __global float* subVector,
-                                   __global float* subMatrix,
-                                   __global float* subMatrix_f) {
+                                   __global VALUE_TYPE* W,
+                                   __global VALUE_TYPE* H,
+                                   __global VALUE_TYPE* p,
+                                   __global VALUE_TYPE* subVector,
+                                   __global VALUE_TYPE* subMatrix,
+                                   __global VALUE_TYPE* subMatrix_f) {
     //int i = get_global_id(0);
     //int j = get_global_size(0);
     int s = get_local_id(0);
@@ -723,7 +723,7 @@ __kernel void updateW_overH_kernel(const int rows,
     int base = a * k * k;
     int baseV = a * k;
     for (int Rw = a; Rw < rows; Rw += v) {
-        __global float* Wr = &W[Rw * k];
+        __global VALUE_TYPE* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
         //printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
@@ -756,7 +756,7 @@ __kernel void updateW_overH_kernel(const int rows,
             batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
             for (unsigned c = s; c < k; c += g) {
-                Wr[c] = 0.0f;
+                Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
                 }
@@ -764,7 +764,7 @@ __kernel void updateW_overH_kernel(const int rows,
             barrier(CLK_LOCAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
-                Wr[c] = 0.0f;
+                Wr[c] = 0.0;
             }
         }
     }
@@ -773,14 +773,14 @@ __kernel void updateW_overH_kernel(const int rows,
 __kernel void updateH_overW_kernel(const int cols,
                                    __global const unsigned* col_ptr,
                                    __global const unsigned* row_idx,
-                                   __global const float* val,
-                                   const float lambda,
+                                   __global const VALUE_TYPE* val,
+                                   const VALUE_TYPE lambda,
                                    const uint k,
-                                   __global float* W,
-                                   __global float* H,
-                                   __global float* p,
-                                   __global float* subVector,
-                                   __global float* subMatrix) {
+                                   __global VALUE_TYPE* W,
+                                   __global VALUE_TYPE* H,
+                                   __global VALUE_TYPE* p,
+                                   __global VALUE_TYPE* subVector,
+                                   __global VALUE_TYPE* subMatrix) {
     //int i = get_global_id(0);
     //int j = get_global_size(0);
     int s = get_local_id(0);
@@ -790,7 +790,7 @@ __kernel void updateH_overW_kernel(const int cols,
     int base = a * k * k;
     int baseV = a * k;
     for (int Rh = a; Rh < cols; Rh += v) {
-        __global float* Hr = &H[Rh * k];
+        __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
@@ -823,7 +823,7 @@ __kernel void updateH_overW_kernel(const int cols,
             barrier(CLK_LOCAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
-                Hr[c] = 0.0f;
+                Hr[c] = 0.0;
             }
         }
     }

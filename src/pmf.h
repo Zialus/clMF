@@ -12,7 +12,7 @@ public:
 
     int maxiter = 5;
     unsigned k = 10;
-    float lambda = 0.05f;
+    VALUE_TYPE lambda = 0.05;
 
     unsigned platform_id = 0;
     int verbose = 0;

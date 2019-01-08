@@ -93,14 +93,12 @@ void Mt_byM_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
 #define kind dynamic,500
 
 void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
-    int maxIter = param.maxiter;
-    VALUE_TYPE lambda = param.lambda;
-    int k = param.k;
-    int num_threads_old = omp_get_num_threads();
+    int k = (int) param.k;
 
+    int num_threads_old = omp_get_num_threads();
     omp_set_num_threads(param.threads);
 
-    for (int iter = 0; iter < maxIter; ++iter) {
+    for (int iter = 0; iter < param.maxiter; ++iter) {
 
         //optimize W over H
 #pragma omp parallel for schedule(kind)
@@ -126,7 +124,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 
                 //add lambda to diag of sub-matrix
                 for (int c = 0; c < k; c++) {
-                    subMatrix[c][c] = subMatrix[c][c] + lambda;
+                    subMatrix[c][c] = subMatrix[c][c] + param.lambda;
                 }
 
                 //invert sub-matrix
@@ -190,7 +188,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 
                 //add lambda to diag of sub-matrix
                 for (int c = 0; c < k; c++) {
-                    subMatrix[c][c] = subMatrix[c][c] + lambda;
+                    subMatrix[c][c] = subMatrix[c][c] + param.lambda;
                 }
 
                 //invert sub-matrix

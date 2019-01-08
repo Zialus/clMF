@@ -289,7 +289,7 @@ void initial_col(mat_t& X, unsigned k, unsigned n) {
     srand(0L);
     for (unsigned i = 0; i < n; ++i) {
         for (unsigned j = 0; j < k; ++j) {
-            X[j][i] = 0.1 * (VALUE_TYPE(rand()) / RAND_MAX) + 0.001;
+            X[j][i] = (VALUE_TYPE) 0.1 * (VALUE_TYPE(rand()) / RAND_MAX) + (VALUE_TYPE) 0.001;
         }
     }
 }
@@ -334,7 +334,7 @@ parameter parse_command_line(int argc, char** argv) {
                     snprintf(param.opencl_filename, 1024, "%s", argv[i]);
                     break;
                 case 'k':
-                    param.k = atoi(argv[i]);
+                    param.k = (unsigned) atoi(argv[i]);
                     break;
                 case 'l':
                     param.lambda = (VALUE_TYPE) atof(argv[i]);
@@ -349,7 +349,7 @@ parameter parse_command_line(int argc, char** argv) {
                     param.do_predict = atoi(argv[i]);
                     break;
                 case 'P':
-                    param.platform_id = atoi(argv[i]);
+                    param.platform_id = (unsigned) atoi(argv[i]);
                     break;
                 case 'q':
                     param.verbose = atoi(argv[i]);
@@ -393,7 +393,7 @@ parameter parse_command_line(int argc, char** argv) {
 }
 
 void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
-    int error_count = 0;
+    unsigned error_count = 0;
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < m; j++) {
             double delta = fabs(W[i][j] - W_ref[i][j]);
@@ -408,9 +408,9 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m) {
     if (error_count == 0) {
         std::cout << "Check... PASS!" << std::endl;
     } else {
-        int entries = k * m;
+        unsigned entries = k * m;
         double error_percentage = (double) error_count / entries;
-        printf("Check... NO PASS! [%f%%] #Error = %d out of %d entries.\n", error_percentage, error_count, entries);
+        printf("Check... NO PASS! [%f%%] #Error = %u out of %u entries.\n", error_percentage, error_count, entries);
     }
 }
 

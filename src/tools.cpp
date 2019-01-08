@@ -336,6 +336,9 @@ parameter parse_command_line(int argc, char** argv) {
                 case 'k':
                     param.k = (unsigned) atoi(argv[i]);
                     break;
+                case 'n':
+                    param.threads = atoi(argv[i]);
+                    break;
                 case 'l':
                     param.lambda = (VALUE_TYPE) atof(argv[i]);
                     break;

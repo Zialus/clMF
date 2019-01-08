@@ -83,10 +83,7 @@ static void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global VAL
     int base = get_group_id(0) * j * j;
     int ss = get_local_id(0);
     int gg = get_local_size(0);
-    VALUE_TYPE SUM[100] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0};
+    VALUE_TYPE SUM[K_SIZE * K_SIZE] = {0};
     for (int I = ss; I < j; I += gg) {
         for (int J = I; J < j; ++J) {
             for (int K = 0; K < i; ++K) {
@@ -97,95 +94,6 @@ static void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global VAL
             Result[base + (I * j) + J] = SUM[I * j + J];
         }
     }
-}
-
-__kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
-                         __global const unsigned* colMajored_sparse_idx, __global const unsigned* row_ptr,
-                         __global const unsigned* col_idx) {
-    int basev = get_group_id(0) * j;
-    int ss = get_local_id(0);
-    int gg = get_local_size(0);
-    __local VALUE_TYPE a[300];
-    __local VALUE_TYPE b[30];
-    VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
-    //printf("enter batchsolve.\n");
-    unsigned n = row_ptr[i + 1] - row_ptr[i];
-    //printf("n=%d.\n",n);
-    long nn = n / 30;
-    if (nn > 0) {
-        //printf("inner enter.\n");
-        for (unsigned nm = 0; nm < nn; nm++) {
-            for (unsigned idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
-                unsigned idx2 = colMajored_sparse_idx[idx];
-                b[idx - (nm * 30) - row_ptr[i]] = val[idx2];
-                for (int ii = 0; ii < j; ii++) {
-                    a[(idx - (nm * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-                }
-            }
-            for (int gh = 0; gh < 30; gh++) {
-                subvector0 += b[gh] * a[gh * j];
-                subvector1 += b[gh] * a[gh * j + 1];
-                subvector2 += b[gh] * a[gh * j + 2];
-                subvector3 += b[gh] * a[gh * j + 3];
-                subvector4 += b[gh] * a[gh * j + 4];
-                subvector5 += b[gh] * a[gh * j + 5];
-                subvector6 += b[gh] * a[gh * j + 6];
-                subvector7 += b[gh] * a[gh * j + 7];
-                subvector8 += b[gh] * a[gh * j + 8];
-                subvector9 += b[gh] * a[gh * j + 9];
-            }
-        }
-        for (unsigned idx = row_ptr[i] + nn * 30 + ss; idx < row_ptr[i + 1]; idx += gg) {
-            unsigned idx2 = colMajored_sparse_idx[idx];
-            b[idx - (nn * 30) - row_ptr[i]] = val[idx2];
-            for (int ii = 0; ii < j; ii++) {
-                a[(idx - (nn * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-            }
-        }
-        for (unsigned gh = 0; gh < row_ptr[i + 1] - row_ptr[i] - nn * 30; gh++) {
-            subvector0 += b[gh] * a[gh * j];
-            subvector1 += b[gh] * a[gh * j + 1];
-            subvector2 += b[gh] * a[gh * j + 2];
-            subvector3 += b[gh] * a[gh * j + 3];
-            subvector4 += b[gh] * a[gh * j + 4];
-            subvector5 += b[gh] * a[gh * j + 5];
-            subvector6 += b[gh] * a[gh * j + 6];
-            subvector7 += b[gh] * a[gh * j + 7];
-            subvector8 += b[gh] * a[gh * j + 8];
-            subvector9 += b[gh] * a[gh * j + 9];
-        }
-    } else {
-        //printf("else enter.\n");
-        for (unsigned idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
-            unsigned idx2 = colMajored_sparse_idx[idx];
-            b[idx - row_ptr[i]] = val[idx2];
-            for (int ii = 0; ii < j; ii++) {
-                a[(idx - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-            }
-        }
-        for (unsigned gh = 0; gh < n; gh++) {
-            subvector0 += b[gh] * a[gh * j];
-            subvector1 += b[gh] * a[gh * j + 1];
-            subvector2 += b[gh] * a[gh * j + 2];
-            subvector3 += b[gh] * a[gh * j + 3];
-            subvector4 += b[gh] * a[gh * j + 4];
-            subvector5 += b[gh] * a[gh * j + 5];
-            subvector6 += b[gh] * a[gh * j + 6];
-            subvector7 += b[gh] * a[gh * j + 7];
-            subvector8 += b[gh] * a[gh * j + 8];
-            subvector9 += b[gh] * a[gh * j + 9];
-        }
-    }
-    result[basev + 0] = subvector0;
-    result[basev + 1] = subvector1;
-    result[basev + 2] = subvector2;
-    result[basev + 3] = subvector3;
-    result[basev + 4] = subvector4;
-    result[basev + 5] = subvector5;
-    result[basev + 6] = subvector6;
-    result[basev + 7] = subvector7;
-    result[basev + 8] = subvector8;
-    result[basev + 9] = subvector9;
 }
 
 __kernel void updateW_overH_kernel(const int rows,
@@ -225,13 +133,6 @@ __kernel void updateW_overH_kernel(const int rows,
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            /*
-            for (unsigned c = s; c < k; c += g) {
-                for (unsigned aa = 0; aa < k; aa++) {
-                    subMatrix_f[c * k + aa] = subMatrix[base + c * k + aa];
-                }
-            }
-
             for (unsigned c = s; c < k; c += g) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
@@ -239,8 +140,6 @@ __kernel void updateW_overH_kernel(const int rows,
                     subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
                 }
             }
-            */
-            batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
             for (unsigned c = s; c < k; c += g) {
                 Wr[c] = 0.0;

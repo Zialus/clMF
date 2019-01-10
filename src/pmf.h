@@ -17,9 +17,11 @@ public:
     unsigned platform_id = 0;
     int verbose = 0;
 
+    int version = 1;
+
     char device_type[4] = {'g', 'p', 'u', '\0'};
     char src_dir[1024] = "../data/simple";
-    char opencl_filename[1024] = "../kcode/ALS.cl";
+    char kcode_path[1024] = "../kcode";
 };
 
 #endif

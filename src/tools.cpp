@@ -331,7 +331,7 @@ parameter parse_command_line(int argc, char** argv) {
         } else {
             switch (argv[i - 1][1]) {
                 case 'c':
-                    snprintf(param.opencl_filename, 1024, "%s", argv[i]);
+                    snprintf(param.kcode_path, 1024, "%s", argv[i]);
                     break;
                 case 'k':
                     param.k = (unsigned) atoi(argv[i]);
@@ -359,6 +359,9 @@ parameter parse_command_line(int argc, char** argv) {
                     break;
                 case 'r':
                     param.do_ref = atoi(argv[i]);
+                    break;
+                case 'V':
+                    param.version = atoi(argv[i]);
                     break;
                 default:
                     fprintf(stderr, "unknown option: -%c\n", argv[i - 1][1]);

@@ -5,12 +5,12 @@ script:
   - mkdir build && cd build
   - cmake -DCMAKE_BUILD_TYPE=Release ..
   - cmake --build . --config Release
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ctest -V -C Release; fi
+  - ctest -V -C Release
 
 before_script:
   - eval "${MATRIX_EVAL}"
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=2; export THREADS_FLAG=1; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=1; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];   then export BLOCKS_FLAG=8; export THREADS_FLAG=1; export VERSION_FLAG=1; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export BLOCKS_FLAG=8; export THREADS_FLAG=1; export VERSION_FLAG=2; fi
   - cmake --version
   - python --version
   - clinfo

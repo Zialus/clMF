@@ -35,7 +35,26 @@ int main(int argc, char* argv[]) {
     initial_col(W_ref, R.rows, param.k);
     initial_col(H_ref, R.cols, param.k);
 
-    clmf(R, W_c, H_c, param, param.opencl_filename);
+    switch (param.version) {
+        case 1: {
+            std::cout << "[info] Picked Version 1: ALS rolled" << std::endl;
+            char kcode_filename[1024 + 15];
+            snprintf(kcode_filename, sizeof(kcode_filename), "%s/ALS_rolled.cl", param.kcode_path);
+            clmf(R, W_c, H_c, param, kcode_filename);
+            break;
+        }
+        case 2: {
+            std::cout << "[info] Picked Version 2: ALS unrolled" << std::endl;
+            char kcode_filename[1024 + 15];
+            snprintf(kcode_filename, sizeof(kcode_filename), "%s/ALS.cl", param.kcode_path);
+            clmf(R, W_c, H_c, param, kcode_filename);
+            break;
+        }
+        default: {
+            printf("[FAILED] Wrong version");
+            return EXIT_FAILURE;
+        }
+    }
 
     std::chrono::duration<double> deltaT56{};
     std::chrono::duration<double> deltaT9_10{};

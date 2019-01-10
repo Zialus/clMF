@@ -16,7 +16,8 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     cl_uint NumDevice;
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     assert(NumDevice == 1);
-    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE, nullptr);
+    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE, &err);
+    CL_CHECK(err);
     printf("[INFO] Connected!\n");
 
     printf("[INFO] - The kernel to be compiled: %s\n", filename);
@@ -24,7 +25,8 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     convertToString(filename, sourceStr);
     const char* source = sourceStr.c_str();
     size_t sourceSize[] = {strlen(source)};
-    cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, nullptr);
+    cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, &err);
+    CL_CHECK(err);
 
     char options[1024];
     snprintf(options, sizeof(options), "-DVALUE_TYPE=%s -DK_SIZE=%d", getT(sizeof(VALUE_TYPE)), param.k);
@@ -45,9 +47,9 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(status);
     std::cout << "[INFO]: Compiled OpenCl code successfully!\n";
 
-    clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, nullptr, &length);
+    CL_CHECK(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, nullptr, &length));
     char* buffer2 = (char*) malloc(length + 1);
-    clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, length, buffer2, nullptr);
+    CL_CHECK(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, length, buffer2, nullptr));
     if (buffer2 != nullptr && param.verbose) {
         printf("[Kernels]: %s\n", buffer2);
         free(buffer2);
@@ -177,13 +179,13 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         /** update_W_Over_H */
         cl_event eventPoint0;
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint0));
-        clWaitForEvents(1, &eventPoint0);
+        CL_CHECK(clWaitForEvents(1, &eventPoint0));
 
-        clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr);
-        clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr);
+        CL_CHECK(clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr));
+        CL_CHECK(clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr));
         t_update_ratings += t_end - t_start;
 
-        clReleaseEvent(eventPoint0);
+        CL_CHECK(clReleaseEvent(eventPoint0));
 /*
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
         CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
@@ -221,13 +223,13 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         /** update_H_Over_W */
         cl_event eventPoint1;
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint1));
-        clWaitForEvents(1, &eventPoint1);
+        CL_CHECK(clWaitForEvents(1, &eventPoint1));
 
-        clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr);
-        clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr);
+        CL_CHECK(clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr));
+        CL_CHECK(clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr));
         t_update_ratings += t_end - t_start;
 
-        clReleaseEvent(eventPoint1);
+        CL_CHECK(clReleaseEvent(eventPoint1));
 /*
         printf("ddd.\n");
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));

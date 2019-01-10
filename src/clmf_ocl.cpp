@@ -16,7 +16,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     cl_uint NumDevice;
     CL_CHECK(clGetContextInfo(context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &NumDevice, nullptr));
     assert(NumDevice == 1);
-    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, nullptr);
+    cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE, nullptr);
     printf("[INFO] Connected!\n");
 
     printf("[INFO] - The kernel to be compiled: %s\n", filename);
@@ -163,14 +163,26 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
     }
 
+    cl_ulong t_update_ratings_acc = 0;
+    cl_ulong t_start;
+    cl_ulong t_end;
+
     std::cout << "------------------------------------------------------" << std::endl;
     std::cout << "[INFO] Computing clMF OpenCL..." << std::endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     for (int ite = 0; ite < param.maxiter; ite++) {
+
+        cl_ulong t_update_ratings = 0;
+
         /** update_W_Over_H */
         cl_event eventPoint0;
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint0));
         clWaitForEvents(1, &eventPoint0);
+
+        clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr);
+        clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr);
+        t_update_ratings += t_end - t_start;
+
         clReleaseEvent(eventPoint0);
 /*
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
@@ -210,6 +222,11 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         cl_event eventPoint1;
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint1));
         clWaitForEvents(1, &eventPoint1);
+
+        clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr);
+        clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr);
+        t_update_ratings += t_end - t_start;
+
         clReleaseEvent(eventPoint1);
 /*
         printf("ddd.\n");
@@ -234,6 +251,13 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
             std::cout<<"\n";
         }
 */
+        t_update_ratings_acc += t_update_ratings;
+
+        if (param.verbose) {
+            printf("[VERBOSE] iteration num %d \tupdate_time %llu|%llu ms \n", ite,
+                   t_update_ratings / 1000000ULL, t_update_ratings_acc / 1000000ULL);
+        }
+
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     deltaT12 = t2 - t1;

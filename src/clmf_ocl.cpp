@@ -29,7 +29,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
     CL_CHECK(err);
 
     char options[1024];
-    snprintf(options, sizeof(options), "-DVALUE_TYPE=%s -DK_SIZE=%d", getT(sizeof(VALUE_TYPE)), param.k);
+    snprintf(options, sizeof(options), "-DVALUE_TYPE=%s -DK_SIZE=%u", getT(sizeof(VALUE_TYPE)), param.k);
     status = clBuildProgram(program, 1, devices, options, nullptr, nullptr);
 
     size_t length;

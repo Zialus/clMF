@@ -30,7 +30,7 @@ public:
 };
 
 // Sparse matrix format CCS & RCS
-// Access column fomat only when you use it..
+// Access column format only when you use it..
 class smat_t {
 public:
     unsigned rows;

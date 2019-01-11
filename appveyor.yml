@@ -1,6 +1,7 @@
 environment:
   BLOCKS_FLAG: '8'
   THREADS_FLAG: '1'
+  VERSION_FLAG: '2'
   matrix:
   - WHATOPENCL: INTEL
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -93,6 +94,7 @@ for:
     - make
     - echo $BLOCKS_FLAG
     - echo $THREADS_FLAG
+    - echo $VERSION_FLAG
 
 -
   matrix:

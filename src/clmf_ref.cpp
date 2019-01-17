@@ -104,7 +104,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 #pragma omp parallel for schedule(kind)
         for (long Rw = 0; Rw < R.rows; ++Rw) {
             VALUE_TYPE* Wr = &W[Rw][0];
-            int omegaSize = R.row_ptr[Rw + 1] - R.row_ptr[Rw];
+            int omegaSize = (int) R.row_ptr[Rw + 1] - R.row_ptr[Rw];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
@@ -168,7 +168,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
 #pragma omp parallel for schedule(kind)
         for (long Rh = 0; Rh < R.cols; ++Rh) {
             VALUE_TYPE* Hr = &H[Rh][0];
-            int omegaSize = R.col_ptr[Rh + 1] - R.col_ptr[Rh];
+            int omegaSize = (int) R.col_ptr[Rh + 1] - R.col_ptr[Rh];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {

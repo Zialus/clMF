@@ -165,25 +165,21 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
     }
 
-    cl_ulong t_update_ratings_acc = 0;
-    cl_ulong t_start;
-    cl_ulong t_end;
+    double t_update_ratings_acc = 0;
 
     std::cout << "------------------------------------------------------" << std::endl;
     std::cout << "[INFO] Computing clMF OpenCL..." << std::endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     for (int ite = 0; ite < param.maxiter; ite++) {
 
-        cl_ulong t_update_ratings = 0;
+        double t_update_ratings = 0;
 
         /** update_W_Over_H */
         cl_event eventPoint0;
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateWOverH_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint0));
         CL_CHECK(clWaitForEvents(1, &eventPoint0));
 
-        CL_CHECK(clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr));
-        CL_CHECK(clGetEventProfilingInfo(eventPoint0, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr));
-        t_update_ratings += t_end - t_start;
+        t_update_ratings += executionTime(eventPoint0);
 
         CL_CHECK(clReleaseEvent(eventPoint0));
 /*
@@ -225,9 +221,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         CL_CHECK(clEnqueueNDRangeKernel(commandQueue, updateHOverW_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint1));
         CL_CHECK(clWaitForEvents(1, &eventPoint1));
 
-        CL_CHECK(clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &t_start, nullptr));
-        CL_CHECK(clGetEventProfilingInfo(eventPoint1, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &t_end, nullptr));
-        t_update_ratings += t_end - t_start;
+        t_update_ratings += executionTime(eventPoint1);
 
         CL_CHECK(clReleaseEvent(eventPoint1));
 /*
@@ -256,8 +250,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, parameter& param, char filename[]) 
         t_update_ratings_acc += t_update_ratings;
 
         if (param.verbose) {
-            printf("[VERBOSE] iteration num %d \tupdate_time %llu|%llu ms \n", ite,
-                   t_update_ratings / 1000000ULL, t_update_ratings_acc / 1000000ULL);
+            printf("[VERBOSE] iteration num %d \tupdate_time %.4lf|%.4lf s \n", ite, t_update_ratings, t_update_ratings_acc);
         }
 
     }

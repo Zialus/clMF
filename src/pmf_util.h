@@ -164,11 +164,6 @@ public:
         return sum / nnz;
     }
 
-    void remove_bias(VALUE_TYPE bias) {
-        for (unsigned i = 0; i < nnz; ++i) { val[i] -= bias; }
-        for (unsigned i = 0; i < nnz; ++i) { val_t[i] -= bias; }
-    }
-
     ~smat_t() {
         if (mem_alloc_by_me) {
             //puts("Warning: Somebody just freed me.");
@@ -179,16 +174,6 @@ public:
             free(col_ptr);
             free(col_idx);
         }
-    }
-
-    void clear_space() {
-        free(val);
-        free(val_t);
-        free(row_ptr);
-        free(row_idx);
-        free(col_ptr);
-        free(col_idx);
-        mem_alloc_by_me = false;
     }
 
     smat_t transpose() {
@@ -219,27 +204,31 @@ public:
 // Test set in COO format
 class testset_t {
 public:
-    long rows;
-    long cols;
-    long nnz;
-    long* test_row;
-    long* test_col;
-    float* test_val;
+    unsigned rows;
+    unsigned cols;
+    unsigned nnz;
+    unsigned* test_row;
+    unsigned* test_col;
+    VALUE_TYPE* test_val;
 
-    void load(long _rows, long _cols, long _nnz, const char* filename) {
+    void load(unsigned _rows, unsigned _cols, unsigned _nnz, const char* filename) {
         unsigned r, c;
-        float v;
+        VALUE_TYPE v;
         rows = _rows;
         cols = _cols;
         nnz = _nnz;
 
-        test_row = new long[nnz];
-        test_col = new long[nnz];
+        test_row = new unsigned[nnz];
+        test_col = new unsigned[nnz];
         test_val = new float[nnz];
 
         FILE* fp = fopen(filename, "r");
-        for (long idx = 0; idx < nnz; ++idx) {
-            CHECK_FSCAN(fscanf(fp, "%u %u %f", &r, &c, &v), 3);
+        for (unsigned idx = 0; idx < nnz; ++idx) {
+            if (sizeof(VALUE_TYPE) == 8) {
+                CHECK_FSCAN(fscanf(fp, "%u %u %lf", &r, &c, &v), 3);
+            } else {
+                CHECK_FSCAN(fscanf(fp, "%u %u %f", &r, &c, &v), 3);
+            }
             test_row[idx] = r - 1;
             test_col[idx] = c - 1;
             test_val[idx] = v;

@@ -41,14 +41,14 @@ int main(int argc, char* argv[]) {
             std::cout << "[info] Picked Version 1: ALS rolled" << std::endl;
             char kcode_filename[1024 + 15];
             snprintf(kcode_filename, sizeof(kcode_filename), "%s/ALS_rolled.cl", param.kcode_path);
-            clmf(R, W_c, H_c, param, kcode_filename);
+            clmf(R, W_c, H_c, T, param, kcode_filename);
             break;
         }
         case 2: {
             std::cout << "[info] Picked Version 2: ALS unrolled" << std::endl;
             char kcode_filename[1024 + 15];
             snprintf(kcode_filename, sizeof(kcode_filename), "%s/ALS.cl", param.kcode_path);
-            clmf(R, W_c, H_c, param, kcode_filename);
+            clmf(R, W_c, H_c, T, param, kcode_filename);
             break;
         }
         default: {

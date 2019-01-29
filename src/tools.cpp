@@ -480,11 +480,11 @@ void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, cons
     printf("[INFO] Test RMSE = %lf\n", rmse);
 }
 
-void calculate_rmse_directly(mat_t& W, mat_t& H, testset_t& T, int iter, int rank, bool ifALS) {
+double calculate_rmse_directly(mat_t& W, mat_t& H, testset_t& T, int rank, bool ifALS) {
 
     double rmse = 0;
     int num_insts = 0;
-    int nans_count = 0;
+//    int nans_count = 0;
 
     long nnz = T.nnz;
 
@@ -509,18 +509,18 @@ void calculate_rmse_directly(mat_t& W, mat_t& H, testset_t& T, int iter, int ran
         if (!std::isnan(tmp)) {
             rmse += tmp;
         } else {
-            nans_count++;
+//            nans_count++;
 //            printf("%d \t - [%u,%u] - v: %lf pred_v: %lf\n", num_insts, i, j, v, pred_v);
         }
         num_insts++;
     }
 
     if (num_insts == 0) { exit(EXIT_FAILURE); }
-    double nans_percentage = (double) nans_count / num_insts;
-    printf("[INFO] NaNs: [%lf%%], NaNs Count: %d out of %d entries.\n", nans_percentage, nans_count, num_insts);
+//    double nans_percentage = (double) nans_count / num_insts;
+//    printf("[INFO] NaNs: [%lf%%], NaNs Count: %d out of %d entries.\n", nans_percentage, nans_count, num_insts);
     rmse = sqrt(rmse / num_insts);
-    printf("[INFO] Test RMSE = %lf\n", rmse);
-
+//    printf("[INFO] Test RMSE = %lf\n", rmse);
+    return rmse;
 }
 
 void print_matrix(mat_t M, unsigned k, unsigned n) {

@@ -278,7 +278,6 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
 */
         t_update_ratings_acc += t_update_ratings;
 
-        if (param.verbose) {
 
             /** Calculate RMSE*/
             cl_event eventPoint3;
@@ -306,10 +305,10 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
             }
             f_rmse = sqrt(tot_rmse / T.nnz);
 
-            printf("[VERBOSE] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%f\n", ite+1, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
+            printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%fs\n", ite+1, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
 
 
-        }
+
 
     }
     auto t2 = std::chrono::high_resolution_clock::now();

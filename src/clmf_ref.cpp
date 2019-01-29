@@ -92,13 +92,17 @@ void Mt_byM_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
 
 #define kind dynamic,500
 
-void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
+void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
     int k = (int) param.k;
 
     int num_threads_old = omp_get_num_threads();
     omp_set_num_threads(param.threads);
 
+    double update_time_acc = 0;
+
     for (int iter = 0; iter < param.maxiter; ++iter) {
+
+        double start = omp_get_wtime();
 
         //optimize W over H
 #pragma omp parallel for schedule(kind)
@@ -224,6 +228,16 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, parameter& param) {
                 }
             }
         }
+        double end = omp_get_wtime();
+        double update_time = end - start;
+        update_time_acc+=update_time;
+
+        start = omp_get_wtime();
+        double rmse = calculate_rmse_directly(W, H, T, param.k, true);
+        end = omp_get_wtime();
+        double rmse_timer = end - start;
+
+        printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%lf time:%fs\n", iter+1, update_time, update_time_acc, rmse, rmse_timer);
 
     }
     omp_set_num_threads(num_threads_old);

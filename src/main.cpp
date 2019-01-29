@@ -66,9 +66,7 @@ int main(int argc, char* argv[]) {
     if (param.do_predict == 1) {
         std::cout << "------------------------------------------------------" << std::endl;
         auto t5 = std::chrono::high_resolution_clock::now();
-//        calculate_rmse(W_c, H_c, param.src_dir, param.k);
-        calculate_rmse_directly(W_c, H_c, T, param.k, param.k, ifALS);
-
+        calculate_rmse(W_c, H_c, param.src_dir, param.k);
         auto t6 = std::chrono::high_resolution_clock::now();
         deltaT56 = t6 - t5;
         std::cout << "[info] OCL Predict Time: " << deltaT56.count() << " s.\n";
@@ -79,15 +77,14 @@ int main(int argc, char* argv[]) {
         std::cout << "------------------------------------------------------" << std::endl;
         std::cout << "[info] Computing clMF OpenMP reference results on CPU." << std::endl;
         auto t9 = std::chrono::high_resolution_clock::now();
-        clmf_ref(R, W_ref, H_ref, param);
+        clmf_ref(R, W_ref, H_ref, T, param);
         auto t10 = std::chrono::high_resolution_clock::now();
         deltaT9_10 = t10 - t9;
         std::cout << "[info] OMP Training Time: " << deltaT9_10.count() << " s.\n";
 
         std::cout << "------------------------------------------------------" << std::endl;
         auto t13 = std::chrono::high_resolution_clock::now();
-//        calculate_rmse(W_ref, H_ref, param.src_dir, param.k);
-        calculate_rmse_directly(W_ref, H_ref, T, param.k, param.k, ifALS);
+        calculate_rmse(W_ref, H_ref, param.src_dir, param.k);
         auto t14 = std::chrono::high_resolution_clock::now();
         deltaT13_14 = t14 - t13;
         std::cout << "[info] OMP Predict Time: " << deltaT13_14.count() << " s.\n";

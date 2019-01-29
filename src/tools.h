@@ -46,7 +46,7 @@ void golden_compare(mat_t W, mat_t W_ref, unsigned k, unsigned m);
 
 void calculate_rmse(const mat_t& W_c, const mat_t& H_c, const char* srcdir, unsigned k);
 
-void calculate_rmse_directly(mat_t& W, mat_t& H, testset_t& T, int iter, int rank, bool ifALS);
+double calculate_rmse_directly(mat_t& W, mat_t& H, testset_t& T, int rank, bool ifALS);
 
 void print_matrix(mat_t M, unsigned k, unsigned n);
 

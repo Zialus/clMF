@@ -14,8 +14,9 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
     uint local_id = get_local_id(0);
     uint group_size = get_local_size(0);
 
-    int c = global_id;
-    if (c < nnz) {
+//    int c = global_id;
+//    if (c < nnz) {
+    for (int c = global_id; c < nnz; c+=global_size) {
         for (int t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];

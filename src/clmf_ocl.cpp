@@ -190,6 +190,8 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
         printf("[VERBOSE] local_work_size for updateHOverW_kernel should be: %zu\n",local);
         CL_CHECK(clGetKernelWorkGroupInfo(updateWOverH_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, nullptr));
         printf("[VERBOSE] local_work_size for updateWOverH_kernel should be: %zu\n",local);
+        CL_CHECK(clGetKernelWorkGroupInfo(gpuRMSE_kernel, devices[0], CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, nullptr));
+        printf("[VERBOSE] local_work_size for gpuRMSE_kernel should be: %zu\n",local);
     }
 
     double t_update_ratings_acc = 0;
@@ -286,9 +288,11 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
             CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, pred_vBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
 
 
-            size_t gws_rmse[1] = {((T.nnz + 1023) / 1024) * 1024};
-            size_t lws_rmse[1] = {1024};
-            CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, gws_rmse, lws_rmse, 0, nullptr, &eventPoint3));
+//            size_t gws_rmse[1] = {((T.nnz + 1023) / 1024) * 1024};
+//            size_t lws_rmse[1] = {1024};
+//            CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, gws_rmse, lws_rmse, 0, nullptr, &eventPoint3));
+            CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint3));
+
             CL_CHECK(clWaitForEvents(1, &eventPoint3));
 
             double rmse_time = executionTime(eventPoint3);

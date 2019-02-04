@@ -281,38 +281,34 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
         t_update_ratings_acc += t_update_ratings;
 
 
-            /** Calculate RMSE*/
-            cl_event eventPoint3;
+        /** Calculate RMSE*/
+        cl_event eventPoint3;
 
-            CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, rmseBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
-            CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, pred_vBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
+        CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, rmseBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
+        CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, pred_vBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
 
+//        size_t gws_rmse[1] = {((T.nnz + 1023) / 1024) * 1024};
+//        size_t lws_rmse[1] = {1024};
+//        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, gws_rmse, lws_rmse, 0, nullptr, &eventPoint3));
+        CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint3));
 
-//            size_t gws_rmse[1] = {((T.nnz + 1023) / 1024) * 1024};
-//            size_t lws_rmse[1] = {1024};
-//            CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, gws_rmse, lws_rmse, 0, nullptr, &eventPoint3));
-            CL_CHECK(clEnqueueNDRangeKernel(commandQueue, gpuRMSE_kernel, 1, nullptr, global_work_size, local_work_size, 0, nullptr, &eventPoint3));
+        CL_CHECK(clWaitForEvents(1, &eventPoint3));
 
-            CL_CHECK(clWaitForEvents(1, &eventPoint3));
+        double rmse_time = executionTime(eventPoint3);
 
-            double rmse_time = executionTime(eventPoint3);
+        CL_CHECK(clReleaseEvent(eventPoint3));
 
-            CL_CHECK(clReleaseEvent(eventPoint3));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, rmseBuffer, CL_TRUE, 0, (T.nnz) * sizeof(float), rmseVec, 0, nullptr, nullptr));
 
-            CL_CHECK(clEnqueueReadBuffer(commandQueue, rmseBuffer, CL_TRUE, 0, (T.nnz) * sizeof(float), rmseVec, 0, nullptr, nullptr));
+        double tot_rmse = 0;
+        double f_rmse = 0;
 
-            double tot_rmse = 0;
-            double f_rmse = 0;
+        for (unsigned i = 0; i < T.nnz; ++i) {
+            tot_rmse += rmseVec[i];
+        }
+        f_rmse = sqrt(tot_rmse / T.nnz);
 
-            for (unsigned i = 0; i < T.nnz; ++i) {
-                tot_rmse += rmseVec[i];
-            }
-            f_rmse = sqrt(tot_rmse / T.nnz);
-
-            printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%fs\n", ite+1, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
-
-
-
+        printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%fs\n", ite + 1, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
 
     }
     auto t2 = std::chrono::high_resolution_clock::now();

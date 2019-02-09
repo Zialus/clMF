@@ -11,13 +11,13 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
                        const unsigned cols) {
     int global_id = get_global_id(0);
     int global_size = get_global_size(0);
-    uint local_id = get_local_id(0);
-    uint group_size = get_local_size(0);
+//    int local_id = get_local_id(0);
+//    int group_size = get_local_size(0);
 
 //    int c = global_id;
 //    if (c < nnz) {
-    for (int c = global_id; c < nnz; c+=global_size) {
-        for (int t = 0; t < k; t++) {
+    for (unsigned c = global_id; c < nnz; c+=global_size) {
+        for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];
             pred_v[c] += W[i * k + t] * H[j * k + t]; //W[i][t] * H[j][t];

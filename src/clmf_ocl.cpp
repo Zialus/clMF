@@ -88,21 +88,21 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     size_t nbits_H_ = R.cols * k * sizeof(VALUE_TYPE);
 
     // creating buffers
-    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, (void*) R.row_ptr, &err);
+    cl_mem row_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_ptr, R.row_ptr, &err);
     CL_CHECK(err);
-    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, (void*) R.col_idx, &err);
+    cl_mem col_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_idx, R.col_idx, &err);
     CL_CHECK(err);
-    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, (void*) R.col_ptr, &err);
+    cl_mem col_ptrBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_col_ptr, R.col_ptr, &err);
     CL_CHECK(err);
-    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, (void*) R.row_idx, &err);
+    cl_mem row_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_row_idx, R.row_idx, &err);
     CL_CHECK(err);
-    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, (void*) R.colMajored_sparse_idx, &err);
+    cl_mem colMajored_sparse_idxBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_colMajored_sparse_idx, R.colMajored_sparse_idx, &err);
     CL_CHECK(err);
-    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, (void*) R.val, &err);
+    cl_mem valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, R.nbits_val, R.val, &err);
     CL_CHECK(err);
-    cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, (void*) W, &err);
+    cl_mem WBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_W_, W, &err);
     CL_CHECK(err);
-    cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, (void*) H, &err);
+    cl_mem HBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nbits_H_, H, &err);
     CL_CHECK(err);
     cl_mem pBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
@@ -110,7 +110,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     CL_CHECK(err);
     cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(VALUE_TYPE), (void*) submatrix, &err);
+    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(VALUE_TYPE), submatrix, &err);
     CL_CHECK(err);
     cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
@@ -120,11 +120,12 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     CL_CHECK(err);
 
     // RMSE related buffers
-    cl_mem test_rowBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), (void*) T.test_row, &err);
+    cl_mem test_rowBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), T.test_row, &err);
     CL_CHECK(err);
-    cl_mem test_colBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), (void*) T.test_col, &err);
+    cl_mem test_colBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), T.test_col, &err);
     CL_CHECK(err);
-    cl_mem test_valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), (void*) T.test_val, &err);
+    cl_mem test_valBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, T.nnz * sizeof(unsigned), T.test_val, &err);
+    CL_CHECK(err);
     cl_mem pred_vBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, T.nnz * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
     cl_mem rmseBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, T.nnz * sizeof(VALUE_TYPE), nullptr, &err);
@@ -142,38 +143,38 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
 
     // setting kernel arguments
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(int), &R.rows));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), (void*) &row_ptrBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), (void*) &col_idxBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), (void*) &colMajored_sparse_idxBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), (void*) &valBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), &row_ptrBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), &col_idxBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), &colMajored_sparse_idxBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), &valBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(VALUE_TYPE), &param.lambda));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), (void*) &WBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), (void*) &HBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), (void*) &pBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), (void*) &subVecBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), (void*) &subMatBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), (void*) &subMatrixBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), &WBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), &HBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), &pBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), &subVecBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), &subMatBuffer));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), &subMatrixBuffer));
 
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(int), &R.cols));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), (void*) &col_ptrBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), (void*) &row_idxBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), (void*) &valBuffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), &col_ptrBuffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), &row_idxBuffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), &valBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(VALUE_TYPE), &param.lambda));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), (void*) &WBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), (void*) &HBuffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 8, sizeof(cl_mem), (void*) &p_Buffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), (void*) &subVec_Buffer));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), (void*) &subMat_Buffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), &WBuffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), &HBuffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 8, sizeof(cl_mem), &p_Buffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), &subVec_Buffer));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), &subMat_Buffer));
 
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 0, sizeof(cl_mem), (void*) &test_rowBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 1, sizeof(cl_mem), (void*) &test_colBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 2, sizeof(cl_mem), (void*) &test_valBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 3, sizeof(cl_mem), (void*) &pred_vBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 4, sizeof(cl_mem), (void*) &rmseBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 5, sizeof(cl_mem), (void*) &WBuffer));
-    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 6, sizeof(cl_mem), (void*) &HBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 0, sizeof(cl_mem), &test_rowBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 1, sizeof(cl_mem), &test_colBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 2, sizeof(cl_mem), &test_valBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 3, sizeof(cl_mem), &pred_vBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 4, sizeof(cl_mem), &rmseBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 5, sizeof(cl_mem), &WBuffer));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 6, sizeof(cl_mem), &HBuffer));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 7, sizeof(unsigned), &T.nnz));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 8, sizeof(unsigned), &k));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 9, sizeof(unsigned), &R.rows));

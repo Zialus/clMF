@@ -202,7 +202,7 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     std::cout << "------------------------------------------------------" << std::endl;
     std::cout << "[INFO] Computing clMF OpenCL..." << std::endl;
     auto t1 = std::chrono::high_resolution_clock::now();
-    for (int ite = 0; ite < param.maxiter; ite++) {
+    for (int ite = 1; ite <= param.maxiter; ite++) {
 
         double t_update_ratings = 0;
 
@@ -281,7 +281,6 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
 */
         t_update_ratings_acc += t_update_ratings;
 
-
         /** Calculate RMSE*/
         cl_event eventPoint3;
 
@@ -309,7 +308,8 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
         }
         f_rmse = sqrt(tot_rmse / T.nnz);
 
-        printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%fs\n", ite + 1, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
+        printf("[-INFO-] iteration num %d \tupdate_time %.4lf|%.4lfs \tRMSE=%f time:%fs\n",
+                ite, t_update_ratings, t_update_ratings_acc, f_rmse, rmse_time);
 
     }
     auto t2 = std::chrono::high_resolution_clock::now();

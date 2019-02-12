@@ -35,17 +35,16 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
 //    }
 }
 
-static void choldc1(int n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
-    int group_id = get_group_id(0);
+static void choldc1(size_t n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
+    size_t group_id = get_group_id(0);
 
-    int base = group_id * n * n;
-    int k;
+    size_t base = group_id * n * n;
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = i; j < n; ++j) {
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = i; j < n; ++j) {
             //sum = a[i][j];
             VALUE_TYPE sum = a[base + i * n + j];
-            for (k = i - 1; k >= 0; --k) {
+            for (int k = i - 1; k >= 0; --k) {
                 //sum -= a[i][k] * a[j][k];
                 sum -= a[base + i * n + k] * a[base + j * n + k];
             }
@@ -62,20 +61,20 @@ static void choldc1(int n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
     }
 }
 
-static void choldcsl(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
-    int group_id = get_group_id(0);
-    int base = group_id * n * n;
+static void choldcsl(size_t n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
+    size_t group_id = get_group_id(0);
+    size_t base = group_id * n * n;
 
     __global VALUE_TYPE* p;
     p = &(tp[group_id * n]);
     choldc1(n, A, p);
 
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         //A[i][i] = 1 / p[i];
         A[base + i * n + i] = 1 / p[i];
-        for (int j = i + 1; j < n; ++j) {
+        for (size_t j = i + 1; j < n; ++j) {
             VALUE_TYPE sum = 0;
-            for (int k = i; k < j; ++k) {
+            for (size_t k = i; k < j; ++k) {
                 //sum -= A[j][k] * A[k][i];
                 sum -= A[base + j * n + k] * A[base + k * n + i];
             }
@@ -85,52 +84,52 @@ static void choldcsl(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
     }
 }
 
-static void inverseMatrix_CholeskyMethod(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* p) {
-    int group_id = get_group_id(0);
-    int base = group_id * n * n;
+static void inverseMatrix_CholeskyMethod(size_t n, __global VALUE_TYPE* A, __global VALUE_TYPE* p) {
+    size_t group_id = get_group_id(0);
+    size_t base = group_id * n * n;
 
     choldcsl(n, A, p);
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = i + 1; j < n; ++j) {
             //A[i][j] = 0.0;
             A[base + i * n + j] = 0.0;
         }
     }
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         //A[i][i] *= A[i][i];
         A[base + i * n + i] *= A[base + i * n + i];
-        for (int k = i + 1; k < n; ++k) {
+        for (size_t k = i + 1; k < n; ++k) {
             //A[i][i] += A[k][i] * A[k][i];
             A[base + i * n + i] += A[base + k * n + i] * A[base + k * n + i];
         }
-        for (int j = i + 1; j < n; ++j) {
-            for (int k = j; k < n; ++k) {
+        for (size_t j = i + 1; j < n; ++j) {
+            for (size_t k = j; k < n; ++k) {
                 //A[i][j] += A[k][i] * A[k][j];
                 A[base + i * n + j] += A[base + k * n + i] * A[base + k * n + j];
             }
         }
     }
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < i; ++j) {
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < i; ++j) {
             //A[i][j] = A[j][i];
             A[base + i * n + j] = A[base + j * n + i];
         }
     }
 }
 
-static void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result,
+static void Mt_byM_multiply_k(size_t i, size_t j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result,
                               const unsigned ptr, __global const unsigned* idx) {
-    int group_id = get_group_id(0);
+    size_t group_id = get_group_id(0);
 
-    int base = group_id * j * j;
-    int ss = get_local_id(0);
-    int gg = get_local_size(0);
+    size_t base = group_id * j * j;
+    size_t ss = get_local_id(0);
+    size_t gg = get_local_size(0);
     VALUE_TYPE SUM[K_SIZE * K_SIZE] = {0};
-    for (int I = ss; I < j; I += gg) {
-        for (int J = I; J < j; ++J) {
-            for (int K = 0; K < i; ++K) {
-                unsigned offset = idx[ptr + K] * j;
+    for (size_t I = ss; I < j; I += gg) {
+        for (size_t J = I; J < j; ++J) {
+            for (size_t K = 0; K < i; ++K) {
+                size_t offset = idx[ptr + K] * j;
                 SUM[I * j + J] += H[offset + I] * H[offset + J];
             }
             Result[base + (J * j) + I] = SUM[I * j + J];
@@ -152,15 +151,15 @@ __kernel void updateW_overH_kernel(const int rows,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix,
                                    __global VALUE_TYPE* subMatrix_f) {
-    //int i = get_global_id(0);
-    //int j = get_global_size(0);
-    int s = get_local_id(0);
-    int g = get_local_size(0);
-    int a = get_group_id(0);
-    int v = get_num_groups(0);
-    int base = a * k * k;
-    int baseV = a * k;
-    for (int Rw = a; Rw < rows; Rw += v) {
+    //size_t i = get_global_id(0);
+    //size_t j = get_global_size(0);
+    size_t s = get_local_id(0);
+    size_t g = get_local_size(0);
+    size_t a = get_group_id(0);
+    size_t v = get_num_groups(0);
+    size_t base = a * k * k;
+    size_t baseV = a * k;
+    for (size_t Rw = a; Rw < rows; Rw += v) {
         __global VALUE_TYPE* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
         //printf("omegasize=%d.\n",omegaSize);
@@ -168,7 +167,7 @@ __kernel void updateW_overH_kernel(const int rows,
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
 
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
             barrier(CLK_LOCAL_MEM_FENCE);
@@ -176,7 +175,7 @@ __kernel void updateW_overH_kernel(const int rows,
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
                     unsigned idx2 = colMajored_sparse_idx[idx];
@@ -184,7 +183,7 @@ __kernel void updateW_overH_kernel(const int rows,
                 }
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
@@ -210,22 +209,23 @@ __kernel void updateH_overW_kernel(const int cols,
                                    __global VALUE_TYPE* p,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix) {
-    //int i = get_global_id(0);
-    //int j = get_global_size(0);
-    int s = get_local_id(0);
-    int g = get_local_size(0);
-    int a = get_group_id(0);
-    int v = get_num_groups(0);
-    int base = a * k * k;
-    int baseV = a * k;
-    for (int Rh = a; Rh < cols; Rh += v) {
+    //size_t i = get_global_id(0);
+    //size_t j = get_global_size(0);
+    size_t s = get_local_id(0);
+    size_t g = get_local_size(0);
+    size_t a = get_group_id(0);
+    size_t v = get_num_groups(0);
+    size_t base = a * k * k;
+    size_t baseV = a * k;
+    for (size_t Rh = a; Rh < cols; Rh += v) {
         __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
+        //printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
@@ -233,14 +233,14 @@ __kernel void updateH_overW_kernel(const int cols,
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = col_ptr[Rh]; idx < col_ptr[Rh + 1]; ++idx) {
                     subVector[baseV + c] += val[idx] * W[(row_idx[idx] * k) + c];
                 }
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 Hr[c] = 0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Hr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];

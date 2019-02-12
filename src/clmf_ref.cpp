@@ -22,6 +22,7 @@ void choldc1(int n, VALUE_TYPE** a, VALUE_TYPE* p) {
 void choldcsl(int n, VALUE_TYPE** A) {
     VALUE_TYPE* p = (VALUE_TYPE*) malloc(n * sizeof(VALUE_TYPE));
     choldc1(n, A, p);
+
     for (int i = 0; i < n; ++i) {
         A[i][i] = 1 / p[i];
         for (int j = i + 1; j < n; ++j) {
@@ -60,21 +61,6 @@ void inverseMatrix_CholeskyMethod(int n, VALUE_TYPE** A) {
     }
 }
 
-//Multiply matrix M by M transpose
-void M_byMt_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
-    VALUE_TYPE SUM;
-    for (int I = 0; I < i; ++I) {
-        for (int J = 0; J < i; ++J) {
-            SUM = 0.0;
-            for (int K = 0; K < j; ++K) {
-                SUM += M[I][K] * M[J][K];
-            }
-            Result[I][J] = SUM;
-        }
-    }
-}
-
-//Multiply matrix M transpose by M
 void Mt_byM_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
     VALUE_TYPE SUM;
     for (int I = 0; I < j; ++I) {

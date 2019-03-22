@@ -9,14 +9,14 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
                        const unsigned k,
                        const unsigned rows,
                        const unsigned cols) {
-    int global_id = get_global_id(0);
-    int global_size = get_global_size(0);
-//    int local_id = get_local_id(0);
-//    int group_size = get_local_size(0);
+    size_t global_id = get_global_id(0);
+    size_t global_size = get_global_size(0);
+//    size_t local_id = get_local_id(0);
+//    size_t group_size = get_local_size(0);
 
-//    int c = global_id;
+//    size_t c = global_id;
 //    if (c < nnz) {
-    for (unsigned c = global_id; c < nnz; c+=global_size) {
+    for (size_t c = global_id; c < nnz; c+=global_size) {
         for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];
@@ -35,17 +35,18 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
 //    }
 }
 
-static void choldc1(int n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
-    int base = get_group_id(0) * n * n;
-    int k;
-    VALUE_TYPE sum;
-    for (int i = 0; i < n; ++i) {
-        for (int j = i; j < n; ++j) {
+static void choldc1(size_t n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
+    size_t group_id = get_group_id(0);
+
+    size_t base = group_id * n * n;
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = i; j < n; ++j) {
             //sum = a[i][j];
-            sum = a[base + i * n + j];
-            for (k = i - 1; k >= 0; --k) {
+            VALUE_TYPE sum = a[base + i * n + j];
+            for (int k = (int) i - 1; k >= 0; --k) {
                 //sum -= a[i][k] * a[j][k];
-                sum -= a[base + i * n + k] * a[base + j * n + k];
+                sum -= a[base + i * n + (size_t) k] * a[base + j * n + (size_t) k];
             }
             if (i == j) {
                 if (sum <= 0) {
@@ -60,19 +61,20 @@ static void choldc1(int n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
     }
 }
 
-static void choldcsl(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
-    VALUE_TYPE sum;
-    int base = get_group_id(0) * n * n;
+static void choldcsl(size_t n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
+    size_t group_id = get_group_id(0);
+    size_t base = group_id * n * n;
+
     __global VALUE_TYPE* p;
-    int gid = get_group_id(0);
-    p = &(tp[gid * n]);
+    p = &(tp[group_id * n]);
     choldc1(n, A, p);
-    for (int i = 0; i < n; ++i) {
+
+    for (size_t i = 0; i < n; ++i) {
         //A[i][i] = 1 / p[i];
         A[base + i * n + i] = 1 / p[i];
-        for (int j = i + 1; j < n; ++j) {
-            sum = 0;
-            for (int k = i; k < j; ++k) {
+        for (size_t j = i + 1; j < n; ++j) {
+            VALUE_TYPE sum = 0;
+            for (size_t k = i; k < j; ++k) {
                 //sum -= A[j][k] * A[k][i];
                 sum -= A[base + j * n + k] * A[base + k * n + i];
             }
@@ -82,44 +84,48 @@ static void choldcsl(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* tp) {
     }
 }
 
-static void inverseMatrix_CholeskyMethod(int n, __global VALUE_TYPE* A, __global VALUE_TYPE* p) {
-    int base = get_group_id(0) * n * n;
-    int i, j, k;
+static void inverseMatrix_CholeskyMethod(size_t n, __global VALUE_TYPE* A, __global VALUE_TYPE* p) {
+    size_t group_id = get_group_id(0);
+    size_t base = group_id * n * n;
+
     choldcsl(n, A, p);
     //vecIndex = (i * 3) + j; to ontain index from vector if needed.
-    for (i = 0; i < n; ++i) {
-        for (j = i + 1; j < n; ++j) {
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = i + 1; j < n; ++j) {
             //A[i][j] = 0.0;
             A[base + i * n + j] = 0.0;
         }
     }
-    for (i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         //A[i][i] *= A[i][i];
         A[base + i * n + i] *= A[base + i * n + i];
-        for (k = i + 1; k < n; ++k) {
+        for (size_t k = i + 1; k < n; ++k) {
             //A[i][i] += A[k][i] * A[k][i];
             A[base + i * n + i] += A[base + k * n + i] * A[base + k * n + i];
         }
-        for (j = i + 1; j < n; ++j) {
-            for (k = j; k < n; ++k) {
+        for (size_t j = i + 1; j < n; ++j) {
+            for (size_t k = j; k < n; ++k) {
                 //A[i][j] += A[k][i] * A[k][j];
                 A[base + i * n + j] += A[base + k * n + i] * A[base + k * n + j];
             }
         }
     }
-    for (i = 0; i < n; ++i) {
-        for (j = 0; j < i; ++j) {
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < i; ++j) {
             //A[i][j] = A[j][i];
             A[base + i * n + j] = A[base + j * n + i];
         }
     }
 }
 
-__kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result, const unsigned ptr,
-                                __global const unsigned* idx) {
-    int base = get_group_id(0) * j * j;
-    int ss = get_local_id(0);
-    int gg = get_local_size(0);
+__kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result,
+                                const unsigned ptr, __global const unsigned* idx) {
+    size_t group_id = get_group_id(0);
+
+    size_t base = group_id * j * j;
+    size_t ss = get_local_id(0);
+    size_t gg = get_local_size(0);
+
     //__local VALUE_TYPE SUM[100];
     VALUE_TYPE SUM0 = 0, SUM1 = 0, SUM2 = 0, SUM3 = 0, SUM4 = 0, SUM5 = 0, SUM6 = 0, SUM7 = 0, SUM8 = 0, SUM9 = 0,
             SUM11 = 0, SUM12 = 0, SUM13 = 0, SUM14 = 0, SUM15 = 0, SUM16 = 0, SUM17 = 0, SUM18 = 0, SUM19 = 0,
@@ -132,20 +138,20 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global V
             SUM88 = 0, SUM89 = 0,
             SUM99 = 0;
     __local VALUE_TYPE a[300];
-    __local int offset[30];
-    int f = 300 / j;
-    int nh = (i / f) + 1;
-    int p = nh;
+    __local unsigned offset[30];
+    unsigned f = 300 / j;
+    unsigned nh = (i / f) + 1;
+    unsigned p = nh;
     if (i > f) {
         for (; p > 1; p--) {
-            for (int K = ss; K < f; K += gg) {
+            for (size_t K = ss; K < f; K += gg) {
                 offset[K] = idx[ptr + K + (nh - p) * f] * j;
-                for (int I = 0; I < j; ++I) {
+                for (unsigned I = 0; I < j; ++I) {
                     a[K * j + I] = H[offset[K] + I];
                 }
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (int S = 0; S < f; S++) {
+            for (unsigned S = 0; S < f; S++) {
                 SUM0 += a[S * j] * a[S * j];
                 SUM1 += a[S * j] * a[S * j + 1];
                 SUM2 += a[S * j] * a[S * j + 2];
@@ -214,15 +220,15 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global V
             barrier(CLK_LOCAL_MEM_FENCE);
         }
 
-        for (int K = ss; K < i - (nh - 1) * f; K += gg) {
+        for (size_t K = ss; K < i - (nh - 1) * f; K += gg) {
             offset[K] = idx[ptr + K + (nh - 1) * f] * j;
-            for (int I = 0; I < j; ++I) {
+            for (unsigned I = 0; I < j; ++I) {
                 a[K * j + I] = H[offset[K] + I];
             }
         }
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        for (int S = 0; S < i - (nh - 1) * f; S++) {
+        for (unsigned S = 0; S < i - (nh - 1) * f; S++) {
             SUM0 += a[S * j] * a[S * j];
             SUM1 += a[S * j] * a[S * j + 1];
             SUM2 += a[S * j] * a[S * j + 2];
@@ -391,14 +397,14 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global V
         Result[base + 98] = Result[base + 89];
         Result[base + 99] = SUM99;
     } else {
-        for (int K = ss; K < i; K += gg) {
+        for (size_t K = ss; K < i; K += gg) {
             offset[K] = idx[ptr + K] * j;
-            for (int I = 0; I < j; ++I) {
+            for (unsigned I = 0; I < j; ++I) {
                 a[K * j + I] = H[offset[K] + I];
             }
         }
         barrier(CLK_LOCAL_MEM_FENCE);
-        for (int S = 0; S < i; S++) {
+        for (unsigned S = 0; S < i; S++) {
             SUM0 += a[S * j] * a[S * j];
             SUM1 += a[S * j] * a[S * j + 1];
             SUM2 += a[S * j] * a[S * j + 2];
@@ -568,30 +574,30 @@ __kernel void Mt_byM_multiply_k(int i, int j, __global VALUE_TYPE* H, __global V
     }
 }
 
-__kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
+__kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
                          __global const unsigned* colMajored_sparse_idx, __global const unsigned* row_ptr,
                          __global const unsigned* col_idx) {
-    int basev = get_group_id(0) * j;
-    int ss = get_local_id(0);
-    int gg = get_local_size(0);
+    size_t basev = get_group_id(0) * j;
+    size_t ss = get_local_id(0);
+    size_t gg = get_local_size(0);
     __local VALUE_TYPE a[300];
     __local VALUE_TYPE b[30];
     VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
     //printf("enter batchsolve.\n");
     unsigned n = row_ptr[i + 1] - row_ptr[i];
     //printf("n=%d.\n",n);
-    long nn = n / 30;
+    unsigned long nn = n / 30;
     if (nn > 0) {
         //printf("inner enter.\n");
         for (unsigned nm = 0; nm < nn; nm++) {
-            for (unsigned idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
+            for (size_t idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
                 unsigned idx2 = colMajored_sparse_idx[idx];
                 b[idx - (nm * 30) - row_ptr[i]] = val[idx2];
-                for (int ii = 0; ii < j; ii++) {
+                for (unsigned ii = 0; ii < j; ii++) {
                     a[(idx - (nm * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
                 }
             }
-            for (int gh = 0; gh < 30; gh++) {
+            for (unsigned gh = 0; gh < 30; gh++) {
                 subvector0 += b[gh] * a[gh * j];
                 subvector1 += b[gh] * a[gh * j + 1];
                 subvector2 += b[gh] * a[gh * j + 2];
@@ -604,10 +610,10 @@ __kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VA
                 subvector9 += b[gh] * a[gh * j + 9];
             }
         }
-        for (unsigned idx = row_ptr[i] + nn * 30 + ss; idx < row_ptr[i + 1]; idx += gg) {
+        for (size_t idx = row_ptr[i] + nn * 30 + ss; idx < row_ptr[i + 1]; idx += gg) {
             unsigned idx2 = colMajored_sparse_idx[idx];
             b[idx - (nn * 30) - row_ptr[i]] = val[idx2];
-            for (int ii = 0; ii < j; ii++) {
+            for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - (nn * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
             }
         }
@@ -625,10 +631,10 @@ __kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VA
         }
     } else {
         //printf("else enter.\n");
-        for (unsigned idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
+        for (size_t idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
             unsigned idx2 = colMajored_sparse_idx[idx];
             b[idx - row_ptr[i]] = val[idx2];
-            for (int ii = 0; ii < j; ii++) {
+            for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
             }
         }
@@ -657,25 +663,25 @@ __kernel void batchsolve(int i, int j, __global VALUE_TYPE* H, __global const VA
     result[basev + 9] = subvector9;
 }
 
-__kernel void batchsolve1(int i, int j, __global VALUE_TYPE* W, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
+__kernel void batchsolve1(ulong i, ulong j, __global VALUE_TYPE* W, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
                           __global const unsigned* col_ptr, __global const unsigned* row_idx) {
-    int basev = get_group_id(0) * j;
-    int ss = get_local_id(0);
-    int gg = get_local_size(0);
+    size_t basev = get_group_id(0) * j;
+    size_t ss = get_local_id(0);
+    size_t gg = get_local_size(0);
     __local VALUE_TYPE a[300];
     __local VALUE_TYPE b[30];
     VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
     unsigned n = col_ptr[i + 1] - col_ptr[i];
-    long nn = n / 30;
+    unsigned long nn = n / 30;
     if (nn > 0) {
         for (unsigned nm = 0; nm < nn; nm++) {
-            for (unsigned idx = col_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + col_ptr[i]; idx += gg) {
+            for (size_t idx = col_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + col_ptr[i]; idx += gg) {
                 b[idx - (nm * 30) - col_ptr[i]] = val[idx];
-                for (int ii = 0; ii < j; ii++) {
+                for (unsigned ii = 0; ii < j; ii++) {
                     a[(idx - (nm * 30) - col_ptr[i]) * j + ii] = W[(row_idx[idx] * j) + ii];
                 }
             }
-            for (int gh = 0; gh < 30; gh++) {
+            for (unsigned gh = 0; gh < 30; gh++) {
                 subvector0 += b[gh] * a[gh * j];
                 subvector1 += b[gh] * a[gh * j + 1];
                 subvector2 += b[gh] * a[gh * j + 2];
@@ -688,9 +694,9 @@ __kernel void batchsolve1(int i, int j, __global VALUE_TYPE* W, __global const V
                 subvector9 += b[gh] * a[gh * j + 9];
             }
         }
-        for (unsigned idx = col_ptr[i] + nn * 30 + ss; idx < col_ptr[i + 1]; idx += gg) {
+        for (size_t idx = col_ptr[i] + nn * 30 + ss; idx < col_ptr[i + 1]; idx += gg) {
             b[idx - (nn * 30) - col_ptr[i]] = val[idx];
-            for (int ii = 0; ii < j; ii++) {
+            for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - (nn * 30) - col_ptr[i]) * j + ii] = W[(row_idx[idx] * j) + ii];
             }
         }
@@ -707,9 +713,9 @@ __kernel void batchsolve1(int i, int j, __global VALUE_TYPE* W, __global const V
             subvector9 += b[gh] * a[gh * j + 9];
         }
     } else {
-        for (unsigned idx = col_ptr[i] + ss; idx < col_ptr[i + 1]; idx += gg) {
+        for (size_t idx = col_ptr[i] + ss; idx < col_ptr[i + 1]; idx += gg) {
             b[idx - col_ptr[i]] = val[idx];
-            for (int ii = 0; ii < j; ii++) {
+            for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - col_ptr[i]) * j + ii] = W[(row_idx[idx] * j) + ii];
             }
         }
@@ -738,7 +744,7 @@ __kernel void batchsolve1(int i, int j, __global VALUE_TYPE* W, __global const V
     result[basev + 9] = subvector9;
 }
 
-__kernel void updateW_overH_kernel(const int rows,
+__kernel void updateW_overH_kernel(const uint rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
@@ -751,15 +757,15 @@ __kernel void updateW_overH_kernel(const int rows,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix,
                                    __global VALUE_TYPE* subMatrix_f) {
-    //int i = get_global_id(0);
-    //int j = get_global_size(0);
-    int s = get_local_id(0);
-    int g = get_local_size(0);
-    int a = get_group_id(0);
-    int v = get_num_groups(0);
-    int base = a * k * k;
-    int baseV = a * k;
-    for (int Rw = a; Rw < rows; Rw += v) {
+    //size_t i = get_global_id(0);
+    //size_t j = get_global_size(0);
+    size_t s = get_local_id(0);
+    size_t g = get_local_size(0);
+    size_t a = get_group_id(0);
+    size_t v = get_num_groups(0);
+    size_t base = a * k * k;
+    size_t baseV = a * k;
+    for (size_t Rw = a; Rw < rows; Rw += v) {
         __global VALUE_TYPE* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
         //printf("omegasize=%d.\n",omegaSize);
@@ -767,7 +773,7 @@ __kernel void updateW_overH_kernel(const int rows,
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
 
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
             barrier(CLK_LOCAL_MEM_FENCE);
@@ -781,18 +787,10 @@ __kernel void updateW_overH_kernel(const int rows,
                     subMatrix_f[c * k + aa] = subMatrix[base + c * k + aa];
                 }
             }
-
-            for (unsigned c = s; c < k; c += g) {
-                subVector[baseV + c] = 0;
-                for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
-                    unsigned idx2 = colMajored_sparse_idx[idx];
-                    subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
-                }
-            }
             */
             batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
@@ -807,7 +805,7 @@ __kernel void updateW_overH_kernel(const int rows,
     }
 }
 
-__kernel void updateH_overW_kernel(const int cols,
+__kernel void updateH_overW_kernel(const uint cols,
                                    __global const unsigned* col_ptr,
                                    __global const unsigned* row_idx,
                                    __global const VALUE_TYPE* val,
@@ -818,22 +816,23 @@ __kernel void updateH_overW_kernel(const int cols,
                                    __global VALUE_TYPE* p,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix) {
-    //int i = get_global_id(0);
-    //int j = get_global_size(0);
-    int s = get_local_id(0);
-    int g = get_local_size(0);
-    int a = get_group_id(0);
-    int v = get_num_groups(0);
-    int base = a * k * k;
-    int baseV = a * k;
-    for (int Rh = a; Rh < cols; Rh += v) {
+    //size_t i = get_global_id(0);
+    //size_t j = get_global_size(0);
+    size_t s = get_local_id(0);
+    size_t g = get_local_size(0);
+    size_t a = get_group_id(0);
+    size_t v = get_num_groups(0);
+    size_t base = a * k * k;
+    size_t baseV = a * k;
+    for (size_t Rh = a; Rh < cols; Rh += v) {
         __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
+//        printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
 
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
             barrier(CLK_LOCAL_MEM_FENCE);
@@ -841,17 +840,14 @@ __kernel void updateH_overW_kernel(const int cols,
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_LOCAL_MEM_FENCE);
-            /*
-            for (unsigned c = s; c < k; c+=g){
-                subVector[baseV + c] = 0;
-                for (unsigned idx = col_ptr[Rh]; idx < col_ptr[Rh + 1]; ++idx){
-                    subVector[baseV + c] += val[idx] * W[(row_idx[idx] * k) + c];
-                }
-            }
-            */
+
+
             batchsolve1(Rh, k, W, val, subVector, col_ptr, row_idx);
+
+
+
             barrier(CLK_LOCAL_MEM_FENCE);
-            for (unsigned c = s; c < k; c += g) {
+            for (size_t c = s; c < k; c += g) {
                 Hr[c] = 0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Hr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];

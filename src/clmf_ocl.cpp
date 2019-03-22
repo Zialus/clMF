@@ -142,13 +142,13 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     CL_CHECK(err);
 
     // setting kernel arguments
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(int), &R.rows));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 0, sizeof(unsigned), &R.rows));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 1, sizeof(cl_mem), &row_ptrBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 2, sizeof(cl_mem), &col_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 3, sizeof(cl_mem), &colMajored_sparse_idxBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 4, sizeof(cl_mem), &valBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 5, sizeof(VALUE_TYPE), &param.lambda));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(int), &k));
+    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 6, sizeof(unsigned), &k));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 7, sizeof(cl_mem), &WBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), &HBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), &pBuffer));
@@ -156,12 +156,12 @@ void clmf(smat_t& R, mat_t& W_c, mat_t& H_c, testset_t &T, parameter& param, cha
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), &subMatBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 12, sizeof(cl_mem), &subMatrixBuffer));
 
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(int), &R.cols));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(unsigned), &R.cols));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), &col_ptrBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 2, sizeof(cl_mem), &row_idxBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 3, sizeof(cl_mem), &valBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 4, sizeof(VALUE_TYPE), &param.lambda));
-    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(int), &k));
+    CL_CHECK(clSetKernelArg(updateHOverW_kernel, 5, sizeof(unsigned), &k));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 6, sizeof(cl_mem), &WBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 7, sizeof(cl_mem), &HBuffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 8, sizeof(cl_mem), &p_Buffer));

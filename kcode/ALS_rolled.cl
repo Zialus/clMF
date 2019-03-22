@@ -44,9 +44,9 @@ static void choldc1(size_t n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
         for (size_t j = i; j < n; ++j) {
             //sum = a[i][j];
             VALUE_TYPE sum = a[base + i * n + j];
-            for (int k = i - 1; k >= 0; --k) {
+            for (int k = (int) i - 1; k >= 0; --k) {
                 //sum -= a[i][k] * a[j][k];
-                sum -= a[base + i * n + k] * a[base + j * n + k];
+                sum -= a[base + i * n + (size_t) k] * a[base + j * n + (size_t) k];
             }
             if (i == j) {
                 if (sum <= 0) {
@@ -138,7 +138,7 @@ static void Mt_byM_multiply_k(size_t i, size_t j, __global VALUE_TYPE* H, __glob
     }
 }
 
-__kernel void updateW_overH_kernel(const int rows,
+__kernel void updateW_overH_kernel(const uint rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const unsigned* colMajored_sparse_idx,
@@ -198,7 +198,7 @@ __kernel void updateW_overH_kernel(const int rows,
     }
 }
 
-__kernel void updateH_overW_kernel(const int cols,
+__kernel void updateH_overW_kernel(const uint cols,
                                    __global const unsigned* col_ptr,
                                    __global const unsigned* row_idx,
                                    __global const VALUE_TYPE* val,
@@ -220,7 +220,7 @@ __kernel void updateH_overW_kernel(const int cols,
     for (size_t Rh = a; Rh < cols; Rh += v) {
         __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
-        //printf("omegasize=%d.\n",omegaSize);
+//        printf("omegasize=%d.\n",omegaSize);
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
             barrier(CLK_GLOBAL_MEM_FENCE);

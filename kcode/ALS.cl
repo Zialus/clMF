@@ -768,7 +768,7 @@ __kernel void updateW_overH_kernel(const uint rows,
     for (size_t Rw = a; Rw < rows; Rw += v) {
         __global VALUE_TYPE* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
-        //printf("omegasize=%d.\n",omegaSize);
+
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
@@ -827,32 +827,40 @@ __kernel void updateH_overW_kernel(const uint cols,
     for (size_t Rh = a; Rh < cols; Rh += v) {
         __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
-//        printf("omegasize=%d.\n",omegaSize);
+
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
+
             barrier(CLK_LOCAL_MEM_FENCE);
 
             for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
+
             barrier(CLK_LOCAL_MEM_FENCE);
+
             if (s == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
+
             barrier(CLK_LOCAL_MEM_FENCE);
+
 
 
             batchsolve1(Rh, k, W, val, subVector, col_ptr, row_idx);
 
 
 
+
             barrier(CLK_LOCAL_MEM_FENCE);
+
             for (size_t c = s; c < k; c += g) {
                 Hr[c] = 0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Hr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
                 }
             }
+
             barrier(CLK_LOCAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {

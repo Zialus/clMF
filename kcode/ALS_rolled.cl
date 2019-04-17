@@ -165,16 +165,16 @@ __kernel void updateW_overH_kernel(const uint rows,
 
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
             for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             if (s == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             /*
             for (unsigned c = s; c < k; c += g) {
                 for (unsigned aa = 0; aa < k; aa++) {
@@ -189,14 +189,14 @@ __kernel void updateW_overH_kernel(const uint rows,
                     subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
                 }
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
                 }
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
                 Wr[c] = 0.0;

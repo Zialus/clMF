@@ -169,7 +169,7 @@ void clmf_ref(SparseMatrix& R, MatData& W, MatData& H, TestData& T,parameter& pa
 
                 //a trick to avoid malloc
                 VALUE_TYPE** W_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
-                for (unsigned idx = R.get_csc_col_ptr()[Rh], i = 0; idx < R.get_csc_col_ptr()[Rh + 1]; ++idx, ++i) {
+                for (unsigned idx = R.get_csc_col_ptr()[Rh], i = 0; i < omegaSize ; ++idx, ++i) {
                     W_Omega[i] = &W[R.get_csc_row_indx()[idx]][0];
                 }
 

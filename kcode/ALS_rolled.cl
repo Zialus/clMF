@@ -20,7 +20,7 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
         for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];
-            pred_v[c] += W[i * k + t] * H[j * k + t]; //W[i][t] * H[j][t];
+            pred_v[c] += W[(i-1) * k + t] * H[(j-1) * k + t]; //W[i][t] * H[j][t];
 //            pred_v[c] += W[t * rows + i] * H[t * cols + j]; //W[i][t] * H[j][t];
         }
 
@@ -141,7 +141,7 @@ static void Mt_byM_multiply_k(size_t i, size_t j, __global VALUE_TYPE* H, __glob
 __kernel void updateW_overH_kernel(const uint rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
-                                   __global const unsigned* colMajored_sparse_idx,
+                                   __global const VALUE_TYPE* val_t,
                                    __global const VALUE_TYPE* val,
                                    const VALUE_TYPE lambda,
                                    const uint k,
@@ -185,8 +185,7 @@ __kernel void updateW_overH_kernel(const uint rows,
             for (size_t c = s; c < k; c += g) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
-                    unsigned idx2 = colMajored_sparse_idx[idx];
-                    subVector[baseV + c] += val[idx2] * H[(col_idx[idx] * k) + c];
+                    subVector[baseV + c] += val_t[idx] * H[(col_idx[idx] * k) + c];
                 }
             }
             barrier(CLK_GLOBAL_MEM_FENCE);

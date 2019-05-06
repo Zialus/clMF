@@ -20,7 +20,7 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
         for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];
-            pred_v[c] += W[i * k + t] * H[j * k + t]; //W[i][t] * H[j][t];
+            pred_v[c] += W[(i-1) * k + t] * H[(j-1) * k + t]; //W[i][t] * H[j][t];
 //            pred_v[c] += W[t * rows + i] * H[t * cols + j]; //W[i][t] * H[j][t];
         }
 
@@ -575,7 +575,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
 }
 
 __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
-                         __global const unsigned* colMajored_sparse_idx, __global const unsigned* row_ptr,
+                         __global const VALUE_TYPE* val_t, __global const unsigned* row_ptr,
                          __global const unsigned* col_idx) {
     size_t basev = get_group_id(0) * j;
     size_t ss = get_local_id(0);
@@ -591,8 +591,7 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global cons
         //printf("inner enter.\n");
         for (unsigned nm = 0; nm < nn; nm++) {
             for (size_t idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
-                unsigned idx2 = colMajored_sparse_idx[idx];
-                b[idx - (nm * 30) - row_ptr[i]] = val[idx2];
+                b[idx - (nm * 30) - row_ptr[i]] = val_t[idx];
                 for (unsigned ii = 0; ii < j; ii++) {
                     a[(idx - (nm * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
                 }
@@ -611,8 +610,7 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global cons
             }
         }
         for (size_t idx = row_ptr[i] + nn * 30 + ss; idx < row_ptr[i + 1]; idx += gg) {
-            unsigned idx2 = colMajored_sparse_idx[idx];
-            b[idx - (nn * 30) - row_ptr[i]] = val[idx2];
+            b[idx - (nn * 30) - row_ptr[i]] = val_t[idx];
             for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - (nn * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
             }
@@ -632,8 +630,7 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global cons
     } else {
         //printf("else enter.\n");
         for (size_t idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
-            unsigned idx2 = colMajored_sparse_idx[idx];
-            b[idx - row_ptr[i]] = val[idx2];
+            b[idx - row_ptr[i]] = val_t[idx];
             for (unsigned ii = 0; ii < j; ii++) {
                 a[(idx - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
             }
@@ -747,7 +744,7 @@ __kernel void batchsolve1(ulong i, ulong j, __global VALUE_TYPE* W, __global con
 __kernel void updateW_overH_kernel(const uint rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
-                                   __global const unsigned* colMajored_sparse_idx,
+                                   __global const VALUE_TYPE* val_t,
                                    __global const VALUE_TYPE* val,
                                    const VALUE_TYPE lambda,
                                    const uint k,
@@ -788,7 +785,7 @@ __kernel void updateW_overH_kernel(const uint rows,
                 }
             }
             */
-            batchsolve(Rw, k, H, val, subVector, colMajored_sparse_idx, row_ptr, col_idx);
+            batchsolve(Rw, k, H, val, subVector, val_t, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;

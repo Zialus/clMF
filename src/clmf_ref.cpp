@@ -78,7 +78,7 @@ void Mt_byM_multiply(int i, int j, VALUE_TYPE** M, VALUE_TYPE** Result) {
 
 #define kind dynamic,500
 
-void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
+void clmf_ref(SparseMatrix& R, MatData& W, MatData& H, TestData& T,parameter& param) {
     int k = (int) param.k;
 
     int num_threads_old = omp_get_num_threads();
@@ -94,7 +94,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
 #pragma omp parallel for schedule(kind)
         for (long Rw = 0; Rw < R.rows; ++Rw) {
             VALUE_TYPE* Wr = &W[Rw][0];
-            int omegaSize = (int) R.row_ptr[Rw + 1] - R.row_ptr[Rw];
+            int omegaSize = (int) R.get_csr_row_ptr()[Rw + 1] - R.get_csr_row_ptr()[Rw];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
@@ -106,8 +106,8 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
 
                 //a trick to avoid malloc
                 VALUE_TYPE** H_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
-                for (unsigned idx = R.row_ptr[Rw], i = 0; idx < R.row_ptr[Rw + 1]; ++idx, ++i) {
-                    H_Omega[i] = &H[R.col_idx[idx]][0];
+                for (unsigned idx = R.get_csr_row_ptr()[Rw], i = 0; idx < R.get_csr_row_ptr()[Rw + 1]; ++idx, ++i) {
+                    H_Omega[i] = &H[R.get_csr_col_indx()[idx]][0];
                 }
 
                 Mt_byM_multiply(omegaSize, k, H_Omega, subMatrix);
@@ -124,9 +124,8 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
                 //sparse multiplication
                 for (int c = 0; c < k; ++c) {
                     subVector[c] = 0;
-                    for (unsigned idx = R.row_ptr[Rw]; idx < R.row_ptr[Rw + 1]; ++idx) {
-                        unsigned idx2 = R.colMajored_sparse_idx[idx];
-                        subVector[c] += R.val[idx2] * H[R.col_idx[idx]][c];
+                    for (unsigned idx = R.get_csr_row_ptr()[Rw]; idx < R.get_csr_row_ptr()[Rw + 1]; ++idx) {
+                        subVector[c] += R.get_csr_val()[idx] * H[R.get_csr_col_indx()[idx]][c];
                     }
                 }
 
@@ -158,7 +157,7 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
 #pragma omp parallel for schedule(kind)
         for (long Rh = 0; Rh < R.cols; ++Rh) {
             VALUE_TYPE* Hr = &H[Rh][0];
-            int omegaSize = (int) R.col_ptr[Rh + 1] - R.col_ptr[Rh];
+            int omegaSize = (int) R.get_csc_col_ptr()[Rh + 1] - R.get_csc_col_ptr()[Rh];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
@@ -170,8 +169,8 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
 
                 //a trick to avoid malloc
                 VALUE_TYPE** W_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
-                for (unsigned idx = R.col_ptr[Rh], i = 0; idx < R.col_ptr[Rh + 1]; ++idx, ++i) {
-                    W_Omega[i] = &W[R.row_idx[idx]][0];
+                for (unsigned idx = R.get_csc_col_ptr()[Rh], i = 0; idx < R.get_csc_col_ptr()[Rh + 1]; ++idx, ++i) {
+                    W_Omega[i] = &W[R.get_csc_row_indx()[idx]][0];
                 }
 
                 Mt_byM_multiply(omegaSize, k, W_Omega, subMatrix);
@@ -188,8 +187,8 @@ void clmf_ref(smat_t& R, mat_t& W, mat_t& H, testset_t& T,parameter& param) {
                 //sparse multiplication
                 for (int c = 0; c < k; ++c) {
                     subVector[c] = 0;
-                    for (unsigned idx = R.col_ptr[Rh]; idx < R.col_ptr[Rh + 1]; ++idx) {
-                        subVector[c] += R.val[idx] * W[R.row_idx[idx]][c];
+                    for (unsigned idx = R.get_csc_col_ptr()[Rh]; idx < R.get_csc_col_ptr()[Rh + 1]; ++idx) {
+                        subVector[c] += R.get_csc_val()[idx] * W[R.get_csc_row_indx()[idx]][c];
                     }
                 }
 

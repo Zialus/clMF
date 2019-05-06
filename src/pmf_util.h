@@ -132,7 +132,7 @@ public:
         }
     }
 
-    void read_binary_file(long rows_, long cols_, long nnz_,
+    void read_binary_file(unsigned long rows_, unsigned long cols_, unsigned long nnz_,
                           const std::string& fname_data,
                           const std::string& fname_row,
                           const std::string& fname_col) {

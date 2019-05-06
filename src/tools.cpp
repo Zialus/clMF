@@ -280,8 +280,8 @@ void load(const char* srcdir, SparseMatrix& R, TestData& T) {
 
     long m;
     long n;
-    long nnz;
-    CHECK_FSCAN(fscanf(fp, "%ld %ld %ld", &m, &n, &nnz), 3);
+    unsigned long nnz;
+    CHECK_FSCAN(fscanf(fp, "%ld %ld %lu", &m, &n, &nnz), 3);
 
     char buf[1024];
     char binary_filename_val[1024];
@@ -540,28 +540,26 @@ void calculate_rmse(const MatData& W_c, const MatData& H_c, const char* srcdir, 
     printf("[INFO] Test RMSE = %lf\n", rmse);
 }
 
-double calculate_rmse_directly(MatData& W, MatData& H, TestData& T, int rank, bool ifALS) {
+double calculate_rmse_directly(MatData& W, MatData& H, TestData& T, unsigned rank, bool ifALS) {
 
     double rmse = 0;
     int num_insts = 0;
 //    int nans_count = 0;
 
-    long nnz = T.nnz;
+    unsigned long nnz = T.nnz;
 
-    for (long idx = 0; idx < nnz; ++idx) {
+    for (unsigned long idx = 0; idx < nnz; ++idx) {
         unsigned i = T.getTestRow()[idx];
         unsigned j = T.getTestCol()[idx];
         double v = T.getTestVal()[idx];
 
         double pred_v = 0;
         if (ifALS) {
-//#pragma omp parallel for  reduction(+:pred_v)
-            for (int t = 0; t < rank; t++) {
+            for (unsigned t = 0; t < rank; t++) {
                 pred_v += W[i][t] * H[j][t];
             }
         } else {
-//#pragma omp parallel for  reduction(+:pred_v)
-            for (int t = 0; t < rank; t++) {
+            for (unsigned t = 0; t < rank; t++) {
                 pred_v += W[t][i] * H[t][j];
             }
         }

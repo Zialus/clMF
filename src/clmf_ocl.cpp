@@ -71,14 +71,14 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     }
 
     VALUE_TYPE* W = (VALUE_TYPE*) malloc(k * R.rows * sizeof(VALUE_TYPE));
-    for (unsigned i = 0; i < R.rows; ++i) {
+    for (long i = 0; i < R.rows; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             W[i * k + j] = 0.0;
         }
     }
 
     VALUE_TYPE* H = (VALUE_TYPE*) malloc(k * R.cols * sizeof(VALUE_TYPE));
-    for (unsigned i = 0; i < R.cols; ++i) {
+    for (long i = 0; i < R.cols; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             H[i * k + j] = H_c[i][j];
         }
@@ -357,12 +357,12 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     free(devices);
     free(rmseVec);
 
-    for (unsigned i = 0; i < R.rows; ++i) {
+    for (long i = 0; i < R.rows; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             W_c[i][j] = W[i * k + j];
         }
     }
-    for (unsigned i = 0; i < R.cols; ++i) {
+    for (long i = 0; i < R.cols; ++i) {
         for (unsigned j = 0; j < k; ++j) {
             H_c[i][j] = H[i * k + j];
         }

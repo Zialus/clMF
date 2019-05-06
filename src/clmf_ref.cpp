@@ -94,7 +94,7 @@ void clmf_ref(SparseMatrix& R, MatData& W, MatData& H, TestData& T,parameter& pa
 #pragma omp parallel for schedule(kind)
         for (long Rw = 0; Rw < R.rows; ++Rw) {
             VALUE_TYPE* Wr = &W[Rw][0];
-            int omegaSize = (int) R.get_csr_row_ptr()[Rw + 1] - R.get_csr_row_ptr()[Rw];
+            unsigned omegaSize = R.get_csr_row_ptr()[Rw + 1] - R.get_csr_row_ptr()[Rw];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {
@@ -106,7 +106,7 @@ void clmf_ref(SparseMatrix& R, MatData& W, MatData& H, TestData& T,parameter& pa
 
                 //a trick to avoid malloc
                 VALUE_TYPE** H_Omega = (VALUE_TYPE**) malloc(omegaSize * sizeof(VALUE_TYPE*));
-                for (unsigned idx = R.get_csr_row_ptr()[Rw], i = 0; idx < R.get_csr_row_ptr()[Rw + 1]; ++idx, ++i) {
+                for (unsigned idx = R.get_csr_row_ptr()[Rw], i = 0; i < omegaSize; ++idx, ++i) {
                     H_Omega[i] = &H[R.get_csr_col_indx()[idx]][0];
                 }
 

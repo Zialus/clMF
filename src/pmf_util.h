@@ -15,7 +15,7 @@ public:
     long rows, cols;
     unsigned long nnz, max_row_nnz, max_col_nnz;
 
-    void read_binary_file(long rows_, long cols_, long nnz_,
+    void read_binary_file(long rows_, long cols_, unsigned long nnz_,
 //                                    std::string fname_data, std::string fname_row, std::string fname_col,
                           const std::string& fname_csr_row_ptr, const std::string& fname_csr_col_indx,
                           const std::string& fname_csr_val,
@@ -27,12 +27,12 @@ public:
 
         /// read csr
         this->read_compressed(fname_csr_row_ptr, fname_csr_col_indx, fname_csr_val,
-                              this->csr_row_ptr_, this->csr_col_indx_, this->csr_val_, rows + 1,
+                              this->csr_row_ptr_, this->csr_col_indx_, this->csr_val_, (unsigned long) rows + 1,
                               this->max_row_nnz);
 
         /// read csc
         this->read_compressed(fname_csc_col_ptr, fname_csc_row_indx, fname_csc_val,
-                              this->csc_col_ptr_, this->csc_row_indx_, this->csc_val_, cols + 1,
+                              this->csc_col_ptr_, this->csc_row_indx_, this->csc_val_, (unsigned long) cols + 1,
                               this->max_col_nnz);
     }
 
@@ -95,7 +95,7 @@ private:
         }
 
         std::ifstream f_ptr(fname_cs_ptr, std::ios::binary);
-        max_nnz_in_one_dim = std::numeric_limits<long>::min();
+        max_nnz_in_one_dim = std::numeric_limits<unsigned long>::min();
 
         unsigned cur = 0;
         for (unsigned long i = 0; i < num_elems_in_cs_ptr; i++) {
@@ -103,7 +103,7 @@ private:
             f_ptr.read((char*) &cur, sizeof(int));
             cs_ptr.get()[i] = cur;
 
-            if (i > 0) { max_nnz_in_one_dim = std::max<long>(max_nnz_in_one_dim, cur - prev); }
+            if (i > 0) { max_nnz_in_one_dim = std::max<unsigned long>(max_nnz_in_one_dim, cur - prev); }
         }
     }
 
@@ -117,7 +117,7 @@ class TestData {
 public:
     unsigned long rows, cols, nnz;
 
-    void read(long rows_, long cols_, long nnz_, const std::string& filename) {
+    void read(unsigned long rows_, unsigned long cols_, unsigned long nnz_, const std::string& filename) {
         this->rows = rows_;
         this->cols = cols_;
         this->nnz = nnz_;
@@ -127,7 +127,7 @@ public:
         test_val = std::unique_ptr<VALUE_TYPE[]>(new VALUE_TYPE[nnz_]);
 
         std::ifstream fp(filename);
-        for (long idx = 0; idx < nnz_; ++idx) {
+        for (unsigned long idx = 0; idx < nnz_; ++idx) {
             fp >> test_row[idx] >> test_col[idx] >> test_val[idx];
         }
     }

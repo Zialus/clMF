@@ -339,8 +339,8 @@ void load(const char* srcdir, SparseMatrix& R, TestData& T) {
 
     if (fscanf(fp, "%ld %1023s", &nnz, buf) != EOF) {
         snprintf(filename, sizeof(filename), "%s/%s", srcdir, buf);
-        T.read(m, n, nnz, filename);
-//        T.read_binary_file(m, n, nnz, binary_filename_val_test, binary_filename_row_test, binary_filename_col_test);
+//        T.read(m, n, nnz, filename);
+        T.read_binary_file(m, n, nnz, binary_filename_val_test, binary_filename_row_test, binary_filename_col_test);
     }
 
     auto t5 = std::chrono::high_resolution_clock::now();
@@ -557,12 +557,12 @@ double calculate_rmse_directly(MatData& W, MatData& H, TestData& T, int rank, bo
         if (ifALS) {
 //#pragma omp parallel for  reduction(+:pred_v)
             for (int t = 0; t < rank; t++) {
-                pred_v += W[i-1][t] * H[j-1][t];
+                pred_v += W[i][t] * H[j][t];
             }
         } else {
 //#pragma omp parallel for  reduction(+:pred_v)
             for (int t = 0; t < rank; t++) {
-                pred_v += W[t][i-1] * H[t][j-1];
+                pred_v += W[t][i] * H[t][j];
             }
         }
         double tmp = (pred_v - v) * (pred_v - v);

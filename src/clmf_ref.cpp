@@ -157,7 +157,7 @@ void clmf_ref(SparseMatrix& R, MatData& W, MatData& H, TestData& T,parameter& pa
 #pragma omp parallel for schedule(kind)
         for (long Rh = 0; Rh < R.cols; ++Rh) {
             VALUE_TYPE* Hr = &H[Rh][0];
-            int omegaSize = (int) R.get_csc_col_ptr()[Rh + 1] - R.get_csc_col_ptr()[Rh];
+            unsigned omegaSize = R.get_csc_col_ptr()[Rh + 1] - R.get_csc_col_ptr()[Rh];
             VALUE_TYPE** subMatrix;
 
             if (omegaSize > 0) {

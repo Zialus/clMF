@@ -4,7 +4,7 @@ void choldc1(unsigned n, VALUE_TYPE** a, VALUE_TYPE* p) {
     for (unsigned i = 0; i < n; ++i) {
         for (unsigned j = i; j < n; ++j) {
             VALUE_TYPE sum = a[i][j];
-            for (int k = i - 1; k >= 0; --k) {
+            for (int k = (int) i - 1; k >= 0; --k) {
                 sum -= a[i][k] * a[j][k];
             }
             if (i == j) {

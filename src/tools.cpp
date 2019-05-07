@@ -327,7 +327,6 @@ void load(const char* srcdir, SparseMatrix& R, TestData& T) {
     auto t2 = std::chrono::high_resolution_clock::now();
 
     R.read_binary_file(m, n, nnz,
-//                       binary_filename_val, binary_filename_row, binary_filename_col,
                        binary_filename_rowptr, binary_filename_colidx, binary_filename_csrval,
                        binary_filename_colptr, binary_filename_rowidx, binary_filename_cscval);
 
@@ -337,9 +336,8 @@ void load(const char* srcdir, SparseMatrix& R, TestData& T) {
 
     auto t4 = std::chrono::high_resolution_clock::now();
 
-    if (fscanf(fp, "%ld %1023s", &nnz, buf) != EOF) {
+    if (fscanf(fp, "%lu %1023s", &nnz, buf) != EOF) {
         snprintf(filename, sizeof(filename), "%s/%s", srcdir, buf);
-//        T.read(m, n, nnz, filename);
         T.read_binary_file(m, n, nnz, binary_filename_val_test, binary_filename_row_test, binary_filename_col_test);
     }
 
@@ -364,7 +362,7 @@ void exit_with_help() {
     printf(
             "Usage: clMF [options] data_dir\n"
             "options:\n"
-            "    -c : path to the kernel code (default \"../kcode/ALS.cl\")\n"
+            "    -c : path to the kernel code (default \"../kcode/\")\n"
             "    -k rank : set the rank (default 10)\n"
             "    -n threads : set the number of threads for OpenMP (default 16)\n"
             "    -l lambda : set the regularization parameter lambda (default 0.05)\n"

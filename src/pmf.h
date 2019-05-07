@@ -8,7 +8,7 @@ public:
     int nThreadsPerBlock = 32;
 
     int do_ref = 0; // compare opencl results to reference results
-    int do_predict = 0;
+    int do_predict = 0; // predict RMSE
 
     int maxiter = 5;
     unsigned k = 10;

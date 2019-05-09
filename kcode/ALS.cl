@@ -572,7 +572,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
     }
 }
 
-__kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
+__kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALUE_TYPE* result,
                          __global const VALUE_TYPE* val_t, __global const unsigned* row_ptr,
                          __global const unsigned* col_idx) {
     size_t basev = get_group_id(0) * j;
@@ -743,7 +743,6 @@ __kernel void updateW_overH_kernel(const uint rows,
                                    __global const unsigned* row_ptr,
                                    __global const unsigned* col_idx,
                                    __global const VALUE_TYPE* val_t,
-                                   __global const VALUE_TYPE* val,
                                    const VALUE_TYPE lambda,
                                    const uint k,
                                    __global VALUE_TYPE* W,
@@ -783,7 +782,7 @@ __kernel void updateW_overH_kernel(const uint rows,
                 }
             }
             */
-            batchsolve(Rw, k, H, val, subVector, val_t, row_ptr, col_idx);
+            batchsolve(Rw, k, H, subVector, val_t, row_ptr, col_idx);
             barrier(CLK_LOCAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;

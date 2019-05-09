@@ -8,7 +8,8 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
                        const unsigned nnz,
                        const unsigned k,
                        const unsigned rows,
-                       const unsigned cols) {
+                       const unsigned cols,
+                       const unsigned isALS) {
     size_t global_id = get_global_id(0);
     size_t global_size = get_global_size(0);
 //    size_t local_id = get_local_id(0);
@@ -20,19 +21,16 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
         for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];
-            pred_v[c] += W[i * k + t] * H[j * k + t]; //W[i][t] * H[j][t];
-//            pred_v[c] += W[t * rows + i] * H[t * cols + j]; //W[i][t] * H[j][t];
+            if (isALS) {
+                pred_v[c] += W[i * k + t] * H[j * k + t]; //W[i][t] * H[j][t];  ALS
+            } else {
+                pred_v[c] += W[t * rows + i] * H[t * cols + j]; //W[i][t] * H[j][t]; CCD
+            }
         }
 
         rmse[c] = (pred_v[c] - test_val[c]) * (pred_v[c] - test_val[c]);
     }
 
-//    for (uint stride = group_size / 2; stride > 0; stride /= 2) {
-//        barrier(CLK_LOCAL_MEM_FENCE);
-//        if (local_id < stride) {
-//            rmse[local_id] += rmse[local_id + stride];
-//        }
-//    }
 }
 
 static void choldc1(size_t n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {

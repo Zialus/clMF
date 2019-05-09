@@ -175,6 +175,8 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 9, sizeof(cl_mem), &subVec_Buffer));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 10, sizeof(cl_mem), &subMat_Buffer));
 
+    bool isALS = true;
+
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 0, sizeof(cl_mem), &test_rowBuffer));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 1, sizeof(cl_mem), &test_colBuffer));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 2, sizeof(cl_mem), &test_valBuffer));
@@ -186,6 +188,7 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 8, sizeof(unsigned), &k));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 9, sizeof(unsigned), &R.rows));
     CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 10, sizeof(unsigned), &R.cols));
+    CL_CHECK(clSetKernelArg(gpuRMSE_kernel, 11, sizeof(unsigned), &isALS));
 
     size_t global_work_size[1] = {static_cast<size_t>(param.nBlocks * param.nThreadsPerBlock)};
     size_t local_work_size[1] = {static_cast<size_t>(param.nThreadsPerBlock)};

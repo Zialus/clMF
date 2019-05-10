@@ -148,7 +148,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
                     a[K * j + I] = H[offset[K] + I];
                 }
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             for (unsigned S = 0; S < f; S++) {
                 SUM0 += a[S * j] * a[S * j];
                 SUM1 += a[S * j] * a[S * j + 1];
@@ -215,7 +215,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
 
                 SUM99 += a[S * j + 9] * a[S * j + 9];
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
         }
 
         for (size_t K = ss; K < i - (nh - 1) * f; K += gg) {
@@ -224,7 +224,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
                 a[K * j + I] = H[offset[K] + I];
             }
         }
-        barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_GLOBAL_MEM_FENCE);
 
         for (unsigned S = 0; S < i - (nh - 1) * f; S++) {
             SUM0 += a[S * j] * a[S * j];
@@ -292,7 +292,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
 
             SUM99 += a[S * j + 9] * a[S * j + 9];
         }
-        barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_GLOBAL_MEM_FENCE);
 
         Result[base + 0] = SUM0;
         Result[base + 1] = SUM1;
@@ -401,7 +401,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
                 a[K * j + I] = H[offset[K] + I];
             }
         }
-        barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_GLOBAL_MEM_FENCE);
         for (unsigned S = 0; S < i; S++) {
             SUM0 += a[S * j] * a[S * j];
             SUM1 += a[S * j] * a[S * j + 1];
@@ -468,7 +468,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
 
             SUM99 += a[S * j + 9] * a[S * j + 9];
         }
-        barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_GLOBAL_MEM_FENCE);
         Result[base + 0] = SUM0;
         Result[base + 1] = SUM1;
         Result[base + 2] = SUM2;
@@ -765,16 +765,16 @@ __kernel void updateW_overH_kernel(const uint rows,
 
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
             for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             if (s == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             /*
             for (unsigned c = s; c < k; c += g) {
                 for (unsigned aa = 0; aa < k; aa++) {
@@ -783,14 +783,14 @@ __kernel void updateW_overH_kernel(const uint rows,
             }
             */
             batchsolve(Rw, k, H, subVector, val_t, row_ptr, col_idx);
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
                 }
             }
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
                 Wr[c] = 0.0;
@@ -825,19 +825,19 @@ __kernel void updateH_overW_kernel(const uint cols,
         if (omegaSize > 0) {
             Mt_byM_multiply_k(omegaSize, k, W, subMatrix, col_ptr[Rh], row_idx);
 
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
             for (size_t c = s; c < k; c += g) {
                 subMatrix[base + c * k + c] += lambda;
             }
 
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
             if (s == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
 
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
 
 
@@ -846,7 +846,7 @@ __kernel void updateH_overW_kernel(const uint cols,
 
 
 
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
 
             for (size_t c = s; c < k; c += g) {
                 Hr[c] = 0;
@@ -855,7 +855,7 @@ __kernel void updateH_overW_kernel(const uint cols,
                 }
             }
 
-            barrier(CLK_LOCAL_MEM_FENCE);
+            barrier(CLK_GLOBAL_MEM_FENCE);
         } else {
             for (unsigned c = 0; c < k; ++c) {
                 Hr[c] = 0.0;

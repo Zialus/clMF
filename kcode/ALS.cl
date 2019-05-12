@@ -573,9 +573,9 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
     }
 }
 
-__kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALUE_TYPE* result,
-                         __global const VALUE_TYPE* val_t, __global const unsigned* row_ptr,
-                         __global const unsigned* col_idx) {
+__kernel void batchsolve_H(ulong i, ulong j, __global VALUE_TYPE* H, __global VALUE_TYPE* result,
+                           __global const VALUE_TYPE* val_t, __global const unsigned* row_ptr,
+                           __global const unsigned* col_idx) {
     size_t basev = get_group_id(0) * j;
     size_t ss = get_local_id(0);
     size_t gg = get_local_size(0);
@@ -655,9 +655,9 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALU
     result[basev + 9] = subvector9;
 }
 
-__kernel void batchsolve1(ulong i, ulong j, __global VALUE_TYPE* W, __global VALUE_TYPE* result,
-                          __global const VALUE_TYPE* val, __global const unsigned* col_ptr,
-                          __global const unsigned* row_idx) {
+__kernel void batchsolve_W(ulong i, ulong j, __global VALUE_TYPE* W, __global VALUE_TYPE* result,
+                           __global const VALUE_TYPE* val, __global const unsigned* col_ptr,
+                           __global const unsigned* row_idx) {
     size_t basev = get_group_id(0) * j;
     size_t ss = get_local_id(0);
     size_t gg = get_local_size(0);
@@ -780,7 +780,7 @@ __kernel void updateW_overH_kernel(const uint rows,
                 }
             }
             */
-            batchsolve(Rw, k, H, subVector, val_t, row_ptr, col_idx);
+            batchsolve_H(Rw, k, H, subVector, val_t, row_ptr, col_idx);
             barrier(CLK_GLOBAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
@@ -838,10 +838,7 @@ __kernel void updateH_overW_kernel(const uint cols,
             barrier(CLK_GLOBAL_MEM_FENCE);
 
 
-
-            batchsolve1(Rh, k, W, subVector, val, col_ptr, row_idx);
-
-
+            batchsolve_W(Rh, k, W, subVector, val, col_ptr, row_idx);
 
 
             barrier(CLK_GLOBAL_MEM_FENCE);

@@ -36,7 +36,6 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
 
 static void choldc1(size_t n, __global VALUE_TYPE* a, __global VALUE_TYPE* p) {
     size_t group_id = get_group_id(0);
-
     size_t base = group_id * n * n;
 
     for (size_t i = 0; i < n; ++i) {
@@ -120,12 +119,13 @@ static void inverseMatrix_CholeskyMethod(size_t n, __global VALUE_TYPE* A, __glo
 static void Mt_byM_multiply_k(size_t i, size_t j, __global VALUE_TYPE* H, __global VALUE_TYPE* Result,
                               const unsigned ptr, __global const unsigned* idx) {
     size_t group_id = get_group_id(0);
-
     size_t base = group_id * j * j;
-    size_t ss = get_local_id(0);
-    size_t gg = get_local_size(0);
+    size_t local_id = get_local_id(0);
+    size_t local_size = get_local_size(0);
+
     VALUE_TYPE SUM[K_SIZE * K_SIZE] = {0};
-    for (size_t I = ss; I < j; I += gg) {
+
+    for (size_t I = local_id; I < j; I += local_size) {
         for (size_t J = I; J < j; ++J) {
             for (size_t K = 0; K < i; ++K) {
                 size_t offset = idx[ptr + K] * j;
@@ -149,8 +149,6 @@ __kernel void updateW_overH_kernel(const uint rows,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix,
                                    __global VALUE_TYPE* subMatrix_f) {
-    //size_t i = get_global_id(0);
-    //size_t j = get_global_size(0);
     size_t s = get_local_id(0);
     size_t g = get_local_size(0);
     size_t a = get_group_id(0);
@@ -213,8 +211,6 @@ __kernel void updateH_overW_kernel(const uint cols,
                                    __global VALUE_TYPE* p,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix) {
-    //size_t i = get_global_id(0);
-    //size_t j = get_global_size(0);
     size_t s = get_local_id(0);
     size_t g = get_local_size(0);
     size_t a = get_group_id(0);

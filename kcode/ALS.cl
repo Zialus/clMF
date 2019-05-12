@@ -582,12 +582,9 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALU
     __local VALUE_TYPE a[300];
     __local VALUE_TYPE b[30];
     VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
-    //printf("enter batchsolve.\n");
     unsigned n = row_ptr[i + 1] - row_ptr[i];
-    //printf("n=%d.\n",n);
     unsigned long nn = n / 30;
     if (nn > 0) {
-        //printf("inner enter.\n");
         for (unsigned nm = 0; nm < nn; nm++) {
             for (size_t idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
                 b[idx - (nm * 30) - row_ptr[i]] = val_t[idx];
@@ -627,7 +624,6 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALU
             subvector9 += b[gh] * a[gh * j + 9];
         }
     } else {
-        //printf("else enter.\n");
         for (size_t idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
             b[idx - row_ptr[i]] = val_t[idx];
             for (unsigned ii = 0; ii < j; ii++) {
@@ -659,8 +655,9 @@ __kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* H, __global VALU
     result[basev + 9] = subvector9;
 }
 
-__kernel void batchsolve1(ulong i, ulong j, __global VALUE_TYPE* W, __global const VALUE_TYPE* val, __global VALUE_TYPE* result,
-                          __global const unsigned* col_ptr, __global const unsigned* row_idx) {
+__kernel void batchsolve1(ulong i, ulong j, __global VALUE_TYPE* W, __global VALUE_TYPE* result,
+                          __global const VALUE_TYPE* val, __global const unsigned* col_ptr,
+                          __global const unsigned* row_idx) {
     size_t basev = get_group_id(0) * j;
     size_t ss = get_local_id(0);
     size_t gg = get_local_size(0);
@@ -842,7 +839,7 @@ __kernel void updateH_overW_kernel(const uint cols,
 
 
 
-            batchsolve1(Rh, k, W, val, subVector, col_ptr, row_idx);
+            batchsolve1(Rh, k, W, subVector, val, col_ptr, row_idx);
 
 
 

@@ -17,8 +17,8 @@ __kernel void GPU_rmse(__global unsigned const* test_row,
 
 //    size_t c = global_id;
 //    if (c < nnz) {
-    for (size_t c = global_id; c < nnz; c+=global_size) {
-        pred_v[c]=0;
+    for (size_t c = global_id; c < nnz; c += global_size) {
+        pred_v[c] = 0;
         for (unsigned t = 0; t < k; t++) {
             unsigned i = test_row[c];
             unsigned j = test_col[c];

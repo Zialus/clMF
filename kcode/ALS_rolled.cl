@@ -149,13 +149,14 @@ __kernel void updateW_overH_kernel(const uint rows,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix,
                                    __global VALUE_TYPE* subMatrix_f) {
-    size_t s = get_local_id(0);
-    size_t g = get_local_size(0);
-    size_t a = get_group_id(0);
-    size_t v = get_num_groups(0);
-    size_t base = a * k * k;
-    size_t baseV = a * k;
-    for (size_t Rw = a; Rw < rows; Rw += v) {
+    size_t local_id = get_local_id(0);
+    size_t local_size = get_local_size(0);
+    size_t group_id = get_group_id(0);
+    size_t num_groups = get_num_groups(0);
+    size_t base = group_id * k * k;
+    size_t baseV = group_id * k;
+
+    for (size_t Rw = group_id; Rw < rows; Rw += num_groups) {
         __global VALUE_TYPE* Wr = &W[Rw * k];
         unsigned omegaSize = row_ptr[Rw + 1] - row_ptr[Rw];
 
@@ -163,29 +164,29 @@ __kernel void updateW_overH_kernel(const uint rows,
             Mt_byM_multiply_k(omegaSize, k, H, subMatrix, row_ptr[Rw], col_idx);
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 subMatrix[base + c * k + c] += lambda;
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
-            if (s == 0) {
+            if (local_id == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
             /*
-            for (unsigned c = s; c < k; c += g) {
+            for (unsigned c = local_id; c < k; c += local_size) {
                 for (unsigned aa = 0; aa < k; aa++) {
                     subMatrix_f[c * k + aa] = subMatrix[base + c * k + aa];
                 }
             }
             */
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = row_ptr[Rw]; idx < row_ptr[Rw + 1]; ++idx) {
                     subVector[baseV + c] += val_t[idx] * H[(col_idx[idx] * k) + c];
                 }
             }
             barrier(CLK_GLOBAL_MEM_FENCE);
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 Wr[c] = 0.0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Wr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];
@@ -211,13 +212,14 @@ __kernel void updateH_overW_kernel(const uint cols,
                                    __global VALUE_TYPE* p,
                                    __global VALUE_TYPE* subVector,
                                    __global VALUE_TYPE* subMatrix) {
-    size_t s = get_local_id(0);
-    size_t g = get_local_size(0);
-    size_t a = get_group_id(0);
-    size_t v = get_num_groups(0);
-    size_t base = a * k * k;
-    size_t baseV = a * k;
-    for (size_t Rh = a; Rh < cols; Rh += v) {
+    size_t local_id = get_local_id(0);
+    size_t local_size = get_local_size(0);
+    size_t group_id = get_group_id(0);
+    size_t num_groups = get_num_groups(0);
+    size_t base = group_id * k * k;
+    size_t baseV = group_id * k;
+
+    for (size_t Rh = group_id; Rh < cols; Rh += num_groups) {
         __global VALUE_TYPE* Hr = &H[Rh * k];
         unsigned omegaSize = col_ptr[Rh + 1] - col_ptr[Rh];
 
@@ -226,19 +228,19 @@ __kernel void updateH_overW_kernel(const uint cols,
 
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 subMatrix[base + c * k + c] += lambda;
             }
 
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            if (s == 0) {
+            if (local_id == 0) {
                 inverseMatrix_CholeskyMethod(k, subMatrix, p);
             }
 
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 subVector[baseV + c] = 0;
                 for (unsigned idx = col_ptr[Rh]; idx < col_ptr[Rh + 1]; ++idx) {
                     subVector[baseV + c] += val[idx] * W[(row_idx[idx] * k) + c];
@@ -247,7 +249,7 @@ __kernel void updateH_overW_kernel(const uint cols,
 
             barrier(CLK_GLOBAL_MEM_FENCE);
 
-            for (size_t c = s; c < k; c += g) {
+            for (size_t c = local_id; c < k; c += local_size) {
                 Hr[c] = 0;
                 for (unsigned subVid = 0; subVid < k; ++subVid) {
                     Hr[c] += subVector[baseV + subVid] * subMatrix[base + c * k + subVid];

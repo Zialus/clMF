@@ -137,8 +137,6 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(err);
     cl_mem rmseBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, T.nnz * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem emptyBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY, T.nnz * sizeof(VALUE_TYPE), nullptr, &err);
-    CL_CHECK(err);
 
     // creating and building kernels
     cl_kernel updateWOverH_kernel = clCreateKernel(program, "updateW_overH_kernel", &err);
@@ -293,8 +291,10 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
         /** Calculate RMSE*/
         cl_event eventPoint3;
 
-        CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, rmseBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
-        CL_CHECK(clEnqueueCopyBuffer(commandQueue, emptyBuffer, pred_vBuffer, 0, 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
+//        float zero = 0.0f;
+//
+//        CL_CHECK(clEnqueueFillBuffer(commandQueue, rmseBuffer, &zero, sizeof(float), 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
+//        CL_CHECK(clEnqueueFillBuffer(commandQueue, pred_vBuffer, &zero, sizeof(float), 0, (T.nnz) * sizeof(float), 0, nullptr, &eventPoint3));
 
 //        size_t gws_rmse[1] = {((T.nnz + 1023) / 1024) * 1024};
 //        size_t lws_rmse[1] = {1024};
@@ -352,7 +352,6 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(clReleaseMemObject(test_valBuffer));
     CL_CHECK(clReleaseMemObject(pred_vBuffer));
     CL_CHECK(clReleaseMemObject(rmseBuffer));
-    CL_CHECK(clReleaseMemObject(emptyBuffer));
     CL_CHECK(clReleaseCommandQueue(commandQueue));
     CL_CHECK(clReleaseContext(context));
     CL_CHECK(clReleaseDevice(devices[0]));

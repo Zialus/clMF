@@ -573,89 +573,7 @@ __kernel void Mt_byM_multiply_k(uint i, uint j, __global VALUE_TYPE* H, __global
     }
 }
 
-__kernel void batchsolve_H(ulong i, ulong j, __global VALUE_TYPE* H, __global VALUE_TYPE* result,
-                           __global const VALUE_TYPE* val_t, __global const unsigned* row_ptr,
-                           __global const unsigned* col_idx) {
-    size_t basev = get_group_id(0) * j;
-    size_t ss = get_local_id(0);
-    size_t gg = get_local_size(0);
-    __local VALUE_TYPE a[300];
-    __local VALUE_TYPE b[30];
-    VALUE_TYPE subvector0 = 0, subvector1 = 0, subvector2 = 0, subvector3 = 0, subvector4 = 0, subvector5 = 0, subvector6 = 0, subvector7 = 0, subvector8 = 0, subvector9 = 0;
-    unsigned n = row_ptr[i + 1] - row_ptr[i];
-    unsigned long nn = n / 30;
-    if (nn > 0) {
-        for (unsigned nm = 0; nm < nn; nm++) {
-            for (size_t idx = row_ptr[i] + nm * 30 + ss; idx < (nm + 1) * 30 + row_ptr[i]; idx += gg) {
-                b[idx - (nm * 30) - row_ptr[i]] = val_t[idx];
-                for (unsigned ii = 0; ii < j; ii++) {
-                    a[(idx - (nm * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-                }
-            }
-            for (unsigned gh = 0; gh < 30; gh++) {
-                subvector0 += b[gh] * a[gh * j];
-                subvector1 += b[gh] * a[gh * j + 1];
-                subvector2 += b[gh] * a[gh * j + 2];
-                subvector3 += b[gh] * a[gh * j + 3];
-                subvector4 += b[gh] * a[gh * j + 4];
-                subvector5 += b[gh] * a[gh * j + 5];
-                subvector6 += b[gh] * a[gh * j + 6];
-                subvector7 += b[gh] * a[gh * j + 7];
-                subvector8 += b[gh] * a[gh * j + 8];
-                subvector9 += b[gh] * a[gh * j + 9];
-            }
-        }
-        for (size_t idx = row_ptr[i] + nn * 30 + ss; idx < row_ptr[i + 1]; idx += gg) {
-            b[idx - (nn * 30) - row_ptr[i]] = val_t[idx];
-            for (unsigned ii = 0; ii < j; ii++) {
-                a[(idx - (nn * 30) - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-            }
-        }
-        for (unsigned gh = 0; gh < row_ptr[i + 1] - row_ptr[i] - nn * 30; gh++) {
-            subvector0 += b[gh] * a[gh * j];
-            subvector1 += b[gh] * a[gh * j + 1];
-            subvector2 += b[gh] * a[gh * j + 2];
-            subvector3 += b[gh] * a[gh * j + 3];
-            subvector4 += b[gh] * a[gh * j + 4];
-            subvector5 += b[gh] * a[gh * j + 5];
-            subvector6 += b[gh] * a[gh * j + 6];
-            subvector7 += b[gh] * a[gh * j + 7];
-            subvector8 += b[gh] * a[gh * j + 8];
-            subvector9 += b[gh] * a[gh * j + 9];
-        }
-    } else {
-        for (size_t idx = row_ptr[i] + ss; idx < row_ptr[i + 1]; idx += gg) {
-            b[idx - row_ptr[i]] = val_t[idx];
-            for (unsigned ii = 0; ii < j; ii++) {
-                a[(idx - row_ptr[i]) * j + ii] = H[(col_idx[idx] * j) + ii];
-            }
-        }
-        for (unsigned gh = 0; gh < n; gh++) {
-            subvector0 += b[gh] * a[gh * j];
-            subvector1 += b[gh] * a[gh * j + 1];
-            subvector2 += b[gh] * a[gh * j + 2];
-            subvector3 += b[gh] * a[gh * j + 3];
-            subvector4 += b[gh] * a[gh * j + 4];
-            subvector5 += b[gh] * a[gh * j + 5];
-            subvector6 += b[gh] * a[gh * j + 6];
-            subvector7 += b[gh] * a[gh * j + 7];
-            subvector8 += b[gh] * a[gh * j + 8];
-            subvector9 += b[gh] * a[gh * j + 9];
-        }
-    }
-    result[basev + 0] = subvector0;
-    result[basev + 1] = subvector1;
-    result[basev + 2] = subvector2;
-    result[basev + 3] = subvector3;
-    result[basev + 4] = subvector4;
-    result[basev + 5] = subvector5;
-    result[basev + 6] = subvector6;
-    result[basev + 7] = subvector7;
-    result[basev + 8] = subvector8;
-    result[basev + 9] = subvector9;
-}
-
-__kernel void batchsolve_W(ulong i, ulong j, __global VALUE_TYPE* W, __global VALUE_TYPE* result,
+__kernel void batchsolve(ulong i, ulong j, __global VALUE_TYPE* W, __global VALUE_TYPE* result,
                            __global const VALUE_TYPE* val, __global const unsigned* col_ptr,
                            __global const unsigned* row_idx) {
     size_t basev = get_group_id(0) * j;
@@ -780,7 +698,7 @@ __kernel void updateW_overH_kernel(const uint rows,
                 }
             }
             */
-            batchsolve_H(Rw, k, H, subVector, val_t, row_ptr, col_idx);
+            batchsolve(Rw, k, H, subVector, val_t, row_ptr, col_idx);
             barrier(CLK_GLOBAL_MEM_FENCE);
             for (size_t c = s; c < k; c += g) {
                 Wr[c] = 0.0;
@@ -838,7 +756,7 @@ __kernel void updateH_overW_kernel(const uint cols,
             barrier(CLK_GLOBAL_MEM_FENCE);
 
 
-            batchsolve_W(Rh, k, W, subVector, val, col_ptr, row_idx);
+            batchsolve(Rh, k, W, subVector, val, col_ptr, row_idx);
 
 
             barrier(CLK_GLOBAL_MEM_FENCE);

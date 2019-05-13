@@ -63,12 +63,14 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     int nBlocks = param.nBlocks;
     int nThreadsPerBlock = param.nThreadsPerBlock;
 
+/*
     VALUE_TYPE* submatrix = (VALUE_TYPE*) malloc(k * k * sizeof(VALUE_TYPE));
     for (unsigned i = 0; i < k; i++) {
         for (unsigned j = 0; j < k; j++) {
             submatrix[i * k + j] = 0.0;
         }
     }
+*/
 
     VALUE_TYPE* W = (VALUE_TYPE*) malloc(k * R.rows * sizeof(VALUE_TYPE));
     for (long i = 0; i < R.rows; ++i) {
@@ -117,8 +119,6 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(err);
     cl_mem subMatBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
-    cl_mem subMatrixBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, k * k * sizeof(VALUE_TYPE), submatrix, &err);
-    CL_CHECK(err);
     cl_mem p_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
     CL_CHECK(err);
     cl_mem subVec_Buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, nBlocks * nThreadsPerBlock * k * sizeof(VALUE_TYPE), nullptr, &err);
@@ -158,7 +158,6 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 8, sizeof(cl_mem), &pBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 9, sizeof(cl_mem), &subVecBuffer));
     CL_CHECK(clSetKernelArg(updateWOverH_kernel, 10, sizeof(cl_mem), &subMatBuffer));
-    CL_CHECK(clSetKernelArg(updateWOverH_kernel, 11, sizeof(cl_mem), &subMatrixBuffer));
 
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 0, sizeof(unsigned), &R.cols));
     CL_CHECK(clSetKernelArg(updateHOverW_kernel, 1, sizeof(cl_mem), &col_ptrBuffer));
@@ -224,7 +223,7 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
 /*
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
         CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
-        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatrixBuffer, CL_TRUE, 0, k*k*sizeof(VALUE_TYPE), submatrix, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatBuffer, CL_TRUE, 0, k*k*sizeof(VALUE_TYPE), submatrix, 0, nullptr, nullptr));
         std::cout<<"update_W_over_H   W:\n";
         for(int df=0;df<10;df++)
         {
@@ -264,9 +263,9 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
 
         CL_CHECK(clReleaseEvent(eventPoint1));
 /*
-        printf("ddd.\n");
         CL_CHECK(clEnqueueReadBuffer(commandQueue, WBuffer, CL_TRUE, 0, nbits_W_, W, 0, nullptr, nullptr));
         CL_CHECK(clEnqueueReadBuffer(commandQueue, HBuffer, CL_TRUE, 0, nbits_H_, H, 0, nullptr, nullptr));
+        CL_CHECK(clEnqueueReadBuffer(commandQueue, subMatBuffer, CL_TRUE, 0, k*k*sizeof(VALUE_TYPE), submatrix, 0, nullptr, nullptr));
         std::cout<<"update_H_over_W   W:\n";
         for(int df=0;df<10;df++)
         {
@@ -282,6 +281,16 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
             for(int fd=0;fd<5;fd++)
             {
                 std::cout<<H[df*k+fd]<<"  ";
+            }
+            std::cout<<"\n";
+        }
+
+        std::cout<<"update_H_over_W   subMatrix:\n";
+        for(int df=0;df<10;df++)
+        {
+            for(int fd=0;fd<10;fd++)
+            {
+                std::cout<<submatrix[df*k+fd]<<"  ";
             }
             std::cout<<"\n";
         }
@@ -343,7 +352,6 @@ void clmf(SparseMatrix& R, MatData& W_c, MatData& H_c, TestData &T, parameter& p
     CL_CHECK(clReleaseMemObject(pBuffer));
     CL_CHECK(clReleaseMemObject(subVecBuffer));
     CL_CHECK(clReleaseMemObject(subMatBuffer));
-    CL_CHECK(clReleaseMemObject(subMatrixBuffer));
     CL_CHECK(clReleaseMemObject(p_Buffer));
     CL_CHECK(clReleaseMemObject(subVec_Buffer));
     CL_CHECK(clReleaseMemObject(subMat_Buffer));

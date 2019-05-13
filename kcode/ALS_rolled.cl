@@ -147,8 +147,7 @@ __kernel void updateW_overH_kernel(const uint rows,
                                    __global VALUE_TYPE* H,
                                    __global VALUE_TYPE* p,
                                    __global VALUE_TYPE* subVector,
-                                   __global VALUE_TYPE* subMatrix,
-                                   __global VALUE_TYPE* subMatrix_f) {
+                                   __global VALUE_TYPE* subMatrix) {
     size_t local_id = get_local_id(0);
     size_t local_size = get_local_size(0);
     size_t group_id = get_group_id(0);

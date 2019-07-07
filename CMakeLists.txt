@@ -64,4 +64,4 @@ add_test(NAME b COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -
 add_test(NAME c COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -V $ENV{VERSION_FLAG} -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/c)
 add_test(NAME simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -V $ENV{VERSION_FLAG} -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/simple)
 add_test(NAME tricky_simple COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -V $ENV{VERSION_FLAG} -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/tricky_simple)
-#add_test(NAME toy-example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -V $ENV{VERSION_FLAG} -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/toy-example)
+add_test(NAME toy_example COMMAND $<TARGET_FILE:clMF> -k 10 -t 10 -l 0.05 -P 0 -d 1 -q 1 -r 1 -p 1 -V $ENV{VERSION_FLAG} -nBlocks $ENV{BLOCKS_FLAG} -nThreadsPerBlock $ENV{THREADS_FLAG} ${CMAKE_SOURCE_DIR}/data/toy_example)

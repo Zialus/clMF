@@ -97,7 +97,22 @@ matrix:
       before_install:
         - brew update
         - brew install llvm@7 && brew link --overwrite llvm@7 --force
-
+      install: *mac_extra
+    - os: osx
+      osx_image: xcode10.1
+      env:
+        - MATRIX_EVAL="CC=clang-8 && CXX=clang++"
+      before_install:
+        - brew update
+        - brew install llvm@8 && brew link --overwrite llvm@8 --force
+      install: *mac_extra
+    - os: osx
+      osx_image: xcode10.1
+      env:
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++"
+      before_install:
+        - brew update
+        - brew install llvm@9 && brew link --overwrite llvm@9 --force
       install: *mac_extra
 
     ######## OSX GCC ########
@@ -140,6 +155,14 @@ matrix:
       before_install:
         - brew update
         - brew install gcc@8
+      install: *mac_extra
+    - os: osx
+      osx_image: xcode10.1
+      env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+      before_install:
+        - brew update
+        - brew install gcc@9
       install: *mac_extra
 
     ######## LINUX CLANG ########
@@ -207,6 +230,30 @@ matrix:
             - clang-7
             - libomp-dev
       install: *linux_extras
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-8
+            - libomp-dev
+      install: *linux_extras
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-9
+            - libomp-dev
+      install: *linux_extras
 
     ######## LINUX GCC ########
     - os: linux
@@ -258,6 +305,16 @@ matrix:
             - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - g++-8
+      install: *linux_extras
+    - os: linux
+      env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - g++-9
       install: *linux_extras
 
 

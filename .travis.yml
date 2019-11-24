@@ -60,36 +60,12 @@ matrix:
     - os: osx
       osx_image: xcode10.1
       env:
-        - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++"
-      before_install:
-        - brew update
-        - brew install llvm@3.9 && brew link --overwrite llvm@3.9 --force
-      install: &mac_extra
-        - brew install clinfo
-    - os: osx
-      osx_image: xcode10.1
-      env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++"
-      before_install:
-        - brew update
-        - brew install llvm@4 && brew link --overwrite llvm@4 --force
-      install: *mac_extra
-    - os: osx
-      osx_image: xcode10.1
-      env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++"
-      before_install:
-        - brew update
-        - brew install llvm@5 && brew link --overwrite llvm@5 --force
-      install: *mac_extra
-    - os: osx
-      osx_image: xcode10.1
-      env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++"
       before_install:
         - brew update
         - brew install llvm@6 && brew link --overwrite llvm@6 --force
-      install: *mac_extra
+      install: &mac_extra
+        - brew install clinfo
     - os: osx
       osx_image: xcode10.1
       env:

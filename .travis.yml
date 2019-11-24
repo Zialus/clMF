@@ -88,7 +88,10 @@ matrix:
         - MATRIX_EVAL="CC=clang-9 && CXX=clang++"
       before_install:
         - brew update
-        - brew install llvm@9 && brew link --overwrite llvm@9 --force
+        - brew install llvm@9
+        - export PATH="/usr/local/opt/llvm/bin:$PATH"
+        - export LDFLAGS="-L/usr/local/opt/llvm/lib"
+        - export CPPFLAGS="-I/usr/local/opt/llvm/include"
       install: *mac_extra
 
     ######## OSX GCC ########
@@ -138,7 +141,7 @@ matrix:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       before_install:
         - brew update
-        - brew install gcc@9
+#        - brew install gcc@9
       install: *mac_extra
 
     ######## LINUX CLANG ########

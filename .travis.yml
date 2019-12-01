@@ -58,93 +58,125 @@ matrix:
 
     ######## OSX CLANG ########
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++"
+      addons:
+        homebrew:
+          packages:
+            - llvm@6
+            - clinfo
+          update: true
       before_install:
-        - brew update
-        - brew install llvm@6 && brew link --overwrite llvm@6 --force
-      install: &mac_extra
-        - brew install clinfo
+        - export PATH="/usr/local/opt/llvm@6/bin:$PATH"
+        - export LDFLAGS="-L/usr/local/opt/llvm@6/lib"
+        - export CPPFLAGS="-I/usr/local/opt/llvm@6/include"
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++"
+      addons:
+        homebrew:
+          packages:
+            - llvm@7
+            - clinfo
+          update: true
       before_install:
-        - brew update
-        - brew install llvm@7 && brew link --overwrite llvm@7 --force
-      install: *mac_extra
+        - export PATH="/usr/local/opt/llvm@7/bin:$PATH"
+        - export LDFLAGS="-L/usr/local/opt/llvm@7/lib"
+        - export CPPFLAGS="-I/usr/local/opt/llvm@7/include"
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=clang-8 && CXX=clang++"
+      addons:
+        homebrew:
+          packages:
+            - llvm@8
+            - clinfo
+          update: true
       before_install:
-        - brew update
-        - brew install llvm@8 && brew link --overwrite llvm@8 --force
-      install: *mac_extra
+        - export PATH="/usr/local/opt/llvm@8/bin:$PATH"
+        - export LDFLAGS="-L/usr/local/opt/llvm@8/lib"
+        - export CPPFLAGS="-I/usr/local/opt/llvm@8/include"
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=clang-9 && CXX=clang++"
+      addons:
+        homebrew:
+          packages:
+            - llvm@9
+            - clinfo
+          update: true
       before_install:
-        - brew update
-        - brew install llvm@9
         - export PATH="/usr/local/opt/llvm/bin:$PATH"
         - export LDFLAGS="-L/usr/local/opt/llvm/lib"
         - export CPPFLAGS="-I/usr/local/opt/llvm/include"
-      install: *mac_extra
 
     ######## OSX GCC ########
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
-      before_install:
-        - brew update
-        - brew install gcc@4.9
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@4.9
+            - clinfo
+          update: true
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-      before_install:
-        - brew update
-        - brew install gcc@5
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@5
+            - clinfo
+          update: true
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-      before_install:
-        - brew update
-        - brew install gcc@6
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@6
+            - clinfo
+          update: true
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-      before_install:
-        - brew update
-        - brew install gcc@7
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@7
+            - clinfo
+          update: true
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-      before_install:
-        - brew update
-        - brew install gcc@8
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@8
+            - clinfo
+          update: true
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-      before_install:
-        - brew update
-#        - brew install gcc@9
-      install: *mac_extra
+      addons:
+        homebrew:
+          packages:
+            - gcc@9
+            - clinfo
+          update: true
 
-    ######## LINUX CLANG ########
+    ######## LINUX CLANG #######
     - os: linux
       env:
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
@@ -305,7 +337,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-8
+            - g++-9
         sonarcloud:
           organization: "zialus-github"
           token:
@@ -320,7 +352,7 @@ matrix:
         - sonar-scanner
       install: *linux_extras
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
 
     # COVERITY_SCAN
     - name: "Coverity Scan"
@@ -330,12 +362,12 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-8
+            - g++-9
         coverity_scan:
           project:
             name: "Zialus/clMF"
           notification_email: raulmendesferreira@gmail.com
-          build_command_prepend: "git fetch --unshallow && cov-configure --comptype gcc --compiler gcc-8 --template && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .."
+          build_command_prepend: "git fetch --unshallow && cov-configure --comptype gcc --compiler gcc-9 --template && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .."
           build_command: "make"
           branch_pattern: master
       install: *linux_extras
@@ -343,4 +375,4 @@ matrix:
         - echo "Coverity Scan"
       env:
         - secure: "hlr1miuQzTT0d1PadVmhHeruokuHqHmGTKCMaqFIem+nO6TkL6oZCqD+SQ4WTeBTvQtdEr6k2YP97s1lm39UNjnFIgrccinNogtTBjlEeSO8yljWRcFjIDfToXEuRDXKixxYzKUB7/PxdUuGFIFTxyjQ4UjYWIYq9Y2h+qCSDTxtlI1z2RvIeVukMS0qYt4+ahU/3BNnCcQX/EJmbopZDBv9NqjitIwPesqK0CkXJdu640zaXlw5C+Aba3v+1fr4wbffXHiYQWEj9E39JYwokLmyiKJj5KJPz1tkA7iztDvvZ+cxTC5MIJCBmQNJskYQLul27O52vLvAJDlPMHkW9dZ5DEWZPtJrSyHWwaXNimMwZ+JOpum+RTfc9Mg1DPy4QrSudxokJQdSRj5BmCp71AAWzXkesA4RNMVS0A31Fv4HxW/yTpOPcZ1IBIadTygpG+pFSRzpKo5SREBBE0rzDHeNiqoibkMRSCBuyp8qud7eT+M/FzmpYAj+KxHeGQbB4Pwsgjq/ltxT4WhjDg6xtmK/4VCfwDR4aEMUzQPHFviwXZcfKWLhkr5R1Hnk8SZH63VTcufL1UKs1cKKt1lgY9AGFUUAf5VgbZWWE0XvVx2Oe5R/1YW9M9X7N6JUWxuK1jzvQLf/JdiHl13M83uUCWuwDB09QJ6nZs+ynOvofrE="
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
